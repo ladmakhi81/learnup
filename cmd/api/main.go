@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/go-redis/redis"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
@@ -8,10 +10,11 @@ import (
 
 func main() {
 	_, minioClientErr := SetupMinio()
-
 	if minioClientErr != nil {
 		log.Fatalf("Failed to connect minio: %v", minioClientErr)
 	}
+
+	SetupRedis()
 
 	log.Println("main function invoked")
 }
@@ -26,5 +29,16 @@ func SetupMinio() (*minio.Client, error) {
 		Creds:  credentials.NewStaticV4(username, password, ""),
 		Secure: false,
 		Region: region,
+	})
+}
+
+func SetupRedis() *redis.Client {
+	//TODO: replace these hard code value with config data
+	host := "localhost"
+	port := "6379"
+	return redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Password: "",
+		DB:       0,
 	})
 }
