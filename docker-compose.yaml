@@ -1,0 +1,11 @@
+services:
+  minio_storage_service:
+    container_name: minio
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: root_user
+      MINIO_ROOT_PASSWORD: root_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
