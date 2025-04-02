@@ -92,6 +92,7 @@ func (svc *MinioClientSvc) DeleteBucket(
 func (svc *MinioClientSvc) UploadFileByContent(
 	ctx context.Context,
 	bucketName string,
+	contentType string,
 	fileContents []byte,
 ) (*storage.UploadResult, *storage.StorageError) {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
@@ -118,7 +119,9 @@ func (svc *MinioClientSvc) UploadFileByContent(
 		objectID.String(),
 		fileBuffer,
 		int64(fileBuffer.Len()),
-		minio.PutObjectOptions{},
+		minio.PutObjectOptions{
+			ContentType: contentType,
+		},
 	)
 	if err != nil {
 		return nil, storage.NewStorageError(
