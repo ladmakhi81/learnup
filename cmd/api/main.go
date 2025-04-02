@@ -17,6 +17,7 @@ func main() {
 }
 
 func SetupMinio() (*minio.Client, error) {
+	//TODO: replace these hard code value with config data
 	endpoint := "127.0.0.1:9000"
 	username := "root_user"
 	password := "root_password"
