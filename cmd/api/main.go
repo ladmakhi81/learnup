@@ -27,7 +27,7 @@ func main() {
 
 func SetupMinio() (*minio.Client, error) {
 	//TODO: replace these hard code value with config data
-	endpoint := "127.0.0.1:9000"
+	endpoint := "learnup_minio_storage_service:9000"
 	username := "root_user"
 	password := "root_password"
 	region := "us-east-1"
@@ -40,7 +40,7 @@ func SetupMinio() (*minio.Client, error) {
 
 func SetupRedis() *redis.Client {
 	//TODO: replace these hard code value with config data
-	host := "localhost"
+	host := "learnup_redis_service"
 	port := "6379"
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),

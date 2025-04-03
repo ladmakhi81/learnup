@@ -41,7 +41,7 @@ func (db *Database) Connect() error {
 
 func (db *Database) getConnection() string {
 	//TODO: replace this hard coded values with config values
-	dbHost := "localhost"
+	dbHost := "learnup_main_database_service"
 	dbUser := "postgres"
 	dbPassword := "postgres"
 	dbName := "learnup_db"
