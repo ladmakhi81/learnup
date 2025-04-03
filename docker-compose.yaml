@@ -1,7 +1,7 @@
 services:
   #
-  minio_storage_service:
-    container_name: minio
+  learnup_minio_storage_service:
+    container_name: learnup_minio
     image: minio/minio
     command: server /data --console-address ":9001"
     environment:
@@ -10,15 +10,19 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    networks:
+      - learnup_network
   #
-  redis_service:
-    container_name: redis
+  learnup_redis_service:
+    container_name: learnup_redis
     image: redis
     ports:
       - "6379:6379"
+    networks:
+      - learnup_network
   #
-  main_database_service:
-    container_name: main_database
+  learnup_main_database_service:
+    container_name: learnup_main_database
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -26,3 +30,23 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: learnup_db
+    networks:
+      - learnup_network
+  #
+  learnup_app_service:
+    container_name: learnup_app
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - learnup_main_database_service
+      - learnup_minio_storage_service
+      - learnup_redis_service
+    networks:
+      - learnup_network
+
+networks:
+  learnup_network:
+    driver: bridge
