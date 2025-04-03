@@ -3,24 +3,20 @@ package smtp
 import (
 	"errors"
 	"fmt"
+	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/mail"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/smtp"
 )
 
-// TODO: remove this struct when config file wrote (this is temporary and this struct must removed)
-type SmtpConfig struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-}
-
 type SmtpMailSvc struct {
+	config *env.EnvConfig
 }
 
-func NewSmtpMailSvc() *SmtpMailSvc {
-	return &SmtpMailSvc{}
+func NewSmtpMailSvc(config *env.EnvConfig) *SmtpMailSvc {
+	return &SmtpMailSvc{
+		config: config,
+	}
 }
 
 func (svc SmtpMailSvc) SendPlain(dto mail.SendMailReq) error {
@@ -32,9 +28,7 @@ Subject: %s
 `, dto.Recipient, dto.Subject, dto.Body)
 	addr := svc.getAddr()
 	auth := svc.getSmtpAuth()
-	//TODO: update this code when config file write
-	smtpConfig := svc.getSmtpConfig()
-	mailUsername := smtpConfig.Username
+	mailUsername := svc.config.Smtp.Username
 	err := smtp.SendMail(addr, auth, mailUsername, receivers, []byte(body))
 	if err != nil {
 		return errors.New("Error: happen in sending plain email")
@@ -50,9 +44,7 @@ func (svc SmtpMailSvc) SendTemplate(dto mail.SendTemplateMailReq) error {
 	if parsedErr != nil {
 		return errors.New("Error: happen in finding template")
 	}
-	//TODO: update this code when config file write
-	smtpConfig := svc.getSmtpConfig()
-	mailUsername := smtpConfig.Username
+	mailUsername := svc.config.Smtp.Username
 	body := fmt.Sprintf(`MIME-Version: 1.0
 Content-Type: text/html; charset: utf-8;
 From: %s
@@ -68,8 +60,7 @@ Subject: %s
 }
 
 func (svc SmtpMailSvc) getSmtpAuth() smtp.Auth {
-	//TODO: update this code when config file write
-	smtpConfig := svc.getSmtpConfig()
+	smtpConfig := svc.config.Smtp
 
 	return smtp.PlainAuth(
 		"",
@@ -80,16 +71,5 @@ func (svc SmtpMailSvc) getSmtpAuth() smtp.Auth {
 }
 
 func (svc SmtpMailSvc) getAddr() string {
-	//TODO: update this code when config file write
-	smtpConfig := svc.getSmtpConfig()
-	return fmt.Sprintf("%s:%s", smtpConfig.Host, smtpConfig.Port)
-}
-
-func (svc SmtpMailSvc) getSmtpConfig() SmtpConfig {
-	return SmtpConfig{
-		Host:     "host",
-		Port:     "port",
-		Username: "username",
-		Password: "password",
-	}
+	return fmt.Sprintf("%s:%s", svc.config.Smtp.Host, svc.config.Smtp.Port)
 }
