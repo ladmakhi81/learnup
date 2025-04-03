@@ -44,6 +44,26 @@ services:
       - learnup_main_database_service
       - learnup_minio_storage_service
       - learnup_redis_service
+    environment:
+      # minio
+      LEARNUP_MINIO__URL: ${MINIO_URL}
+      LEARNUP_MINIO__USERNAME: ${MINIO_USERNAME}
+      LEARNUP_MINIO__PASSWORD: ${MINIO_PASSWORD}
+      LEARNUP_MINIO__REGION: ${MINIO_REGION}
+      # redis
+      LEARNUP_REDIS__HOST: ${REDIS_HOST}
+      LEARNUP_REDIS__PORT: ${REDIS_PORT}
+      # main db
+      LEARNUP_MAIN_DB__HOST: ${MAIN_DB_HOST}
+      LEARNUP_MAIN_DB__USERNAME: ${MAIN_DB_USERNAME}
+      LEARNUP_MAIN_DB__PASSWORD: ${MAIN_DB_PASSWORD}
+      LEARNUP_MAIN_DB__NAME: ${MAIN_DB_NAME}
+      LEARNUP_MAIN_DB__PORT: ${MAIN_DB_PORT}
+      # smtp
+      LEARNUP_SMTP__HOST: ${SMTP_HOST}
+      LEARNUP_SMTP__PORT: ${SMTP_PORT}
+      LEARNUP_SMTP__USERNAME: ${SMTP_USERNAME}
+      LEARNUP_SMTP__PASSWORD: ${SMTP_PASSWORD}
     networks:
       - learnup_network
 
