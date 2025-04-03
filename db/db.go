@@ -9,14 +9,19 @@ import (
 )
 
 type Database struct {
-	Core   *gorm.DB
-	config *env.EnvConfig
+	Core        *gorm.DB
+	config      *env.EnvConfig
+	entitiesMap map[string]any
 }
 
 func NewDatabase(config *env.EnvConfig) *Database {
 	return &Database{
 		config: config,
 	}
+}
+
+func (db *Database) AddEntity(entityName string, entity any) {
+	db.entitiesMap[entityName] = entity
 }
 
 func (db *Database) Connect() error {
@@ -37,8 +42,14 @@ func (db *Database) Connect() error {
 	sqlDb.SetConnMaxLifetime(time.Hour * 1)
 	sqlDb.SetConnMaxLifetime(time.Minute * 30)
 
-	// TODO: add models into this AuthMigrate
-	//coreDb.AutoMigrate()
+	entities := make([]any, len(db.entitiesMap))
+	for _, entity := range db.entitiesMap {
+		entities = append(entities, entity)
+	}
+
+	if err := coreDb.AutoMigrate(entities...); err != nil {
+		return err
+	}
 	db.Core = coreDb
 	return nil
 }
