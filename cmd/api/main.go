@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/db"
+	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -13,22 +14,22 @@ import (
 func main() {
 	// config file loader
 	koanfConfigProvider := koanf.NewKoanfEnvSvc()
-	_, configErr := koanfConfigProvider.LoadLearnUp()
+	config, configErr := koanfConfigProvider.LoadLearnUp()
 	if configErr != nil {
 		log.Fatalf("load learn up config failed: %v", configErr)
 	}
 
 	// minio
-	_, minioClientErr := SetupMinio()
+	_, minioClientErr := SetupMinio(config)
 	if minioClientErr != nil {
 		log.Fatalf("Failed to connect minio: %v", minioClientErr)
 	}
 
 	// redis
-	SetupRedis()
+	SetupRedis(config)
 
 	// database
-	dbClient := db.NewDatabase()
+	dbClient := db.NewDatabase(config)
 	if err := dbClient.Connect(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
@@ -36,12 +37,11 @@ func main() {
 	log.Println("main function invoked")
 }
 
-func SetupMinio() (*minio.Client, error) {
-	//TODO: replace these hard code value with config data
-	endpoint := "learnup_minio_storage_service:9000"
-	username := "root_user"
-	password := "root_password"
-	region := "us-east-1"
+func SetupMinio(config *env.EnvConfig) (*minio.Client, error) {
+	endpoint := config.Minio.URL
+	username := config.Minio.Username
+	password := config.Minio.Password
+	region := config.Minio.Region
 	return minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(username, password, ""),
 		Secure: false,
@@ -49,34 +49,12 @@ func SetupMinio() (*minio.Client, error) {
 	})
 }
 
-func SetupRedis() *redis.Client {
-	//TODO: replace these hard code value with config data
-	host := "learnup_redis_service"
-	port := "6379"
+func SetupRedis(config *env.EnvConfig) *redis.Client {
+	host := config.Redis.Host
+	port := config.Redis.Port
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: "",
 		DB:       0,
 	})
 }
-
-//
-//func LoadEnvConfig() error {
-//	k := koanf.New(".")
-//	provider := env.Provider("LEARNUP_", "__", func(s string) string {
-//		return strings.ToLower(strings.TrimPrefix(s, "LEARNUP_"))
-//	})
-//	if err := k.Load(provider, nil); err != nil {
-//		return err
-//	}
-//	var envData struct {
-//		MAIN_DB struct {
-//			HOST string `koanf:"host"`
-//		} `koanf:"main_db"`
-//	}
-//	if err := k.Unmarshal("", &envData); err != nil {
-//		return err
-//	}
-//	fmt.Println("data: ", envData.MAIN_DB.HOST)
-//	return nil
-//}

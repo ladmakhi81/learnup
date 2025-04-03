@@ -2,17 +2,21 @@ package db
 
 import (
 	"fmt"
+	"github.com/ladmakhi81/learnup/pkg/env"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"time"
 )
 
 type Database struct {
-	Core *gorm.DB
+	Core   *gorm.DB
+	config *env.EnvConfig
 }
 
-func NewDatabase() *Database {
-	return &Database{}
+func NewDatabase(config *env.EnvConfig) *Database {
+	return &Database{
+		config: config,
+	}
 }
 
 func (db *Database) Connect() error {
@@ -40,12 +44,11 @@ func (db *Database) Connect() error {
 }
 
 func (db *Database) getConnection() string {
-	//TODO: replace this hard coded values with config values
-	dbHost := "learnup_main_database_service"
-	dbUser := "postgres"
-	dbPassword := "postgres"
-	dbName := "learnup_db"
-	dbPort := 5432
+	dbHost := db.config.MainDB.Host
+	dbUser := db.config.MainDB.Username
+	dbPassword := db.config.MainDB.Password
+	dbName := db.config.MainDB.Name
+	dbPort := db.config.MainDB.Port
 
 	return fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
