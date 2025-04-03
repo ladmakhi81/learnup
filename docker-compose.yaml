@@ -1,4 +1,5 @@
 services:
+  #
   minio_storage_service:
     container_name: minio
     image: minio/minio
@@ -9,8 +10,19 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+  #
   redis_service:
     container_name: redis
     image: redis
     ports:
       - "6379:6379"
+  #
+  main_database_service:
+    container_name: main_database
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: learnup_db

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	"github.com/ladmakhi81/learnup/db"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
@@ -15,6 +16,11 @@ func main() {
 	}
 
 	SetupRedis()
+
+	dbClient := db.NewDatabase()
+	if err := dbClient.Connect(); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
 
 	log.Println("main function invoked")
 }
