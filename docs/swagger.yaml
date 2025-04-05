@@ -1,5 +1,21 @@
 basePath: /api
 definitions:
+  github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq:
+    properties:
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - password
+    - phone
+    type: object
+  github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginRes:
+    properties:
+      accessToken:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
       firstName:
@@ -55,6 +71,44 @@ info:
   title: Learnup
   version: "1.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      summary: Login a user and return an access token
+      tags:
+      - auth
   /users/admin/basic:
     post:
       consumes:

@@ -6,14 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/cache/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cache/contract.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/env/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/env/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/client_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/client_error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/handler/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/handler/user.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

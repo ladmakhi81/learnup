@@ -26,6 +26,18 @@ func NewUserAuthHandler(
 	}
 }
 
+// Login godoc
+//
+//	@Summary	Login a user and return an access token
+//	@Tags		auth
+//	@Accept		json
+//	@Produce	json
+//	@Param		loginRequest	body		dtoreq.LoginReq	true	" "
+//	@Success	200				{object}	types.ApiResponse{data=dtores.LoginRes}
+//	@Failure	400				{object}	types.ApiError
+//	@Failure	404				{object}	types.ApiError
+//	@Failure	500				{object}	types.ApiError
+//	@Router		/auth/login [post]
 func (h UserAuthHandler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.LoginReq)
 	if err := ctx.ShouldBind(dto); err != nil {
