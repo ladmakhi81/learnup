@@ -19,7 +19,7 @@ definitions:
     - password
     - phone
     type: object
-  res.CreateBasicUserRes:
+  github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes:
     properties:
       createdAt:
         type: string
@@ -44,6 +44,12 @@ definitions:
       traceId:
         type: string
     type: object
+  types.ApiResponse:
+    properties:
+      data: {}
+      statusCode:
+        type: integer
+    type: object
 info:
   contact: {}
   title: Learnup
@@ -66,7 +72,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/res.CreateBasicUserRes'
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes'
+              type: object
         "400":
           description: Bad Request
           schema:

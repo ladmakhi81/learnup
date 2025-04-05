@@ -33,7 +33,7 @@ func NewUserAdminHandler(
 //	@Accept		json
 //	@Produce	json
 //	@Param		CreateBasicUserReq	body		dtoreq.CreateBasicUserReq	true	" "
-//	@Success	201					{object}	res.CreateBasicUserRes
+//	@Success	201					{object}	types.ApiResponse{data=dtores.CreateBasicUserRes}
 //	@Failure	400					{object}	types.ApiError
 //	@Failure	409					{object}	types.ApiError
 //	@Failure	500					{object}	types.ApiError
@@ -50,6 +50,6 @@ func (h UserAdminHandler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse,
 	if userErr != nil {
 		return nil, userErr
 	}
-	userResponse := res.NewCreateUserResponse(user)
+	userResponse := dtores.NewCreateUserResponse(user)
 	return types.NewApiResponse(http.StatusCreated, userResponse), nil
 }

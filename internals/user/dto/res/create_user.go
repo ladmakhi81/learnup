@@ -1,4 +1,4 @@
-package res
+package dtores
 
 import (
 	"github.com/ladmakhi81/learnup/internals/user/entity"
