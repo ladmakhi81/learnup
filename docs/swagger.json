@@ -1,0 +1,128 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Learnup",
+        "contact": {},
+        "version": "1.0"
+    },
+    "basePath": "/api",
+    "paths": {
+        "/users/admin/basic": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create Basic User",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "CreateBasicUserReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/res.CreateBasicUserRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq": {
+            "type": "object",
+            "required": [
+                "firstName",
+                "lastName",
+                "password",
+                "phone"
+            ],
+            "properties": {
+                "firstName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "lastName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 8
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "res.CreateBasicUserRes": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ApiError": {
+            "type": "object",
+            "properties": {
+                "message": {},
+                "statusCode": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "traceId": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

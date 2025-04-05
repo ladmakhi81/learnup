@@ -10,7 +10,7 @@ import (
 )
 
 type UserSvc interface {
-	CreateBasic(dto dtoreq.CreateUserReq) (*entity.User, error)
+	CreateBasic(dto dtoreq.CreateBasicUserReq) (*entity.User, error)
 	IsPhoneDuplicated(phone string) (bool, error)
 	FindByPhone(phone string) (*entity.User, error)
 }
@@ -25,7 +25,7 @@ func NewUserSvcImpl(userRepo repo.UserRepo) *UserSvcImpl {
 	}
 }
 
-func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateUserReq) (*entity.User, error) {
+func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entity.User, error) {
 	isPhoneExistBefore, isPhoneExistBeforeErr := svc.IsPhoneDuplicated(dto.Phone)
 	if isPhoneExistBeforeErr != nil {
 		return nil, isPhoneExistBeforeErr

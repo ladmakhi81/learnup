@@ -5,11 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/dto/req/create_user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/dto/req/create_user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/user/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/handler/admin.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/server_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/server_error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +55,7 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/create__user",
+    "git-widget-placeholder": "main",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/home/codyproo",

@@ -1,0 +1,85 @@
+basePath: /api
+definitions:
+  github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
+    properties:
+      firstName:
+        minLength: 3
+        type: string
+      lastName:
+        minLength: 3
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone:
+        type: string
+    required:
+    - firstName
+    - lastName
+    - password
+    - phone
+    type: object
+  res.CreateBasicUserRes:
+    properties:
+      createdAt:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      phone:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  types.ApiError:
+    properties:
+      message: {}
+      statusCode:
+        type: integer
+      timestamp:
+        type: integer
+      traceId:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Learnup
+  version: "1.0"
+paths:
+  /users/admin/basic:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: CreateBasicUserReq
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/res.CreateBasicUserRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      summary: Create Basic User
+      tags:
+      - users
+swagger: "2.0"
