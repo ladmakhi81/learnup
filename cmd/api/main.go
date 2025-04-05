@@ -2,10 +2,17 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/db"
+	"github.com/ladmakhi81/learnup/internals/user"
+	"github.com/ladmakhi81/learnup/internals/user/handler"
+	"github.com/ladmakhi81/learnup/internals/user/repo"
+	"github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
+	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
@@ -34,7 +41,31 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	log.Println("main function invoked")
+	// http handler
+	server := gin.Default()
+	port := fmt.Sprintf(":%d", config.App.Port)
+	api := server.Group("/api")
+
+	// repos
+	userRepo := repo.NewUserRepoImpl(dbClient)
+
+	// svcs
+	validationSvc := validatorv10.NewValidatorSvc(validator.New())
+	userSvc := service.NewUserSvcImpl(userRepo)
+
+	// handlers
+	userAdminHandler := handler.NewUserAdminHandler(userSvc, validationSvc)
+
+	// modules
+	userModule := user.NewModule(userAdminHandler)
+
+	// register module
+	userModule.Register(api)
+
+	log.Printf("the server running on %s \n", port)
+
+	// run http handler
+	log.Fatalln(server.Run(port))
 }
 
 func SetupMinio(config *env.EnvConfig) (*minio.Client, error) {
@@ -53,7 +84,7 @@ func SetupRedis(config *env.EnvConfig) *redis.Client {
 	host := config.Redis.Host
 	port := config.Redis.Port
 	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", host, port),
+		Addr:     fmt.Sprintf("%s:%d", host, port),
 		Password: "",
 		DB:       0,
 	})

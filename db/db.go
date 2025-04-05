@@ -9,19 +9,14 @@ import (
 )
 
 type Database struct {
-	Core        *gorm.DB
-	config      *env.EnvConfig
-	entitiesMap map[string]any
+	Core   *gorm.DB
+	config *env.EnvConfig
 }
 
 func NewDatabase(config *env.EnvConfig) *Database {
 	return &Database{
 		config: config,
 	}
-}
-
-func (db *Database) AddEntity(entityName string, entity any) {
-	db.entitiesMap[entityName] = entity
 }
 
 func (db *Database) Connect() error {
@@ -42,8 +37,9 @@ func (db *Database) Connect() error {
 	sqlDb.SetConnMaxLifetime(time.Hour * 1)
 	sqlDb.SetConnMaxLifetime(time.Minute * 30)
 
-	entities := make([]any, len(db.entitiesMap))
-	for _, entity := range db.entitiesMap {
+	entities := make([]any, 0)
+	for entityName, entity := range LoadEntities() {
+		fmt.Printf("Adding entity %s : %+v\n", entityName, entity)
 		entities = append(entities, entity)
 	}
 

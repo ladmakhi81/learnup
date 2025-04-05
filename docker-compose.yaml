@@ -64,8 +64,12 @@ services:
       LEARNUP_SMTP__PORT: ${SMTP_PORT}
       LEARNUP_SMTP__USERNAME: ${SMTP_USERNAME}
       LEARNUP_SMTP__PASSWORD: ${SMTP_PASSWORD}
+      # app
+      LEARNUP_APP__PORT: ${APP_PORT}
     networks:
       - learnup_network
+    volumes:
+      - ./log:/app/log
 
 networks:
   learnup_network:

@@ -27,9 +27,14 @@ type SmtpEnvConfig struct {
 	Password string `koanf:"password"`
 }
 
+type AppEnvConfig struct {
+	Port int `koanf:"port"`
+}
+
 type EnvConfig struct {
 	Minio  MinioEnvConfig  `koanf:"minio"`
 	Redis  RedisEnvConfig  `koanf:"redis"`
 	MainDB MainDBEnvConfig `koanf:"main_db"`
 	Smtp   SmtpEnvConfig   `koanf:"smtp"`
+	App    AppEnvConfig    `koanf:"app"`
 }
