@@ -6,12 +6,17 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/db"
+	"github.com/ladmakhi81/learnup/internals/auth"
+	authHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
+	authService "github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/internals/user"
-	"github.com/ladmakhi81/learnup/internals/user/handler"
+	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	"github.com/ladmakhi81/learnup/internals/user/repo"
-	"github.com/ladmakhi81/learnup/internals/user/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
+	jwtv5 "github.com/ladmakhi81/learnup/pkg/token/jwt/v5"
 	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -40,7 +45,7 @@ func main() {
 	}
 
 	// redis
-	SetupRedis(config)
+	redisClient := SetupRedis(config)
 
 	// database
 	dbClient := db.NewDatabase(config)
@@ -60,17 +65,23 @@ func main() {
 	userRepo := repo.NewUserRepoImpl(dbClient)
 
 	// svcs
+	redisSvc := redisv6.NewRedisClientSvc(redisClient)
+	tokenSvc := jwtv5.NewJwtSvc(config)
 	validationSvc := validatorv10.NewValidatorSvc(validator.New())
-	userSvc := service.NewUserSvcImpl(userRepo)
+	userSvc := userService.NewUserSvcImpl(userRepo)
+	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc)
 
 	// handlers
-	userAdminHandler := handler.NewUserAdminHandler(userSvc, validationSvc)
+	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc)
+	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler)
+	authModule := auth.NewAuthModule(userAuthHandler)
 
 	// register module
 	userModule.Register(api)
+	authModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 

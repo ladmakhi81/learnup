@@ -32,3 +32,10 @@ func NewBadRequestDTOError(metadata any) *ClientError {
 		Metadata:   metadata,
 	}
 }
+
+func NewNotFoundError(message string) *ClientError {
+	return &ClientError{
+		StatusCode: http.StatusNotFound,
+		Message:    message,
+	}
+}
