@@ -9,4 +9,5 @@ RUN go build -o ./bin ./cmd/api/main.go
 FROM ubuntu:latest
 WORKDIR /app
 COPY --from=builder /app/bin .
+COPY --from=builder /app/translations /app/translations
 CMD ["./bin"]
