@@ -22,5 +22,5 @@ func (m *Module) Register(api *gin.RouterGroup) {
 	usersApi := api.Group("/users")
 	usersAdminApi := usersApi.Group("/admin")
 
-	usersAdminApi.POST("/", utils.JsonHandler(m.userAdminHandler.CreateUser))
+	usersAdminApi.POST("/basic", utils.JsonHandler(m.userAdminHandler.CreateBasicUser))
 }

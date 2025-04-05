@@ -16,8 +16,15 @@ import (
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"log"
+
+	_ "github.com/ladmakhi81/learnup/docs"
+	"github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// @title           Learnup
+// @version         1.0
+// @BasePath  /api
 func main() {
 	// config file loader
 	koanfConfigProvider := koanf.NewKoanfEnvSvc()
@@ -45,6 +52,9 @@ func main() {
 	server := gin.Default()
 	port := fmt.Sprintf(":%d", config.App.Port)
 	api := server.Group("/api")
+
+	// swagger documentation
+	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// repos
 	userRepo := repo.NewUserRepoImpl(dbClient)

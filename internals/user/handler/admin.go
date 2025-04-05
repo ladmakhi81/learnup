@@ -26,8 +26,20 @@ func NewUserAdminHandler(
 	}
 }
 
-func (h UserAdminHandler) CreateUser(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := new(dtoreq.CreateUserReq)
+// CreateBasicUser godoc
+//
+//	@Summary	Create Basic User
+//	@Tags		users
+//	@Accept		json
+//	@Produce	json
+//	@Param		CreateBasicUserReq	body		dtoreq.CreateBasicUserReq	true	" "
+//	@Success	201					{object}	res.CreateBasicUserRes
+//	@Failure	400					{object}	types.ApiError
+//	@Failure	409					{object}	types.ApiError
+//	@Failure	500					{object}	types.ApiError
+//	@Router		/users/admin/basic [post]
+func (h UserAdminHandler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
+	dto := new(dtoreq.CreateBasicUserReq)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(constant.InvalidRequestBody)
 	}
