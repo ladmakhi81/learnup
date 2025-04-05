@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ladmakhi81/learnup/internals/user/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
+	"github.com/ladmakhi81/learnup/internals/user/dto/res"
 	"github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/validation"
 	"github.com/ladmakhi81/learnup/types"
@@ -37,5 +38,6 @@ func (h UserAdminHandler) CreateUser(ctx *gin.Context) (*types.ApiResponse, erro
 	if userErr != nil {
 		return nil, userErr
 	}
-	return types.NewApiResponse(http.StatusCreated, user), nil
+	userResponse := res.NewCreateUserResponse(user)
+	return types.NewApiResponse(http.StatusCreated, userResponse), nil
 }

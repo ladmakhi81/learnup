@@ -10,8 +10,8 @@ func (e ServerError) Error() string {
 	return e.Message
 }
 
-func NewServerError(message string, location string, mainErr error) ServerError {
-	return ServerError{
+func NewServerError(message string, location string, mainErr error) *ServerError {
+	return &ServerError{
 		Message:  message,
 		Location: location,
 		MainErr:  mainErr,
