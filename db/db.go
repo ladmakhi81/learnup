@@ -37,8 +37,15 @@ func (db *Database) Connect() error {
 	sqlDb.SetConnMaxLifetime(time.Hour * 1)
 	sqlDb.SetConnMaxLifetime(time.Minute * 30)
 
-	// TODO: add models into this AuthMigrate
-	//coreDb.AutoMigrate()
+	entities := make([]any, 0)
+	for entityName, entity := range LoadEntities() {
+		fmt.Printf("Adding entity %s : %+v\n", entityName, entity)
+		entities = append(entities, entity)
+	}
+
+	if err := coreDb.AutoMigrate(entities...); err != nil {
+		return err
+	}
 	db.Core = coreDb
 	return nil
 }
