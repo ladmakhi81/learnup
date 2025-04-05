@@ -42,7 +42,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/res.CreateBasicUserRes"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -94,7 +106,7 @@ const docTemplate = `{
                 }
             }
         },
-        "res.CreateBasicUserRes": {
+        "github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -129,6 +141,15 @@ const docTemplate = `{
                 },
                 "traceId": {
                     "type": "string"
+                }
+            }
+        },
+        "types.ApiResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "statusCode": {
+                    "type": "integer"
                 }
             }
         }
