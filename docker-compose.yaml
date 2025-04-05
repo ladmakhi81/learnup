@@ -66,6 +66,7 @@ services:
       LEARNUP_SMTP__PASSWORD: ${SMTP_PASSWORD}
       # app
       LEARNUP_APP__PORT: ${APP_PORT}
+      LEARNUP_APP__TOKEN_SECRET_KEY: ${APP_TOKEN_SECRET_KEY}
     networks:
       - learnup_network
     volumes:

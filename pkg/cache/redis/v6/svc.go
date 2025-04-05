@@ -42,3 +42,14 @@ func (svc *RedisClientSvc) GetHashVal(key, id string) (string, error) {
 	}
 	return val, nil
 }
+
+func (svc *RedisClientSvc) SetVal(key string, val any) error {
+	err := svc.redis.Set(key, val, 0).Err()
+	if err != nil {
+		return cache.NewCacheError(
+			"Error: happen in set value",
+			"RedisClientSvc.SetVal",
+		)
+	}
+	return nil
+}
