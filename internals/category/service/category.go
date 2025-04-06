@@ -15,6 +15,9 @@ type CategoryService interface {
 	FindByID(id uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
 	IsCategoryNameExist(name string) (bool, error)
+	GetCategoriesTree() ([]*entity.Category, error)
+	GetCategories(page, pageSize int) ([]*entity.Category, error)
+	GetCategoriesCount() (int, error)
 }
 
 type CategoryServiceImpl struct {
@@ -105,4 +108,37 @@ func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
+	tree, treeErr := svc.repo.GetCategoriesTree()
+	if treeErr != nil {
+		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
+			"CategoryServiceImpl.GetCategoriesTree",
+			treeErr,
+		)
+	}
+	return tree, nil
+}
+
+func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
+	categories, categoriesErr := svc.repo.GetCategories(page, pageSize)
+	if categoriesErr != nil {
+		return nil, types.NewServerError("Get Categories List Throw Error",
+			"CategoryServiceImpl.GetCategories",
+			categoriesErr,
+		)
+	}
+	return categories, nil
+}
+
+func (svc CategoryServiceImpl) GetCategoriesCount() (int, error) {
+	count, countErr := svc.repo.GetCategoriesCount()
+	if countErr != nil {
+		return 0, types.NewServerError("Get Count Of Categories Throw Error",
+			"CategoryServiceImpl.GetCategoriesCount",
+			countErr,
+		)
+	}
+	return count, nil
 }

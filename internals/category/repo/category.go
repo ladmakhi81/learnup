@@ -12,6 +12,9 @@ type CategoryRepo interface {
 	Delete(categoryID uint) error
 	FindByID(categoryID uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
+	GetCategoriesTree() ([]*entity.Category, error)
+	GetCategories(page, pageSize int) ([]*entity.Category, error)
+	GetCategoriesCount() (int, error)
 }
 
 type CategoryRepoImpl struct {
@@ -55,4 +58,38 @@ func (repo CategoryRepoImpl) FindByName(name string) (*entity.Category, error) {
 		return nil, tx.Error
 	}
 	return category, nil
+}
+
+func (repo CategoryRepoImpl) GetCategoriesTree() ([]*entity.Category, error) {
+	var categories []*entity.Category
+	tx := repo.db.Core.
+		Preload("Children").
+		Where("parent_category_id IS NULL").
+		Find(&categories)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return categories, nil
+}
+
+func (repo CategoryRepoImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
+	var categories []*entity.Category
+	tx := repo.db.Core.
+		Order("created_at desc").
+		Offset(page * pageSize).
+		Limit(pageSize).
+		Find(&categories)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return categories, nil
+}
+
+func (repo CategoryRepoImpl) GetCategoriesCount() (int, error) {
+	count := int64(0)
+	tx := repo.db.Core.Model(&entity.Category{}).Count(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	return int(count), nil
 }

@@ -84,7 +84,7 @@ func internalServerErrorHandler(
 			timestamp,
 			ctx.Request.RequestURI,
 			error.Location,
-			error.Message,
+			error.Message+" - "+error.MainErr.Error(),
 			traceId,
 		),
 	)
