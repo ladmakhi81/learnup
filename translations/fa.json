@@ -9,6 +9,12 @@
       "invalid_credentials": "کاربری با این شماره تماس و گذرواژه یافت نشد"
     }
   },
+  "category": {
+    "errors": {
+      "name_duplicate": "نام دسته بندی قبلا ثبت شده است",
+      "parent_category_id_not_found": "دسته بندی با آیدی مربوط به دسته بندی پدر یافت نشد"
+    }
+  },
   "common": {
     "errors": {
       "invalid_request_body": "بدنه درخواست نادرست میباشد",

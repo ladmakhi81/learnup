@@ -6,8 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/entity/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/entity/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/dto/res/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/dto/res/login.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/dto/req/create_category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/req/create_category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/entity/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/entity/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/repo/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/repo/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

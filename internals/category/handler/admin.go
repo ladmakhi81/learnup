@@ -1,0 +1,64 @@
+package handler
+
+import (
+	"github.com/gin-gonic/gin"
+	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
+	dtores "github.com/ladmakhi81/learnup/internals/category/dto/res"
+	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
+	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/validation"
+	"github.com/ladmakhi81/learnup/types"
+	"net/http"
+)
+
+type CategoryAdminHandler struct {
+	categorySvc    categoryService.CategoryService
+	translationSvc translations.Translator
+	validationSvc  validation.Validation
+}
+
+func NewCategoryAdminHandler(
+	categorySvc categoryService.CategoryService,
+	translationSvc translations.Translator,
+	validationSvc validation.Validation,
+) *CategoryAdminHandler {
+	return &CategoryAdminHandler{
+		categorySvc:    categorySvc,
+		translationSvc: translationSvc,
+		validationSvc:  validationSvc,
+	}
+}
+
+// CreateCategory godoc
+//	@Summary	Create a new category
+//	@Tags		categories
+//	@Accept		json
+//	@Produce	json
+//	@Param		request	body		dtoreq.CreateCategoryReq	true	" "
+//	@Success	201		{object}	types.ApiResponse{data=dtores.CreateCategoryRes}
+//	@Failure	400		{object}	types.ApiError
+//	@Failure	404		{object}	types.ApiError
+//	@Failure	409		{object}	types.ApiError
+//	@Failure	500		{object}	types.ApiError
+//	@Router		/categories/admin/ [post]
+func (h CategoryAdminHandler) CreateCategory(c *gin.Context) (*types.ApiResponse, error) {
+	dto := new(dtoreq.CreateCategoryReq)
+	if err := c.ShouldBind(dto); err != nil {
+		return nil, types.NewBadRequestError(
+			h.translationSvc.Translate("common.errors.invalid_request_body"),
+		)
+	}
+	if err := h.validationSvc.Validate(dto); err != nil {
+		return nil, err
+	}
+	category, categoryErr := h.categorySvc.Create(*dto)
+	if categoryErr != nil {
+		return nil, categoryErr
+	}
+	categoryRes := dtores.NewCreateCategoryRes(
+		category.ID,
+		category.Name,
+		category.CreatedAt,
+	)
+	return types.NewApiResponse(http.StatusCreated, categoryRes), nil
+}

@@ -16,6 +16,24 @@ definitions:
       accessToken:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_category_dto_req.CreateCategoryReq:
+    properties:
+      name:
+        type: string
+      parent_id:
+        type: integer
+    required:
+    - name
+    type: object
+  github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryRes:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
       firstName:
@@ -109,6 +127,48 @@ paths:
       summary: Login a user and return an access token
       tags:
       - auth
+  /categories/admin/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_req.CreateCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      summary: Create a new category
+      tags:
+      - categories
   /users/admin/basic:
     post:
       consumes:
