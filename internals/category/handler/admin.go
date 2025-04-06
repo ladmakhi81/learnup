@@ -79,8 +79,8 @@ func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiRes
 	if categoriesTreeErr != nil {
 		return nil, categoriesTreeErr
 	}
-	categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
-	return types.NewApiResponse(http.StatusOK, categoriesTreeRes), nil
+	//categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
+	return types.NewApiResponse(http.StatusOK, categoriesTree), nil
 }
 
 // GetCategories godoc

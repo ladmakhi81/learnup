@@ -6,16 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/dto/res/get_categories_tree.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/res/get_categories_tree.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/entity/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/entity/category.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/admin.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/repo/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/repo/category.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/handler.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,7 +52,7 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feat/get__categories",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/home/codyproo",

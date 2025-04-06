@@ -110,15 +110,39 @@ func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
 	return true, nil
 }
 
+func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*entity.Category, error) {
+	subCategories, subCategoriesErr := svc.repo.GetSubCategories(category.ID)
+	if subCategoriesErr != nil {
+		return nil, subCategoriesErr
+	}
+	for _, subCategory := range subCategories {
+		nextSubCategory, nextSubCategoryErr := svc.getSubCategories(subCategory)
+		if nextSubCategoryErr != nil {
+			return nil, nextSubCategoryErr
+		}
+		subCategory.Children = nextSubCategory
+	}
+	return subCategories, nil
+}
+
 func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
-	tree, treeErr := svc.repo.GetCategoriesTree()
-	if treeErr != nil {
+	rootCategories, rootCategoriesErr := svc.repo.GetRootCategories()
+	if rootCategoriesErr != nil {
 		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
 			"CategoryServiceImpl.GetCategoriesTree",
-			treeErr,
+			rootCategoriesErr,
 		)
 	}
-	return tree, nil
+	treeCategories := make([]*entity.Category, len(rootCategories))
+	for rootCategoryIndex, rootCategory := range rootCategories {
+		subCategory, subCategoryErr := svc.getSubCategories(rootCategory)
+		if subCategoryErr != nil {
+			return nil, subCategoryErr
+		}
+		rootCategory.Children = subCategory
+		treeCategories[rootCategoryIndex] = rootCategory
+	}
+	return treeCategories, nil
 }
 
 func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {

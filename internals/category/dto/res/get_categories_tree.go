@@ -13,9 +13,9 @@ type GetCategoriesTreeRes struct {
 	Categories []*GetCategoriesTreeItem `json:"categories"`
 }
 
-func mapCategoryToCategoryTreeItem(category []*entity.Category) []*GetCategoriesTreeItem {
-	categoriesTreeItems := make([]*GetCategoriesTreeItem, len(category))
-	for categoryIndex, category := range category {
+func mapCategoryToCategoryTreeItem(categories []*entity.Category) []*GetCategoriesTreeItem {
+	categoriesTreeItems := make([]*GetCategoriesTreeItem, len(categories))
+	for categoryIndex, category := range categories {
 		categoriesTreeItems[categoryIndex] = &GetCategoriesTreeItem{
 			ID:            category.ID,
 			Name:          category.Name,

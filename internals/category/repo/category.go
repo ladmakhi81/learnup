@@ -12,9 +12,10 @@ type CategoryRepo interface {
 	Delete(categoryID uint) error
 	FindByID(categoryID uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
-	GetCategoriesTree() ([]*entity.Category, error)
 	GetCategories(page, pageSize int) ([]*entity.Category, error)
 	GetCategoriesCount() (int, error)
+	GetRootCategories() ([]*entity.Category, error)
+	GetSubCategories(categoryID uint) ([]*entity.Category, error)
 }
 
 type CategoryRepoImpl struct {
@@ -60,11 +61,20 @@ func (repo CategoryRepoImpl) FindByName(name string) (*entity.Category, error) {
 	return category, nil
 }
 
-func (repo CategoryRepoImpl) GetCategoriesTree() ([]*entity.Category, error) {
+func (repo CategoryRepoImpl) GetRootCategories() ([]*entity.Category, error) {
+	var categories []*entity.Category
+	tx := repo.db.Core.Where("parent_category_id IS NULL").Find(&categories)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return categories, nil
+}
+
+func (repo CategoryRepoImpl) GetSubCategories(categoryID uint) ([]*entity.Category, error) {
 	var categories []*entity.Category
 	tx := repo.db.Core.
 		Preload("Children").
-		Where("parent_category_id IS NULL").
+		Where("parent_category_id = ?", categoryID).
 		Find(&categories)
 	if tx.Error != nil {
 		return nil, tx.Error
