@@ -2,27 +2,30 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/auth/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/auth/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/auth/dto/res"
 	"github.com/ladmakhi81/learnup/internals/auth/service"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/pkg/validation"
 	"github.com/ladmakhi81/learnup/types"
 	"net/http"
 )
 
 type UserAuthHandler struct {
-	authSvc       service.AuthService
-	validationSvc validation.Validation
+	authSvc        service.AuthService
+	validationSvc  validation.Validation
+	translationSvc translations.Translator
 }
 
 func NewUserAuthHandler(
 	authSvc service.AuthService,
 	validationSvc validation.Validation,
+	translationSvc translations.Translator,
 ) *UserAuthHandler {
 	return &UserAuthHandler{
-		authSvc:       authSvc,
-		validationSvc: validationSvc,
+		authSvc:        authSvc,
+		validationSvc:  validationSvc,
+		translationSvc: translationSvc,
 	}
 }
 
@@ -41,10 +44,12 @@ func NewUserAuthHandler(
 func (h UserAuthHandler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.LoginReq)
 	if err := ctx.ShouldBind(dto); err != nil {
-		return nil, types.NewBadRequestError(constant.AuthInvalidRequestBody)
+		return nil, types.NewBadRequestError(
+			h.translationSvc.Translate("common.errors.invalid_request_body"),
+		)
 	}
 	if err := h.validationSvc.Validate(dto); err != nil {
-		return nil, types.NewBadRequestDTOError(err)
+		return nil, err
 	}
 	accessToken, accessTokenErr := h.authSvc.Login(*dto)
 	if accessTokenErr != nil {

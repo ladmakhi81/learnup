@@ -1,3 +1,23 @@
 {
-  "hello": "hi"
+  "user": {
+    "errors": {
+      "phone_duplicate": "user phone already exists"
+    }
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "user not found with provided phone and password"
+    }
+  },
+  "common": {
+    "errors": {
+      "invalid_request_body": "invalid request body",
+      "required_validation": "{{.Name}} is required",
+      "max_validation": "{{.Name}} can not be longer than {{.Len}} character",
+      "min_validation": "{{.Name}} must be longer than {{.Len}} character",
+      "numeric_validation": "{{.Name}} is not valid number",
+      "len_validation": "{{.Name}} must have length of {{.Len}}",
+      "unknown_validation": "{{.Name}} with tag {{.Tag}} is not valid"
+    }
+  }
 }

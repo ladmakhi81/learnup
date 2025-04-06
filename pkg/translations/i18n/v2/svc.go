@@ -12,9 +12,15 @@ func NewI18nTranslatorSvc(localizer *i18n.Localizer) *I18nTranslatorSvc {
 	}
 }
 
-func (svc I18nTranslatorSvc) Translate(messageKey string, templateData map[string]any) string {
+func (svc I18nTranslatorSvc) TranslateWithData(messageKey string, templateData map[string]any) string {
 	return svc.localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID:    messageKey,
 		TemplateData: templateData,
+	})
+}
+
+func (svc I18nTranslatorSvc) Translate(messageKey string) string {
+	return svc.localizer.MustLocalize(&i18n.LocalizeConfig{
+		MessageID: messageKey,
 	})
 }

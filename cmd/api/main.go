@@ -79,13 +79,13 @@ func main() {
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
-	validationSvc := validatorv10.NewValidatorSvc(validator.New())
-	userSvc := userService.NewUserSvcImpl(userRepo)
-	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc)
+	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
+	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
+	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 
 	// handlers
-	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc)
-	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc)
+	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
+	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler)
@@ -94,9 +94,6 @@ func main() {
 	// register module
 	userModule.Register(api)
 	authModule.Register(api)
-
-	// TODO: remove it ( this is for test of localizer )
-	fmt.Println(1234, i18nTranslatorSvc.Translate("hello", nil))
 
 	log.Printf("the server running on %s \n", port)
 
@@ -140,7 +137,7 @@ func SetupLocalizer() (*i18n.Localizer, error) {
 			langText: "en",
 		},
 	}
-	defaultLocale := "en"
+	defaultLocale := "fa"
 	localizationBundle := i18n.NewBundle(locales[defaultLocale].langTag)
 	localizationBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 	rootDir, rootDirErr := os.Getwd()

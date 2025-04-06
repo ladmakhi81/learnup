@@ -1,19 +1,24 @@
 package validatorv10
 
 import (
-	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"reflect"
 )
 
 type ValidatorSvc struct {
-	core *validator.Validate
+	core           *validator.Validate
+	translationSvc translations.Translator
 }
 
-func NewValidatorSvc(core *validator.Validate) *ValidatorSvc {
+func NewValidatorSvc(
+	core *validator.Validate,
+	translationSvc translations.Translator,
+) *ValidatorSvc {
 	return &ValidatorSvc{
-		core: core,
+		core:           core,
+		translationSvc: translationSvc,
 	}
 }
 
@@ -42,16 +47,50 @@ func (svc *ValidatorSvc) getJsonTagName(dto any, fieldName string) string {
 func (svc *ValidatorSvc) generateErrMessage(fieldName string, err validator.FieldError) string {
 	switch err.Tag() {
 	case "required":
-		return fmt.Sprintf("%s is required", fieldName)
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.required_validation",
+			map[string]any{
+				"Name": fieldName,
+			},
+		)
 	case "max":
-		return fmt.Sprintf("%s cannot be longer than %s", fieldName, err.Param())
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.max_validation",
+			map[string]any{
+				"Name": fieldName,
+				"Len":  err.Param(),
+			},
+		)
 	case "min":
-		return fmt.Sprintf("%s must be longer than %s", fieldName, err.Param())
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.min_validation",
+			map[string]any{
+				"Name": fieldName,
+				"Len":  err.Param(),
+			},
+		)
 	case "numeric":
-		return fmt.Sprintf("%s is not a valid number", fieldName)
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.numeric_validation",
+			map[string]any{
+				"Name": fieldName,
+			},
+		)
 	case "len":
-		return fmt.Sprintf("%s must have length of %s", fieldName, err.Param())
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.len_validation",
+			map[string]any{
+				"Name": fieldName,
+				"Len":  err.Param(),
+			},
+		)
 	default:
-		return fmt.Sprintf("%s with tag %s is not valid", fieldName, err.Tag())
+		return svc.translationSvc.TranslateWithData(
+			"common.errors.unknown_validation",
+			map[string]any{
+				"Name": fieldName,
+				"Tag":  err.Tag(),
+			},
+		)
 	}
 }

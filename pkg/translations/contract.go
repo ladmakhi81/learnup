@@ -1,5 +1,6 @@
 package translations
 
 type Translator interface {
-	Translate(messageKey string, templateData map[string]any) string
+	TranslateWithData(messageKey string, templateData map[string]any) string
+	Translate(messageKey string) string
 }
