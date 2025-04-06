@@ -200,6 +200,34 @@ paths:
       summary: Create a new category
       tags:
       - categories
+  /categories/admin/{categoryId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: categoryId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      summary: Delete a category by ID
+      tags:
+      - categories
   /categories/admin/page:
     get:
       consumes:

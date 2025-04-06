@@ -12,7 +12,9 @@
   "category": {
     "errors": {
       "name_duplicate": "نام دسته بندی قبلا ثبت شده است",
-      "parent_category_id_not_found": "دسته بندی با آیدی مربوط به دسته بندی پدر یافت نشد"
+      "parent_category_id_not_found": "دسته بندی با آیدی مربوط به دسته بندی پدر یافت نشد",
+      "invalid_category_id": "شناسه دسته بندی نادرست میباشد",
+      "not_found": "دسته بندی یافت نشد"
     }
   },
   "common": {
