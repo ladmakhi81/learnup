@@ -11,7 +11,7 @@ import (
 
 type CategoryService interface {
 	Create(req dtoreq.CreateCategoryReq) (*entity.Category, error)
-	Delete(id uint) error
+	DeleteById(id uint) error
 	FindByID(id uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
 	IsCategoryNameExist(name string) (bool, error)
@@ -73,7 +73,23 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entity.Cat
 	return category, nil
 }
 
-func (svc CategoryServiceImpl) Delete(id uint) error {
+func (svc CategoryServiceImpl) DeleteById(id uint) error {
+	category, categoryErr := svc.FindByID(id)
+	if categoryErr != nil {
+		return categoryErr
+	}
+	if category == nil {
+		return types.NewNotFoundError(
+			svc.translationSvc.Translate("category.errors.not_found"),
+		)
+	}
+	if err := svc.repo.Delete(category); err != nil {
+		return types.NewServerError(
+			"Delete Category By ID Throw Error",
+			"CategoryServiceImpl.DeleteById",
+			err,
+		)
+	}
 	return nil
 }
 

@@ -9,7 +9,7 @@ import (
 
 type CategoryRepo interface {
 	Create(category *entity.Category) error
-	Delete(categoryID uint) error
+	Delete(category *entity.Category) error
 	FindByID(categoryID uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
 	GetCategories(page, pageSize int) ([]*entity.Category, error)
@@ -33,7 +33,11 @@ func (repo CategoryRepoImpl) Create(category *entity.Category) error {
 	return tx.Error
 }
 
-func (repo CategoryRepoImpl) Delete(categoryID uint) error {
+func (repo CategoryRepoImpl) Delete(category *entity.Category) error {
+	tx := repo.db.Core.Delete(category)
+	if tx.Error != nil {
+		return tx.Error
+	}
 	return nil
 }
 

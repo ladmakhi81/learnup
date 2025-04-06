@@ -12,7 +12,9 @@
   "category": {
     "errors": {
       "name_duplicate": "category name already exists",
-      "parent_category_id_not_found": "category not found with provided parent id"
+      "parent_category_id_not_found": "category not found with provided parent id",
+      "invalid_category_id": "invalid category id",
+      "not_found": "category not found"
     }
   },
   "common": {

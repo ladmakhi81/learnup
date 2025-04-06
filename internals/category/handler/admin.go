@@ -10,6 +10,7 @@ import (
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
+	"strconv"
 )
 
 type CategoryAdminHandler struct {
@@ -116,4 +117,31 @@ func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiRespons
 	)
 
 	return types.NewApiResponse(http.StatusOK, pageableCategoryRes), nil
+}
+
+// DeleteCategory godoc
+//	@Summary	Delete a category by ID
+//	@Tags		categories
+//	@Accept		json
+//	@Produce	json
+//	@Param		categoryId	path		int	true	" "
+//	@Success	200			{object}	types.ApiResponse
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/categories/admin/{categoryId} [delete]
+func (h CategoryAdminHandler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
+	categoryIDParam := ctx.Param("categoryId")
+	categoryId, categoryIdErr := strconv.Atoi(categoryIDParam)
+	if categoryIdErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translationSvc.Translate("category.errors.invalid_category_id"),
+		)
+	}
+	if err := h.categorySvc.DeleteById(uint(categoryId)); err != nil {
+		return nil, err
+	}
+	return types.NewApiResponse(
+		http.StatusOK,
+		map[string]any{},
+	), nil
 }
