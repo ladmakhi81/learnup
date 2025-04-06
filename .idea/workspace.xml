@@ -7,14 +7,18 @@
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/auth/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/auth/service/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/service/auth.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/env/koanf/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/env/koanf/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/http/resty/v2/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/http/resty/v2/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/validation/validator/v10/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/validation/validator/v10/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/dto/res/login.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/dto/res/login.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/dto/req/create_category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/req/create_category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/entity/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/entity/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/repo/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/repo/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +60,7 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "fix/correct__function__receiver",
+    "git-widget-placeholder": "feat/create__category",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/home/codyproo",

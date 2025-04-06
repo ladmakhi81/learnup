@@ -14,8 +14,8 @@ type CreateBasicUserRes struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func NewCreateUserResponse(user *entity.User) *CreateBasicUserRes {
-	return &CreateBasicUserRes{
+func NewCreateUserResponse(user *entity.User) CreateBasicUserRes {
+	return CreateBasicUserRes{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,

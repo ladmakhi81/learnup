@@ -9,6 +9,12 @@
       "invalid_credentials": "user not found with provided phone and password"
     }
   },
+  "category": {
+    "errors": {
+      "name_duplicate": "category name already exists",
+      "parent_category_id_not_found": "category not found with provided parent id"
+    }
+  },
   "common": {
     "errors": {
       "invalid_request_body": "invalid request body",

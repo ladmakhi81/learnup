@@ -10,9 +10,13 @@ import (
 	"github.com/ladmakhi81/learnup/internals/auth"
 	authHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
+	"github.com/ladmakhi81/learnup/internals/category"
+	categoryHandler "github.com/ladmakhi81/learnup/internals/category/handler"
+	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
+	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
-	"github.com/ladmakhi81/learnup/internals/user/repo"
+	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/env"
@@ -73,7 +77,8 @@ func main() {
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// repos
-	userRepo := repo.NewUserRepoImpl(dbClient)
+	categoryRepo := categoryRepository.NewCategoryRepoImpl(dbClient)
+	userRepo := userRepository.NewUserRepoImpl(dbClient)
 
 	// svcs
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
@@ -82,18 +87,22 @@ func main() {
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
+	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 
 	// handlers
 	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
+	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler)
 	authModule := auth.NewModule(userAuthHandler)
+	categoryModule := category.NewModule(categoryAdminHandler)
 
 	// register module
 	userModule.Register(api)
 	authModule.Register(api)
+	categoryModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 

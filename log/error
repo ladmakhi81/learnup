@@ -1,2 +1,5 @@
 Timestamp: 1743850292, URL: /api/users/admin/, Location: Unknown, Message: This is server error, TraceID: f51083d4-9778-409a-8c79-b3526deea80d
 Timestamp: 1743850457, URL: /api/users/admin/, Location: This is location, Message: This is server error, TraceID: 68911107-4cd1-4c50-829c-f49f631d1e58
+Timestamp: 1743925784, URL: /api/categories/admin/, Location: CategoryServiceImpl.FindByName, Message: Find Category By Name Throw Error, TraceID: d38d839b-0a2e-4f69-bbdf-f901b4a31ed9
+Timestamp: 1743925787, URL: /api/categories/admin/, Location: CategoryServiceImpl.FindByName, Message: Find Category By Name Throw Error, TraceID: a44a9139-c29b-494d-a37e-4e0cc4fa0647
+Timestamp: 1743925819, URL: /api/categories/admin/, Location: CategoryServiceImpl.FindByName, Message: Find Category By Name Throw Error, TraceID: 7198b431-bb4a-4794-b0b4-7f4eb0f11feb
