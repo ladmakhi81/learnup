@@ -8,6 +8,7 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/pkg/validation"
 	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
 )
 
@@ -30,6 +31,7 @@ func NewCategoryAdminHandler(
 }
 
 // CreateCategory godoc
+//
 //	@Summary	Create a new category
 //	@Tags		categories
 //	@Accept		json
@@ -61,4 +63,57 @@ func (h CategoryAdminHandler) CreateCategory(c *gin.Context) (*types.ApiResponse
 		category.CreatedAt,
 	)
 	return types.NewApiResponse(http.StatusCreated, categoryRes), nil
+}
+
+// GetCategoriesTree godoc
+//
+//	@Summary	Get categories as a tree structure
+//	@Tags		categories
+//	@Accept		json
+//	@Produce	json
+//	@Success	200	{object}	types.ApiResponse{data=dtores.GetCategoriesTreeRes}
+//	@Failure	500	{object}	types.ApiResponse
+//	@Router		/categories/admin/tree [get]
+func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiResponse, error) {
+	categoriesTree, categoriesTreeErr := h.categorySvc.GetCategoriesTree()
+	if categoriesTreeErr != nil {
+		return nil, categoriesTreeErr
+	}
+	//categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
+	return types.NewApiResponse(http.StatusOK, categoriesTree), nil
+}
+
+// GetCategories godoc
+//
+//	@Summary	Get a paginated list of categories
+//	@Tags		categories
+//	@Accept		json
+//	@Produce	json
+//	@Param		page		query		int											false	"Page number"				default(0)
+//	@Param		pageSize	query		int											false	"Number of items per page"	default(10)
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes}	" "
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/categories/admin/page [get]
+func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
+	page, pageSize := utils.ExtractPaginationMetadata(
+		ctx.Query("page"),
+		ctx.Query("pageSize"),
+	)
+	categories, categoriesErr := h.categorySvc.GetCategories(page, pageSize)
+	if categoriesErr != nil {
+		return nil, categoriesErr
+	}
+	categoriesCount, categoriesCountErr := h.categorySvc.GetCategoriesCount()
+	if categoriesCountErr != nil {
+		return nil, categoriesCountErr
+	}
+	pageableCategoryItems := dtores.MapCategoriesToPageableItems(categories)
+	pageableCategoryRes := types.NewPaginationRes(
+		pageableCategoryItems,
+		page,
+		utils.CalculatePaginationTotalPage(categoriesCount),
+		categoriesCount,
+	)
+
+	return types.NewApiResponse(http.StatusOK, pageableCategoryRes), nil
 }

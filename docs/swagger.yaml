@@ -19,8 +19,9 @@ definitions:
   github_com_ladmakhi81_learnup_internals_category_dto_req.CreateCategoryReq:
     properties:
       name:
+        minLength: 3
         type: string
-      parent_id:
+      parentId:
         type: integer
     required:
     - name
@@ -33,6 +34,26 @@ definitions:
         type: integer
       name:
         type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      parentCategoryId:
+        type: integer
+      subCategories:
+        items:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem'
+        type: array
+    type: object
+  github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem'
+        type: array
     type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
@@ -82,6 +103,16 @@ definitions:
     properties:
       data: {}
       statusCode:
+        type: integer
+    type: object
+  types.PaginationRes:
+    properties:
+      currentPage:
+        type: integer
+      row: {}
+      totalCount:
+        type: integer
+      totalPage:
         type: integer
     type: object
 info:
@@ -167,6 +198,63 @@ paths:
           schema:
             $ref: '#/definitions/types.ApiError'
       summary: Create a new category
+      tags:
+      - categories
+  /categories/admin/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ' '
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/types.PaginationRes'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      summary: Get a paginated list of categories
+      tags:
+      - categories
+  /categories/admin/tree:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+      summary: Get categories as a tree structure
       tags:
       - categories
   /users/admin/basic:

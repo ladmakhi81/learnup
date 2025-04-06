@@ -21,4 +21,6 @@ func (m Module) Register(api *gin.RouterGroup) {
 	categoriesAdminApi := categoriesApi.Group("/admin")
 
 	categoriesAdminApi.POST("/", utils.JsonHandler(m.categoryAdminHandler.CreateCategory))
+	categoriesAdminApi.GET("/tree", utils.JsonHandler(m.categoryAdminHandler.GetCategoriesTree))
+	categoriesAdminApi.GET("/page", utils.JsonHandler(m.categoryAdminHandler.GetCategories))
 }

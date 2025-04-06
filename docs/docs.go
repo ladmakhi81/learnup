@@ -147,6 +147,102 @@ const docTemplate = `{
                 }
             }
         },
+        "/categories/admin/page": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get a paginated list of categories",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number of items per page",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": " ",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/types.PaginationRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/admin/tree": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get categories as a tree structure",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/admin/basic": {
             "post": {
                 "consumes": [
@@ -243,9 +339,10 @@ const docTemplate = `{
             ],
             "properties": {
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 3
                 },
-                "parent_id": {
+                "parentId": {
                     "type": "integer"
                 }
             }
@@ -261,6 +358,37 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentCategoryId": {
+                    "type": "integer"
+                },
+                "subCategories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem"
+                    }
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem"
+                    }
                 }
             }
         },
@@ -333,6 +461,21 @@ const docTemplate = `{
             "properties": {
                 "data": {},
                 "statusCode": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.PaginationRes": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "row": {},
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPage": {
                     "type": "integer"
                 }
             }

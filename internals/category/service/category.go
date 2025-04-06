@@ -15,6 +15,9 @@ type CategoryService interface {
 	FindByID(id uint) (*entity.Category, error)
 	FindByName(name string) (*entity.Category, error)
 	IsCategoryNameExist(name string) (bool, error)
+	GetCategoriesTree() ([]*entity.Category, error)
+	GetCategories(page, pageSize int) ([]*entity.Category, error)
+	GetCategoriesCount() (int, error)
 }
 
 type CategoryServiceImpl struct {
@@ -105,4 +108,61 @@ func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*entity.Category, error) {
+	subCategories, subCategoriesErr := svc.repo.GetSubCategories(category.ID)
+	if subCategoriesErr != nil {
+		return nil, subCategoriesErr
+	}
+	for _, subCategory := range subCategories {
+		nextSubCategory, nextSubCategoryErr := svc.getSubCategories(subCategory)
+		if nextSubCategoryErr != nil {
+			return nil, nextSubCategoryErr
+		}
+		subCategory.Children = nextSubCategory
+	}
+	return subCategories, nil
+}
+
+func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
+	rootCategories, rootCategoriesErr := svc.repo.GetRootCategories()
+	if rootCategoriesErr != nil {
+		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
+			"CategoryServiceImpl.GetCategoriesTree",
+			rootCategoriesErr,
+		)
+	}
+	treeCategories := make([]*entity.Category, len(rootCategories))
+	for rootCategoryIndex, rootCategory := range rootCategories {
+		subCategory, subCategoryErr := svc.getSubCategories(rootCategory)
+		if subCategoryErr != nil {
+			return nil, subCategoryErr
+		}
+		rootCategory.Children = subCategory
+		treeCategories[rootCategoryIndex] = rootCategory
+	}
+	return treeCategories, nil
+}
+
+func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
+	categories, categoriesErr := svc.repo.GetCategories(page, pageSize)
+	if categoriesErr != nil {
+		return nil, types.NewServerError("Get Categories List Throw Error",
+			"CategoryServiceImpl.GetCategories",
+			categoriesErr,
+		)
+	}
+	return categories, nil
+}
+
+func (svc CategoryServiceImpl) GetCategoriesCount() (int, error) {
+	count, countErr := svc.repo.GetCategoriesCount()
+	if countErr != nil {
+		return 0, types.NewServerError("Get Count Of Categories Throw Error",
+			"CategoryServiceImpl.GetCategoriesCount",
+			countErr,
+		)
+	}
+	return count, nil
 }
