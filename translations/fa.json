@@ -1,0 +1,23 @@
+{
+  "user": {
+    "errors": {
+      "phone_duplicate": "شماره تماس قبلا ثبت شده است"
+    }
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "کاربری با این شماره تماس و گذرواژه یافت نشد"
+    }
+  },
+  "common": {
+    "errors": {
+      "invalid_request_body": "بدنه درخواست نادرست میباشد",
+      "required_validation": "{{.Name}} الزامی میباشد",
+      "max_validation": "{{.Name}} باید حداکثر {{.Len}} کاراکتر داشته باشد",
+      "min_validation": "{{.Name}} باید حداقل {{.Len}} کاراکتر داشته باشد",
+      "numeric_validation": "{{.Name}} باید عدد باشد",
+      "len_validation": "{{.Name}} باید {{.Len}} کاراکتر داشته باشد",
+      "unknown_validation": "{{.Name}} با تگ {{.Tag}} نادرست میباشد"
+    }
+  }
+}

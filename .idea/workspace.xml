@@ -6,7 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/constant/error_message.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/auth/handler/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/handler/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/service/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/service/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/constant/error_message.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/handler/admin.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/translations/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/translations/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/translations/i18n/v2/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/translations/i18n/v2/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/validation/validator/v10/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/validation/validator/v10/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +59,7 @@
     &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/login&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/localization&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/codyproo&quot;,

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -17,10 +18,15 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
 	jwtv5 "github.com/ladmakhi81/learnup/pkg/token/jwt/v5"
+	i18nv2 "github.com/ladmakhi81/learnup/pkg/translations/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 	"log"
+	"os"
+	"path"
 
 	_ "github.com/ladmakhi81/learnup/docs"
 	"github.com/swaggo/files"
@@ -58,6 +64,11 @@ func main() {
 	port := fmt.Sprintf(":%d", config.App.Port)
 	api := server.Group("/api")
 
+	localizer, localizerErr := SetupLocalizer()
+	if localizerErr != nil {
+		log.Fatalf("Failed to initialize localizer: %v\n", localizerErr)
+	}
+
 	// swagger documentation
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -65,15 +76,16 @@ func main() {
 	userRepo := repo.NewUserRepoImpl(dbClient)
 
 	// svcs
+	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
-	validationSvc := validatorv10.NewValidatorSvc(validator.New())
-	userSvc := userService.NewUserSvcImpl(userRepo)
-	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc)
+	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
+	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
+	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 
 	// handlers
-	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc)
-	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc)
+	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
+	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler)
@@ -109,4 +121,31 @@ func SetupRedis(config *env.EnvConfig) *redis.Client {
 		Password: "",
 		DB:       0,
 	})
+}
+
+func SetupLocalizer() (*i18n.Localizer, error) {
+	locales := map[string]struct {
+		langTag  language.Tag
+		langText string
+	}{
+		"fa": {
+			langTag:  language.Persian,
+			langText: "fa",
+		},
+		"en": {
+			langTag:  language.English,
+			langText: "en",
+		},
+	}
+	defaultLocale := "fa"
+	localizationBundle := i18n.NewBundle(locales[defaultLocale].langTag)
+	localizationBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+	rootDir, rootDirErr := os.Getwd()
+	if rootDirErr != nil {
+		return nil, rootDirErr
+	}
+	translationFolderPath := path.Join(rootDir, "translations")
+	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "fa.json"))
+	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "en.json"))
+	return i18n.NewLocalizer(localizationBundle, locales[defaultLocale].langText), nil
 }

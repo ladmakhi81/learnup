@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/internals/user/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
 	"github.com/ladmakhi81/learnup/internals/user/entity"
 	"github.com/ladmakhi81/learnup/internals/user/repo"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,12 +16,17 @@ type UserSvc interface {
 }
 
 type UserSvcImpl struct {
-	userRepo repo.UserRepo
+	userRepo       repo.UserRepo
+	translationSvc translations.Translator
 }
 
-func NewUserSvcImpl(userRepo repo.UserRepo) *UserSvcImpl {
+func NewUserSvcImpl(
+	userRepo repo.UserRepo,
+	translationSvc translations.Translator,
+) *UserSvcImpl {
 	return &UserSvcImpl{
-		userRepo: userRepo,
+		userRepo:       userRepo,
+		translationSvc: translationSvc,
 	}
 }
 
@@ -31,7 +36,9 @@ func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entity.User,
 		return nil, isPhoneExistBeforeErr
 	}
 	if isPhoneExistBefore {
-		return nil, types.NewConflictError(constant.UserPhoneAlreadyExists)
+		return nil, types.NewConflictError(
+			svc.translationSvc.Translate("user.errors.phone_duplicate"),
+		)
 	}
 	hashedPassword, hashedPasswordErr := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
 	if hashedPasswordErr != nil {

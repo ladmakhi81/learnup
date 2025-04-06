@@ -6,6 +6,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/cache"
 	"github.com/ladmakhi81/learnup/pkg/token"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,20 +16,23 @@ type AuthService interface {
 }
 
 type AuthServiceImpl struct {
-	userSvc  service.UserSvc
-	cacheSvc cache.Cache
-	tokenSvc token.Token
+	userSvc        service.UserSvc
+	cacheSvc       cache.Cache
+	tokenSvc       token.Token
+	translationSvc translations.Translator
 }
 
 func NewAuthServiceImpl(
 	userSvc service.UserSvc,
 	cacheSvc cache.Cache,
 	tokenSvc token.Token,
+	translationSvc translations.Translator,
 ) *AuthServiceImpl {
 	return &AuthServiceImpl{
-		userSvc:  userSvc,
-		cacheSvc: cacheSvc,
-		tokenSvc: tokenSvc,
+		userSvc:        userSvc,
+		cacheSvc:       cacheSvc,
+		tokenSvc:       tokenSvc,
+		translationSvc: translationSvc,
 	}
 }
 
@@ -38,10 +42,14 @@ func (svc *AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
 		return "", userErr
 	}
 	if user == nil {
-		return "", types.NewNotFoundError(constant.AuthInvalidCredentials)
+		return "", types.NewNotFoundError(
+			svc.translationSvc.Translate("auth.errors.invalid_credentials"),
+		)
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.Password)); err != nil {
-		return "", types.NewNotFoundError(constant.AuthInvalidCredentials)
+		return "", types.NewNotFoundError(
+			svc.translationSvc.Translate("auth.errors.invalid_credentials"),
+		)
 	}
 	accessToken, accessTokenErr := svc.tokenSvc.GenerateToken(user.ID)
 	if accessTokenErr != nil {
