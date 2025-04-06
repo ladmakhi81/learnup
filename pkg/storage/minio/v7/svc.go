@@ -23,7 +23,7 @@ func NewMinioClientSvc(
 	}
 }
 
-func (svc *MinioClientSvc) BucketExist(
+func (svc MinioClientSvc) BucketExist(
 	ctx context.Context,
 	bucketName string,
 ) (bool, *storage.StorageError) {
@@ -37,7 +37,7 @@ func (svc *MinioClientSvc) BucketExist(
 	return exist, nil
 }
 
-func (svc *MinioClientSvc) CreateBucket(
+func (svc MinioClientSvc) CreateBucket(
 	ctx context.Context,
 	bucketName string,
 ) *storage.StorageError {
@@ -65,7 +65,7 @@ func (svc *MinioClientSvc) CreateBucket(
 	return nil
 }
 
-func (svc *MinioClientSvc) DeleteBucket(
+func (svc MinioClientSvc) DeleteBucket(
 	ctx context.Context,
 	bucketName string,
 ) *storage.StorageError {
@@ -89,7 +89,7 @@ func (svc *MinioClientSvc) DeleteBucket(
 	return nil
 }
 
-func (svc *MinioClientSvc) UploadFileByContent(
+func (svc MinioClientSvc) UploadFileByContent(
 	ctx context.Context,
 	bucketName string,
 	contentType string,
@@ -132,7 +132,7 @@ func (svc *MinioClientSvc) UploadFileByContent(
 	return storage.NewUploadResult(info.Key, info.Size), nil
 }
 
-func (svc *MinioClientSvc) GetFile(
+func (svc MinioClientSvc) GetFile(
 	ctx context.Context,
 	bucketName,
 	fileName string) ([]byte, *storage.StorageError) {

@@ -36,7 +36,7 @@ func NewAuthServiceImpl(
 	}
 }
 
-func (svc *AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
+func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
 	user, userErr := svc.userSvc.FindByPhone(dto.Phone)
 	if userErr != nil {
 		return "", userErr

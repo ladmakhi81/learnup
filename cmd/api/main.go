@@ -89,7 +89,7 @@ func main() {
 
 	// modules
 	userModule := user.NewModule(userAdminHandler)
-	authModule := auth.NewAuthModule(userAuthHandler)
+	authModule := auth.NewModule(userAuthHandler)
 
 	// register module
 	userModule.Register(api)
