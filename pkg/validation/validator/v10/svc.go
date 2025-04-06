@@ -22,7 +22,7 @@ func NewValidatorSvc(
 	}
 }
 
-func (svc *ValidatorSvc) Validate(dto any) *types.ClientError {
+func (svc ValidatorSvc) Validate(dto any) *types.ClientError {
 	err := svc.core.Struct(dto)
 	if err != nil {
 		var validationErrors []string
@@ -35,7 +35,7 @@ func (svc *ValidatorSvc) Validate(dto any) *types.ClientError {
 	return nil
 }
 
-func (svc *ValidatorSvc) getJsonTagName(dto any, fieldName string) string {
+func (svc ValidatorSvc) getJsonTagName(dto any, fieldName string) string {
 	t := reflect.TypeOf(dto)
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -44,7 +44,7 @@ func (svc *ValidatorSvc) getJsonTagName(dto any, fieldName string) string {
 	return field.Tag.Get("json")
 }
 
-func (svc *ValidatorSvc) generateErrMessage(fieldName string, err validator.FieldError) string {
+func (svc ValidatorSvc) generateErrMessage(fieldName string, err validator.FieldError) string {
 	switch err.Tag() {
 	case "required":
 		return svc.translationSvc.TranslateWithData(

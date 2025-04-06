@@ -18,7 +18,7 @@ func NewModule(
 	}
 }
 
-func (m *Module) Register(api *gin.RouterGroup) {
+func (m Module) Register(api *gin.RouterGroup) {
 	usersApi := api.Group("/users")
 	usersAdminApi := usersApi.Group("/admin")
 

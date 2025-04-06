@@ -15,7 +15,7 @@ func NewRedisClientSvc(redis *redis.Client) *RedisClientSvc {
 	}
 }
 
-func (svc *RedisClientSvc) SetHashVal(key string, id string, val any) error {
+func (svc RedisClientSvc) SetHashVal(key string, id string, val any) error {
 	err := svc.redis.HSet(key, id, val)
 	if err != nil {
 		return cache.NewCacheError(
@@ -26,7 +26,7 @@ func (svc *RedisClientSvc) SetHashVal(key string, id string, val any) error {
 	return nil
 }
 
-func (svc *RedisClientSvc) GetHashVal(key, id string) (string, error) {
+func (svc RedisClientSvc) GetHashVal(key, id string) (string, error) {
 	val, err := svc.redis.HGet(key, id).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -43,7 +43,7 @@ func (svc *RedisClientSvc) GetHashVal(key, id string) (string, error) {
 	return val, nil
 }
 
-func (svc *RedisClientSvc) SetVal(key string, val any) error {
+func (svc RedisClientSvc) SetVal(key string, val any) error {
 	err := svc.redis.Set(key, val, 0).Err()
 	if err != nil {
 		return cache.NewCacheError(

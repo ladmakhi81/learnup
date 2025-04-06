@@ -6,17 +6,17 @@ import (
 	"github.com/ladmakhi81/learnup/utils"
 )
 
-type AuthModule struct {
+type Module struct {
 	userAuthHandler *handler.UserAuthHandler
 }
 
-func NewAuthModule(userAuthHandler *handler.UserAuthHandler) *AuthModule {
-	return &AuthModule{
+func NewModule(userAuthHandler *handler.UserAuthHandler) *Module {
+	return &Module{
 		userAuthHandler: userAuthHandler,
 	}
 }
 
-func (m AuthModule) Register(api *gin.RouterGroup) {
+func (m Module) Register(api *gin.RouterGroup) {
 	authApi := api.Group("/auth")
 
 	authApi.POST("/login", utils.JsonHandler(m.userAuthHandler.Login))

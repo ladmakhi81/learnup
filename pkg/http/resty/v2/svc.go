@@ -15,7 +15,7 @@ func NewRestyHttpSvc() *RestyHttpSvc {
 	}
 }
 
-func (svc *RestyHttpSvc) Post(dto http.PostRequestDTO) (*http.HttpResponse, error) {
+func (svc RestyHttpSvc) Post(dto http.PostRequestDTO) (*http.HttpResponse, error) {
 	resp, respErr := svc.httpClient.R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(dto).
@@ -32,7 +32,7 @@ func (svc *RestyHttpSvc) Post(dto http.PostRequestDTO) (*http.HttpResponse, erro
 	), nil
 }
 
-func (svc *RestyHttpSvc) Get(dto http.GetRequestDTO) (*http.HttpResponse, error) {
+func (svc RestyHttpSvc) Get(dto http.GetRequestDTO) (*http.HttpResponse, error) {
 	resp, respErr := svc.httpClient.R().
 		SetQueryParams(dto.QueryParams).
 		SetHeader("Content-Type", "application/json").

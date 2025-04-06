@@ -13,7 +13,7 @@ func NewKoanfEnvSvc() *KoanfEnvSvc {
 	return &KoanfEnvSvc{}
 }
 
-func (svc *KoanfEnvSvc) LoadLearnUp() (*env.EnvConfig, error) {
+func (svc KoanfEnvSvc) LoadLearnUp() (*env.EnvConfig, error) {
 	k := koanf.New(".")
 	provider := koanfEnv.Provider("LEARNUP_", "__", func(s string) string {
 		return strings.ToLower(strings.TrimPrefix(s, "LEARNUP_"))
