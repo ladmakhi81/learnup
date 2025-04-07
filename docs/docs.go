@@ -306,6 +306,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/admin": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Create a new course",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "requestBody",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/admin/basic": {
             "post": {
                 "security": [
@@ -459,6 +533,198 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReq": {
+            "type": "object",
+            "required": [
+                "abilityToAddComment",
+                "canHaveDiscount",
+                "categoryId",
+                "courseLevel",
+                "description",
+                "fee",
+                "image",
+                "introductionVideo",
+                "name",
+                "prerequisite",
+                "price",
+                "teacher_id",
+                "thumbnailImage"
+            ],
+            "properties": {
+                "abilityToAddComment": {
+                    "type": "boolean"
+                },
+                "canHaveDiscount": {
+                    "type": "boolean"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "commentAccessMode": {
+                    "type": "string",
+                    "enum": [
+                        "all",
+                        "students"
+                    ]
+                },
+                "courseLevel": {
+                    "type": "string",
+                    "enum": [
+                        "beginner",
+                        "pre-intermediate",
+                        "intermediate",
+                        "advance"
+                    ]
+                },
+                "description": {
+                    "type": "string",
+                    "minLength": 20
+                },
+                "discountFeeAmountPercentage": {
+                    "type": "number",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "fee": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "image": {
+                    "type": "string",
+                    "minLength": 10
+                },
+                "introductionVideo": {
+                    "type": "string",
+                    "minLength": 20
+                },
+                "maxDiscountAmount": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 3
+                },
+                "prerequisite": {
+                    "type": "string",
+                    "minLength": 20
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "teacher_id": {
+                    "type": "integer"
+                },
+                "thumbnailImage": {
+                    "type": "string",
+                    "minLength": 10
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes": {
+            "type": "object",
+            "properties": {
+                "abilityToAddComment": {
+                    "type": "boolean"
+                },
+                "canHaveDiscount": {
+                    "type": "boolean"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "commentAccessMode": {
+                    "type": "string"
+                },
+                "courseStatus": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discountFeeAmountPercentage": {
+                    "type": "number"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "introductionVideo": {
+                    "type": "string"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isVerifiedByAdmin": {
+                    "type": "boolean"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "maxDiscountAmount": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prerequisite": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "teacherId": {
+                    "type": "integer"
+                },
+                "teacherIncomeAmount": {
+                    "type": "number"
+                },
+                "thumbnailImage": {
+                    "type": "string"
+                },
+                "verifiedByID": {
+                    "type": "integer"
+                },
+                "verifiedDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus": {
+            "type": "string",
+            "enum": [
+                "starting",
+                "in-progress",
+                "done",
+                "pause",
+                "cancel"
+            ],
+            "x-enum-varnames": [
+                "CourseStatus_Starting",
+                "CourseStatus_InProgress",
+                "CourseStatus_Done",
+                "CourseStatus_Pause",
+                "CourseStatus_Cancel"
+            ]
         },
         "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq": {
             "type": "object",

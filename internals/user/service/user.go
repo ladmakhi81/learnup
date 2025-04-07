@@ -13,6 +13,7 @@ type UserSvc interface {
 	CreateBasic(dto dtoreq.CreateBasicUserReq) (*entity.User, error)
 	IsPhoneDuplicated(phone string) (bool, error)
 	FindByPhone(phone string) (*entity.User, error)
+	FindById(id uint) (*entity.User, error)
 }
 
 type UserSvcImpl struct {
@@ -81,6 +82,18 @@ func (svc UserSvcImpl) FindByPhone(phone string) (*entity.User, error) {
 		return nil, types.NewServerError(
 			"Find User By Phone Throw Error",
 			"UserSvcImpl.FindByPhone",
+			userErr,
+		)
+	}
+	return user, nil
+}
+
+func (svc UserSvcImpl) FindById(id uint) (*entity.User, error) {
+	user, userErr := svc.userRepo.FindById(id)
+	if userErr != nil {
+		return nil, types.NewServerError(
+			"Find User By Id Throw Error",
+			"UserServiceImpl.FindById",
 			userErr,
 		)
 	}
