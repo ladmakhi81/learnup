@@ -9,12 +9,12 @@ import (
 
 type Module struct {
 	userAdminHandler *handler.UserAdminHandler
-	middleware       middleware.Middleware
+	middleware       *middleware.Middleware
 }
 
 func NewModule(
 	userAdminHandler *handler.UserAdminHandler,
-	middleware middleware.Middleware,
+	middleware *middleware.Middleware,
 ) *Module {
 	return &Module{
 		userAdminHandler: userAdminHandler,

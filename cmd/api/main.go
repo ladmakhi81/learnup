@@ -14,6 +14,10 @@ import (
 	categoryHandler "github.com/ladmakhi81/learnup/internals/category/handler"
 	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
+	"github.com/ladmakhi81/learnup/internals/course"
+	courseHandler "github.com/ladmakhi81/learnup/internals/course/handler"
+	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
+	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
@@ -83,6 +87,7 @@ func main() {
 	// repos
 	categoryRepo := categoryRepository.NewCategoryRepoImpl(dbClient)
 	userRepo := userRepository.NewUserRepoImpl(dbClient)
+	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
 
 	// svcs
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
@@ -92,6 +97,7 @@ func main() {
 	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
+	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -100,16 +106,19 @@ func main() {
 	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
+	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)
 	authModule := auth.NewModule(userAuthHandler)
 	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
+	courseModule := course.NewModule(courseAdminHandler, middlewares)
 
 	// register module
 	userModule.Register(api)
 	authModule.Register(api)
 	categoryModule.Register(api)
+	courseModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 

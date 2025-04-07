@@ -1,0 +1,1 @@
+Timestamp: 1744018943, URL: /api/courses/admin/, Location: CourseServiceImpl.Create, Message: Create Course Throw Error - ERROR: could not determine data type of parameter $14 (SQLSTATE 42P18), TraceID: 81c8b5dd-df0f-4195-9896-5636e878c755

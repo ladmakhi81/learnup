@@ -10,8 +10,8 @@ type Middleware struct {
 	redisSvc cache.Cache
 }
 
-func NewMiddleware(tokenSvc token.Token, redisSvc cache.Cache) Middleware {
-	return Middleware{
+func NewMiddleware(tokenSvc token.Token, redisSvc cache.Cache) *Middleware {
+	return &Middleware{
 		tokenSvc: tokenSvc,
 		redisSvc: redisSvc,
 	}
