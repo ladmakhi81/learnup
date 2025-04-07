@@ -22,6 +22,7 @@ type Course struct {
 	Prerequisite                string                   `gorm:"column:prerequisite;type:text;not null"`
 	Level                       CourseLevel              `gorm:"column:level;type:text;not null"`
 	Status                      CourseStatus             `gorm:"column:status;type:text;not null;default:'starting'"`
+	StatusChangedAt             *time.Time               `gorm:"column:status_changed_at;type:timestamp;"`
 	Tags                        []string                 `gorm:"column:tags;type:text;serializer:json"`
 	AbilityToAddComment         bool                     `gorm:"column:ability_to_add_comment;type:boolean;default:false"`
 	CommentAccessMode           CourseCommentAccessMode  `gorm:"column:comment_access_mode;type:text;not null;default:'all'"`

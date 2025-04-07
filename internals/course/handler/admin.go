@@ -8,6 +8,7 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/pkg/validation"
 	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
 )
 
@@ -84,4 +85,41 @@ func (h CourseAdminHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, 
 		CategoryID:                  course.CategoryID,
 	}
 	return types.NewApiResponse(http.StatusCreated, courseRes), nil
+}
+
+// GetCourses godoc
+//
+//	@Summary	Get list of paginated courses
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		page		query		int	false	"Page number"	default(0)
+//	@Param		pageSize	query		int	false	"Page size"		default(10)
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.GetCoursesRes}}
+//	@Failure	401			{object}	types.ApiResponse
+//	@Failure	500			{object}	types.ApiResponse
+//	@Router		/courses/admin/page [get]
+//
+//	@Security	BearerAuth
+func (h CourseAdminHandler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
+	page, pageSize := utils.ExtractPaginationMetadata(
+		ctx.Query("page"),
+		ctx.Query("pageSize"),
+	)
+	courses, coursesErr := h.courseSvc.GetCourses(page, pageSize)
+	if coursesErr != nil {
+		return nil, coursesErr
+	}
+	coursesCount, coursesCountErr := h.courseSvc.GetCoursesCount()
+	if coursesCountErr != nil {
+		return nil, coursesCountErr
+	}
+	mappedCourses := dtores.NewGetCoursesRes(courses)
+	paginationRes := types.NewPaginationRes(
+		mappedCourses,
+		page,
+		utils.CalculatePaginationTotalPage(coursesCount),
+		coursesCount,
+	)
+	return types.NewApiResponse(http.StatusOK, paginationRes), nil
 }

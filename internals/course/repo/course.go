@@ -10,6 +10,8 @@ import (
 type CourseRepo interface {
 	Create(course *entity.Course) error
 	FindByName(name string) (*entity.Course, error)
+	GetCourses(page, pageSize int) ([]*entity.Course, error)
+	GetCoursesCount() (int, error)
 }
 
 type CourseRepoImpl struct {
@@ -36,4 +38,29 @@ func (repo CourseRepoImpl) FindByName(name string) (*entity.Course, error) {
 		}
 	}
 	return course, nil
+}
+
+func (repo CourseRepoImpl) GetCourses(page, pageSize int) ([]*entity.Course, error) {
+	var courses []*entity.Course
+	tx := repo.dbClient.Core.
+		Preload("Teacher").
+		Preload("Category").
+		Preload("VerifiedBy").
+		Offset(page * pageSize).
+		Limit(pageSize).
+		Order("created_at desc").
+		Find(&courses)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return courses, nil
+}
+
+func (repo CourseRepoImpl) GetCoursesCount() (int, error) {
+	count := int64(0)
+	tx := repo.dbClient.Core.Model(&entity.Course{}).Count(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	return int(count), nil
 }

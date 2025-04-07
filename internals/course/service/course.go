@@ -15,6 +15,8 @@ type CourseService interface {
 	Create(authContext any, dto dtoreq.CreateCourseReq) (*entity.Course, error)
 	FindByName(name string) (*entity.Course, error)
 	IsCourseNameExist(name string) (bool, error)
+	GetCourses(page, pageSize int) ([]*entity.Course, error)
+	GetCoursesCount() (int, error)
 }
 
 type CourseServiceImpl struct {
@@ -127,4 +129,28 @@ func (svc CourseServiceImpl) IsCourseNameExist(name string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entity.Course, error) {
+	courses, coursesErr := svc.courseRepo.GetCourses(page, pageSize)
+	if coursesErr != nil {
+		return nil, types.NewServerError(
+			"Find All Pageable Courses Throw Error",
+			"CourseServiceImpl.GetCourses",
+			coursesErr,
+		)
+	}
+	return courses, nil
+}
+
+func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
+	count, countErr := svc.courseRepo.GetCoursesCount()
+	if countErr != nil {
+		return 0, types.NewServerError(
+			"Get Count Of Courses Throw Error",
+			"CourseServiceImpl.GetCourses",
+			countErr,
+		)
+	}
+	return count, nil
 }
