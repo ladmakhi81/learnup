@@ -6,18 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/middleware/middleware.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/middleware/middleware.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/repo/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/repo/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,24 +40,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/create__course",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/codyproo",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CodeWithMe"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/create__course&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/codyproo&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CodeWithMe&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/internals/user/entity" />

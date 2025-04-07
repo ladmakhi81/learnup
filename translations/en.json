@@ -17,6 +17,13 @@
       "not_found": "category not found"
     }
   },
+  "course": {
+    "errors": {
+      "name_duplicate": "course name already exists",
+      "not_found_category": "selected category is not found",
+      "not_found_teacher": "selected teacher is not found"
+    }
+  },
   "common": {
     "errors": {
       "invalid_request_body": "invalid request body",
