@@ -30,6 +30,7 @@ type SmtpEnvConfig struct {
 type AppEnvConfig struct {
 	Port           int    `koanf:"port"`
 	TokenSecretKey string `koanf:"token_secret_key"`
+	OPENAI_KEY     string `koanf:"openai_key"`
 }
 
 type EnvConfig struct {

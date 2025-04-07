@@ -67,6 +67,7 @@ services:
       # app
       LEARNUP_APP__PORT: ${APP_PORT}
       LEARNUP_APP__TOKEN_SECRET_KEY: ${APP_TOKEN_SECRET_KEY}
+      LEARNUP_APP__OPENAI_KEY: ${APP_OPENAI_KEY}
     networks:
       - learnup_network
     volumes:
