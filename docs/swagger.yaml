@@ -180,6 +180,75 @@ definitions:
       verifiedDate:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes:
+    properties:
+      courses:
+        items:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems'
+        type: array
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory:
+    properties:
+      id:
+        type: integer
+      isPublished:
+        type: boolean
+      name:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems:
+    properties:
+      category:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory'
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      introductionVideo:
+        type: string
+      isPublished:
+        type: boolean
+      isVerified:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      status:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus'
+      statusChangedAt:
+        type: string
+      teacher:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher'
+      thumbnail:
+        type: string
+      updatedAt:
+        type: string
+      verifiedBy:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier'
+      verifiedDate:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher:
+    properties:
+      fullName':
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier:
+    properties:
+      fullName':
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus:
     enum:
     - starting
@@ -474,6 +543,53 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a new course
+      tags:
+      - courses
+  /courses/admin/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      data:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes'
+                        type: array
+                    type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+      security:
+      - BearerAuth: []
+      summary: Get list of paginated courses
       tags:
       - courses
   /users/admin/basic:

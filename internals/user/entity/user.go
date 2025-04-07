@@ -15,3 +15,7 @@ type User struct {
 func (User) TableName() string {
 	return "_users"
 }
+
+func (user User) FullName() string {
+	return user.FirstName + " " + user.LastName
+}
