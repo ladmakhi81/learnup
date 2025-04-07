@@ -53,3 +53,11 @@ func (svc RedisClientSvc) SetVal(key string, val any) error {
 	}
 	return nil
 }
+
+func (svc RedisClientSvc) GetVal(key string) (string, error) {
+	val, err := svc.redis.Get(key).Result()
+	if err != nil {
+		return "", cache.NewCacheError("Error: happen in get value", "RedisClientSvc.GetVal")
+	}
+	return val, nil
+}

@@ -6,15 +6,20 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/api/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/admin.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/repo/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/repo/category.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/handler/admin.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/repo/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/repo/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/cache/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cache/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/cache/redis/v6/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/token/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/token/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/token/jwt/v5/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/token/jwt/v5/svc.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,13 +61,14 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/delete__category",
+    "git-widget-placeholder": "feat/token__guard",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/home/codyproo",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CodeWithMe"
   }
 }]]></component>
   <component name="RecentsManager">

@@ -31,6 +31,20 @@ func (svc JwtSvc) GenerateToken(userID uint) (string, error) {
 	return signedToken, nil
 }
 
+func (svc JwtSvc) VerifyToken(tokenString string) (*types.TokenClaim, error) {
+	claims := &types.TokenClaim{}
+	token, tokenErr := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return svc.getSecretKey(), nil
+	})
+	if tokenErr != nil {
+		return nil, errors.New("Error happen in verify token")
+	}
+	if !token.Valid {
+		return nil, errors.New("token is invalid")
+	}
+	return claims, nil
+}
+
 func (svc JwtSvc) getSecretKey() []byte {
 	return []byte(svc.config.App.TokenSecretKey)
 }

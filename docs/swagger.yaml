@@ -197,6 +197,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
       summary: Create a new category
       tags:
       - categories
@@ -225,6 +227,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
       summary: Delete a category by ID
       tags:
       - categories
@@ -259,6 +263,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
       summary: Get a paginated list of categories
       tags:
       - categories
@@ -282,6 +288,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ApiResponse'
+      security:
+      - BearerAuth: []
       summary: Get categories as a tree structure
       tags:
       - categories
@@ -320,7 +328,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
       summary: Create Basic User
       tags:
       - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

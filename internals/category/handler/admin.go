@@ -44,9 +44,11 @@ func NewCategoryAdminHandler(
 //	@Failure	409		{object}	types.ApiError
 //	@Failure	500		{object}	types.ApiError
 //	@Router		/categories/admin/ [post]
-func (h CategoryAdminHandler) CreateCategory(c *gin.Context) (*types.ApiResponse, error) {
+//
+// @Security BearerAuth
+func (h CategoryAdminHandler) CreateCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.CreateCategoryReq)
-	if err := c.ShouldBind(dto); err != nil {
+	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
 		)
@@ -75,6 +77,8 @@ func (h CategoryAdminHandler) CreateCategory(c *gin.Context) (*types.ApiResponse
 //	@Success	200	{object}	types.ApiResponse{data=dtores.GetCategoriesTreeRes}
 //	@Failure	500	{object}	types.ApiResponse
 //	@Router		/categories/admin/tree [get]
+//
+// @Security BearerAuth
 func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiResponse, error) {
 	categoriesTree, categoriesTreeErr := h.categorySvc.GetCategoriesTree()
 	if categoriesTreeErr != nil {
@@ -95,6 +99,8 @@ func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiRes
 //	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes}	" "
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/categories/admin/page [get]
+//
+// @Security BearerAuth
 func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(
 		ctx.Query("page"),
@@ -120,6 +126,7 @@ func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiRespons
 }
 
 // DeleteCategory godoc
+//
 //	@Summary	Delete a category by ID
 //	@Tags		categories
 //	@Accept		json
@@ -129,6 +136,8 @@ func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiRespons
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/categories/admin/{categoryId} [delete]
+//
+// @Security BearerAuth
 func (h CategoryAdminHandler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 	categoryIDParam := ctx.Param("categoryId")
 	categoryId, categoryIdErr := strconv.Atoi(categoryIDParam)

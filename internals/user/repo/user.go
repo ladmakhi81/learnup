@@ -29,7 +29,7 @@ func (svc UserRepoImpl) CreateBasic(user *entity.User) error {
 
 func (svc UserRepoImpl) FindByPhone(phone string) (*entity.User, error) {
 	user := new(entity.User)
-	tx := svc.db.Core.Where("phone = ?", phone).First(user)
+	tx := svc.db.Core.Where("phone_number = ?", phone).First(user)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

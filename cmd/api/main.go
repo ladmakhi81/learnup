@@ -14,6 +14,7 @@ import (
 	categoryHandler "github.com/ladmakhi81/learnup/internals/category/handler"
 	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
+	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
@@ -40,6 +41,9 @@ import (
 // @title           Learnup
 // @version         1.0
 // @BasePath  /api
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// config file loader
 	koanfConfigProvider := koanf.NewKoanfEnvSvc()
@@ -89,15 +93,18 @@ func main() {
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 
+	// middlewares
+	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
+
 	// handlers
 	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
-	userModule := user.NewModule(userAdminHandler)
+	userModule := user.NewModule(userAdminHandler, middlewares)
 	authModule := auth.NewModule(userAuthHandler)
-	categoryModule := category.NewModule(categoryAdminHandler)
+	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
 
 	// register module
 	userModule.Register(api)

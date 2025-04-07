@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
 	"github.com/ladmakhi81/learnup/internals/category/entity"
 	"github.com/ladmakhi81/learnup/internals/category/repo"
@@ -45,7 +44,6 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entity.Cat
 			svc.translationSvc.Translate("category.errors.name_duplicate"),
 		)
 	}
-	fmt.Println("parent id", dto.ParentID, *dto.ParentID)
 	if dto.ParentID != nil {
 		parentCategory, parentCategoryErr := svc.FindByID(*dto.ParentID)
 		if parentCategoryErr != nil {
