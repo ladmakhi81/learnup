@@ -41,6 +41,8 @@ func NewUserAdminHandler(
 //	@Failure	409					{object}	types.ApiError
 //	@Failure	500					{object}	types.ApiError
 //	@Router		/users/admin/basic [post]
+//
+// @Security BearerAuth
 func (h UserAdminHandler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.CreateBasicUserReq)
 	if err := ctx.ShouldBind(dto); err != nil {
