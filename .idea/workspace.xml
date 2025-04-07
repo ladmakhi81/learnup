@@ -6,15 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/entity/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/entity/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/admin.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/repo/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/repo/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/entity/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/entity/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/env/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/env/dto.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,10 +51,10 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/get__admin__courses",
+    "git-widget-placeholder": "feat/ai",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/codyproo",
+    "last_opened_file_path": "/home/codyproo/Desktop/projects/generate-image-openai",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
