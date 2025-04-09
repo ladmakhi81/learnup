@@ -1,7 +1,6 @@
 services:
   #
-  learnup_minio_storage_service:
-    container_name: learnup_minio
+  minio:
     image: minio/minio
     command: server /data --console-address ":9001"
     environment:
@@ -13,16 +12,14 @@ services:
     networks:
       - learnup_network
   #
-  learnup_redis_service:
-    container_name: learnup_redis
+  redis:
     image: redis
     ports:
       - "6379:6379"
     networks:
       - learnup_network
   #
-  learnup_main_database_service:
-    container_name: learnup_main_database
+  db:
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -33,20 +30,38 @@ services:
     networks:
       - learnup_network
   #
-  learnup_app_service:
-    container_name: learnup_app
+  tus:
+    build:
+        context: .
+        dockerfile: Dockerfile
+        target: tusdbuilder
+    command: /app/bin/tusd -port=8089 -s3-bucket=videos -s3-endpoint=http://minio:9000 -hooks-http=http://app:8080/api/tus-hooks/videos s3-disable-ssl=true
+    environment:
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      AWS_REGION: ${MINIO_REGION}
+    ports:
+      - "8089:8089"
+    depends_on:
+      - minio
+    networks:
+      - learnup_network
+  #
+  app:
     build:
       dockerfile: Dockerfile
       context: .
     ports:
       - "8080:8080"
     depends_on:
-      - learnup_main_database_service
-      - learnup_minio_storage_service
-      - learnup_redis_service
+      - db
+      - minio
+      - redis
     environment:
       # minio
       LEARNUP_MINIO__URL: ${MINIO_URL}
+      LEARNUP_MINIO__ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      LEARNUP_MINIO__SECRET_KEY: ${MINIO_SECRET_KEY}
       LEARNUP_MINIO__USERNAME: ${MINIO_USERNAME}
       LEARNUP_MINIO__PASSWORD: ${MINIO_PASSWORD}
       LEARNUP_MINIO__REGION: ${MINIO_REGION}

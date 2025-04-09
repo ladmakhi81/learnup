@@ -3,9 +3,9 @@ package miniov7
 import (
 	"bytes"
 	"context"
-	"github.com/google/uuid"
 	"github.com/ladmakhi81/learnup/pkg/storage"
 	"github.com/minio/minio-go/v7"
+	"io"
 )
 
 type MinioClientSvc struct {
@@ -92,6 +92,7 @@ func (svc MinioClientSvc) DeleteBucket(
 func (svc MinioClientSvc) UploadFileByContent(
 	ctx context.Context,
 	bucketName string,
+	objectPath string,
 	contentType string,
 	fileContents []byte,
 ) (*storage.UploadResult, *storage.StorageError) {
@@ -105,18 +106,11 @@ func (svc MinioClientSvc) UploadFileByContent(
 			"MinioClientSvc.UploadFileByContent",
 		)
 	}
-	objectID, objectIDErr := uuid.NewUUID()
-	if objectIDErr != nil {
-		return nil, storage.NewStorageError(
-			"Error: happen in generating object id",
-			"MinioClientSvc.UploadFileByContent",
-		)
-	}
 	fileBuffer := bytes.NewBuffer(fileContents)
 	info, err := svc.minio.PutObject(
 		ctx,
 		bucketName,
-		objectID.String(),
+		objectPath,
 		fileBuffer,
 		int64(fileBuffer.Len()),
 		minio.PutObjectOptions{
@@ -135,7 +129,8 @@ func (svc MinioClientSvc) UploadFileByContent(
 func (svc MinioClientSvc) GetFile(
 	ctx context.Context,
 	bucketName,
-	fileName string) ([]byte, *storage.StorageError) {
+	fileName string,
+) ([]byte, *storage.StorageError) {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return nil, existErr
@@ -167,4 +162,54 @@ func (svc MinioClientSvc) GetFile(
 		)
 	}
 	return fileContents[:contentLength], nil
+}
+
+func (svc MinioClientSvc) GetFileReader(
+	ctx context.Context,
+	bucketName,
+	fileName string,
+) (io.Reader, *storage.StorageError) {
+	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
+	if existErr != nil {
+		return nil, existErr
+	}
+	if !isBucketExist {
+		return nil, storage.NewStorageError(
+			"Error: bucket does not exist",
+			"MinioClientSvc.GetFileReader",
+		)
+	}
+	object, objectErr := svc.minio.GetObject(
+		ctx,
+		bucketName,
+		fileName,
+		minio.GetObjectOptions{},
+	)
+	if objectErr != nil {
+		return nil, storage.NewStorageError(
+			"Error: happen in get file",
+			"MinioClientSvc.GetFileReader",
+		)
+	}
+	return object, nil
+}
+
+func (svc MinioClientSvc) DeleteObject(
+	ctx context.Context,
+	bucketName string,
+	objectID string,
+) error {
+	err := svc.minio.RemoveObject(
+		ctx,
+		bucketName,
+		objectID,
+		minio.RemoveObjectOptions{},
+	)
+	if err != nil {
+		return storage.NewStorageError(
+			"Error: happen in delete object id",
+			"MinioClientSvc.DeleteObject",
+		)
+	}
+	return nil
 }
