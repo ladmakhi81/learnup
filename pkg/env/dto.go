@@ -1,10 +1,10 @@
 package env
 
 type MinioEnvConfig struct {
-	URL      string `koanf:"url"`
-	Username string `koanf:"username"`
-	Password string `koanf:"password"`
-	Region   string `koanf:"region"`
+	URL       string `koanf:"url"`
+	AccessKey string `koanf:"access_key"`
+	SecretKey string `koanf:"secret_key"`
+	Region    string `koanf:"region"`
 }
 
 type RedisEnvConfig struct {

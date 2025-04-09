@@ -19,13 +19,20 @@ import (
 	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
+	"github.com/ladmakhi81/learnup/internals/tus"
+	tusHookHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
+	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
+	ffmpegv1 "github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
+	logrusv1 "github.com/ladmakhi81/learnup/pkg/logger/logrus/v1"
+	miniov7 "github.com/ladmakhi81/learnup/pkg/storage/minio/v7"
 	jwtv5 "github.com/ladmakhi81/learnup/pkg/token/jwt/v5"
 	i18nv2 "github.com/ladmakhi81/learnup/pkg/translations/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
@@ -57,7 +64,7 @@ func main() {
 	}
 
 	// minio
-	_, minioClientErr := SetupMinio(config)
+	minioClient, minioClientErr := SetupMinio(config)
 	if minioClientErr != nil {
 		log.Fatalf("Failed to connect minio: %v", minioClientErr)
 	}
@@ -90,6 +97,8 @@ func main() {
 	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
 
 	// svcs
+	logrusSvc := logrusv1.NewLogrusLoggerSvc()
+	minioSvc := miniov7.NewMinioClientSvc(minioClient, config.Minio.Region)
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
@@ -98,6 +107,9 @@ func main() {
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
+	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
+	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc)
+	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -107,18 +119,21 @@ func main() {
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
 	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc)
+	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)
 	authModule := auth.NewModule(userAuthHandler)
 	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
 	courseModule := course.NewModule(courseAdminHandler, middlewares)
+	tusModule := tus.NewModule(tusHandler)
 
 	// register module
 	userModule.Register(api)
 	authModule.Register(api)
 	categoryModule.Register(api)
 	courseModule.Register(api)
+	tusModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
@@ -128,11 +143,11 @@ func main() {
 
 func SetupMinio(config *env.EnvConfig) (*minio.Client, error) {
 	endpoint := config.Minio.URL
-	username := config.Minio.Username
-	password := config.Minio.Password
+	accessKey := config.Minio.AccessKey
+	secretKey := config.Minio.SecretKey
 	region := config.Minio.Region
 	return minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(username, password, ""),
+		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: false,
 		Region: region,
 	})
