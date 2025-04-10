@@ -26,6 +26,9 @@ import (
 	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	"github.com/ladmakhi81/learnup/internals/video"
+	videoHandler "github.com/ladmakhi81/learnup/internals/video/handler"
+	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/env"
@@ -95,6 +98,7 @@ func main() {
 	categoryRepo := categoryRepository.NewCategoryRepoImpl(dbClient)
 	userRepo := userRepository.NewUserRepoImpl(dbClient)
 	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
+	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -108,7 +112,7 @@ func main() {
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc)
+	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc)
 
 	// middlewares
@@ -119,6 +123,7 @@ func main() {
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
 	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc)
+	videoAdminHandler := videoHandler.NewVideoAdminHandler(validationSvc, videoSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
 
 	// modules
@@ -127,6 +132,7 @@ func main() {
 	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
 	courseModule := course.NewModule(courseAdminHandler, middlewares)
 	tusModule := tus.NewModule(tusHandler)
+	videoModule := video.NewModule(videoAdminHandler)
 
 	// register module
 	userModule.Register(api)
@@ -134,6 +140,7 @@ func main() {
 	categoryModule.Register(api)
 	courseModule.Register(api)
 	tusModule.Register(api)
+	videoModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 

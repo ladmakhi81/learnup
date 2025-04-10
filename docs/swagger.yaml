@@ -297,6 +297,49 @@ definitions:
       updatedAt:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_video_dto_req.AddVideoToCourse:
+    properties:
+      accessLevel:
+        allOf:
+        - $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel'
+        enum:
+        - private
+        - public
+      courseId:
+        minimum: 1
+        type: integer
+      description:
+        minLength: 10
+        type: string
+      isPublished:
+        type: boolean
+      title:
+        minLength: 3
+        type: string
+    required:
+    - accessLevel
+    - courseId
+    - description
+    - isPublished
+    - title
+    type: object
+  github_com_ladmakhi81_learnup_internals_video_dto_res.CreateCourseRes:
+    properties:
+      courseId:
+        type: integer
+      id:
+        type: integer
+      url:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel:
+    enum:
+    - private
+    - public
+    type: string
+    x-enum-varnames:
+    - VideoAccessLevel_Private
+    - VideoAccessLevel_Public
   types.ApiError:
     properties:
       message: {}
@@ -573,7 +616,7 @@ paths:
                   allOf:
                   - $ref: '#/definitions/types.PaginationRes'
                   - properties:
-                      data:
+                      row:
                         items:
                           $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes'
                         type: array
@@ -632,6 +675,44 @@ paths:
       summary: Create Basic User
       tags:
       - users
+  /videos/admin/:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: video
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_dto_req.AddVideoToCourse'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_dto_res.CreateCourseRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+      summary: Add a new video to a course
+      tags:
+      - videos
 securityDefinitions:
   BearerAuth:
     in: header

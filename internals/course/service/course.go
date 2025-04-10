@@ -17,6 +17,7 @@ type CourseService interface {
 	IsCourseNameExist(name string) (bool, error)
 	GetCourses(page, pageSize int) ([]*entity.Course, error)
 	GetCoursesCount() (int, error)
+	FindById(id uint) (*entity.Course, error)
 }
 
 type CourseServiceImpl struct {
@@ -153,4 +154,16 @@ func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
 		)
 	}
 	return count, nil
+}
+
+func (svc CourseServiceImpl) FindById(id uint) (*entity.Course, error) {
+	course, courseErr := svc.courseRepo.FindById(id)
+	if courseErr != nil {
+		return nil, types.NewServerError(
+			"Find Course By ID Throw Error",
+			"CourseServiceImpl.FindById",
+			courseErr,
+		)
+	}
+	return course, nil
 }
