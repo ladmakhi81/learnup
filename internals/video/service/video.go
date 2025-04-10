@@ -18,11 +18,13 @@ import (
 )
 
 type VideoService interface {
-	EncodeVideoWithObjectID(objectID string) error
+	EncodeVideoWithObjectID(videoID uint, objectID string) error
 	AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity.Video, error)
 	FindByTitle(title string) (*videoEntity.Video, error)
 	IsVideoTitleExist(title string) (bool, error)
 	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
+	UpdateVideoURL(id uint, url string) (*videoEntity.Video, error)
+	FindById(id uint) (*videoEntity.Video, error)
 }
 
 type VideoServiceImpl struct {
@@ -49,15 +51,19 @@ func NewVideoServiceImpl(
 	}
 }
 
-func (svc VideoServiceImpl) EncodeVideoWithObjectID(objectID string) error {
+func (svc VideoServiceImpl) EncodeVideoWithObjectID(videoID uint, objectID string) error {
 	storeLocation, storeLocationErr := svc.encodeVideo(objectID)
 	if storeLocationErr != nil {
 		return storeLocationErr
 	}
-	if err := svc.moveVideosFromLocalToObjectStorage(storeLocation); err != nil {
-		return err
+	encodedPath, encodedErr := svc.moveVideosFromLocalToObjectStorage(storeLocation)
+	if encodedErr != nil {
+		return encodedErr
 	}
 	if err := svc.removeUnusedVideoFiles(objectID, storeLocation); err != nil {
+		return err
+	}
+	if _, err := svc.UpdateVideoURL(videoID, encodedPath); err != nil {
 		return err
 	}
 	return nil
@@ -140,10 +146,10 @@ func (svc VideoServiceImpl) encodeVideo(objectID string) (string, error) {
 	return storeLocation, nil
 }
 
-func (svc VideoServiceImpl) moveVideosFromLocalToObjectStorage(storeLocation string) error {
+func (svc VideoServiceImpl) moveVideosFromLocalToObjectStorage(storeLocation string) (string, error) {
 	dirFiles, dirErr := os.ReadDir(storeLocation)
 	if dirErr != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in finding directories of encoded files",
 			"VideoServiceImpl.EncodeVideoWithObjectID",
 			dirErr,
@@ -157,7 +163,7 @@ func (svc VideoServiceImpl) moveVideosFromLocalToObjectStorage(storeLocation str
 	for _, dirFile := range dirFiles {
 		file, fileErr := os.ReadFile(path.Join(storeLocation, dirFile.Name()))
 		if fileErr != nil {
-			return types.NewServerError(
+			return "", types.NewServerError(
 				"Error in finding file of directories of encoded files",
 				"VideoServiceImpl.EncodeVideoWithObjectID",
 				fileErr,
@@ -172,14 +178,14 @@ func (svc VideoServiceImpl) moveVideosFromLocalToObjectStorage(storeLocation str
 			currentContentType,
 			file,
 		); err != nil {
-			return types.NewServerError(
+			return "", types.NewServerError(
 				"Error in storing encoded video into storage",
 				"VideoServiceImpl.EncodeVideoWithObjectID",
 				err,
 			)
 		}
 	}
-	return nil
+	return encodedFilePath, nil
 }
 
 func (svc VideoServiceImpl) removeUnusedVideoFiles(objectID, storeLocation string) error {
@@ -224,4 +230,36 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.
 		)
 	}
 	return videos, nil
+}
+
+func (svc VideoServiceImpl) UpdateVideoURL(id uint, url string) (*videoEntity.Video, error) {
+	video, videoErr := svc.FindById(id)
+	if videoErr != nil {
+		return nil, videoErr
+	}
+	if video == nil {
+		return nil, types.NewNotFoundError("video is not found")
+	}
+	video.URL = url
+	video.Status = videoEntity.VideoStatus_Done
+	if err := svc.videoRepo.Update(video); err != nil {
+		return nil, types.NewServerError(
+			"Error in updating the video",
+			"VideoServiceImpl.UpdateVideoURL",
+			err,
+		)
+	}
+	return video, nil
+}
+
+func (svc VideoServiceImpl) FindById(id uint) (*videoEntity.Video, error) {
+	video, videoErr := svc.videoRepo.FindById(id)
+	if videoErr != nil {
+		return nil, types.NewServerError(
+			"Error in finding video by id",
+			"VideoServiceImpl.FindById",
+			videoErr,
+		)
+	}
+	return video, nil
 }

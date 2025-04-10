@@ -10,7 +10,9 @@ import (
 type VideoRepo interface {
 	Create(video *videoEntity.Video) error
 	FindByTitle(title string) (*videoEntity.Video, error)
+	FindById(id uint) (*videoEntity.Video, error)
 	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
+	Update(video *videoEntity.Video) error
 }
 
 type VideoRepoImpl struct {
@@ -51,4 +53,23 @@ func (repo VideoRepoImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.Vi
 		return nil, tx.Error
 	}
 	return videos, nil
+}
+
+func (repo VideoRepoImpl) Update(video *videoEntity.Video) error {
+	tx := repo.dbClient.Core.Updates(video)
+	return tx.Error
+}
+
+func (repo VideoRepoImpl) FindById(id uint) (*videoEntity.Video, error) {
+	video := &videoEntity.Video{}
+	tx := repo.dbClient.Core.
+		Where("id = ?", id).
+		First(video)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, tx.Error
+	}
+	return video, nil
 }
