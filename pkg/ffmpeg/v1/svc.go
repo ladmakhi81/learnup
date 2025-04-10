@@ -41,6 +41,7 @@ func (svc FfmpegSvc) EncodeVideo(videoReader io.Reader) (string, error) {
 		WithInput(videoReader).
 		Run()
 	if err != nil {
+		fmt.Println(err)
 		return "", fmt.Errorf("Error in encode video by ffmpeg: %s", err.Error())
 	}
 	return tmpDir, nil
