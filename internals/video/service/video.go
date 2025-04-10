@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	notificationReqDto "github.com/ladmakhi81/learnup/internals/notification/dto/req"
+	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
+	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
 	"github.com/ladmakhi81/learnup/internals/video/repo"
@@ -25,14 +28,16 @@ type VideoService interface {
 	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
 	UpdateVideoURL(id uint, url string) (*videoEntity.Video, error)
 	FindById(id uint) (*videoEntity.Video, error)
+	CreateCompleteUploadVideoNotification(videoID uint) error
 }
 
 type VideoServiceImpl struct {
-	minioClient storage.Storage
-	ffmpegSvc   ffmpeg.Ffmpeg
-	logSvc      logger.Log
-	courseSvc   courseService.CourseService
-	videoRepo   repo.VideoRepo
+	minioClient     storage.Storage
+	ffmpegSvc       ffmpeg.Ffmpeg
+	logSvc          logger.Log
+	courseSvc       courseService.CourseService
+	videoRepo       repo.VideoRepo
+	notificationSvc notificationService.NotificationService
 }
 
 func NewVideoServiceImpl(
@@ -41,14 +46,15 @@ func NewVideoServiceImpl(
 	logSvc logger.Log,
 	courseSvc courseService.CourseService,
 	videoRepo repo.VideoRepo,
+	notificationSvc notificationService.NotificationService,
 ) *VideoServiceImpl {
 	return &VideoServiceImpl{
-		minioClient: minioClient,
-		ffmpegSvc:   ffmpegSvc,
-		logSvc:      logSvc,
-		courseSvc:   courseSvc,
-		videoRepo:   videoRepo,
-	}
+		minioClient:     minioClient,
+		ffmpegSvc:       ffmpegSvc,
+		logSvc:          logSvc,
+		courseSvc:       courseSvc,
+		videoRepo:       videoRepo,
+		notificationSvc: notificationSvc}
 }
 
 func (svc VideoServiceImpl) EncodeVideoWithObjectID(videoID uint, objectID string) error {
@@ -64,6 +70,9 @@ func (svc VideoServiceImpl) EncodeVideoWithObjectID(videoID uint, objectID strin
 		return err
 	}
 	if _, err := svc.UpdateVideoURL(videoID, encodedPath); err != nil {
+		return err
+	}
+	if err := svc.CreateCompleteUploadVideoNotification(videoID); err != nil {
 		return err
 	}
 	return nil
@@ -124,6 +133,27 @@ func (svc VideoServiceImpl) IsVideoTitleExist(title string) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) error {
+	course, courseErr := svc.courseSvc.FindByVideoId(videoID)
+	if courseErr != nil {
+		return courseErr
+	}
+	if _, err := svc.notificationSvc.Create(
+		notificationReqDto.NewCreateNotificationReq(
+			*course.TeacherID,
+			notificationEntity.NotificationType_CompleteVideoUpload,
+			map[string]any{
+				"videoId":     videoID,
+				"courseId":    course.ID,
+				"courseTitle": course.Name,
+			},
+		),
+	); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (svc VideoServiceImpl) encodeVideo(objectID string) (string, error) {

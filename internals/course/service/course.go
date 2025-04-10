@@ -19,6 +19,7 @@ type CourseService interface {
 	GetCoursesCount() (int, error)
 	FindById(id uint) (*entity.Course, error)
 	FindDetailById(id uint) (*entity.Course, error)
+	FindByVideoId(id uint) (*entity.Course, error)
 }
 
 type CourseServiceImpl struct {
@@ -81,7 +82,6 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 		CommentAccessMode:           dto.CommentAccessMode,
 		Description:                 dto.Description,
 		DiscountFeeAmountPercentage: dto.DiscountFeeAmountPercentage,
-		Fee:                         dto.Fee,
 		IsPublished:                 true,
 		Image:                       dto.Image,
 		IntroductionVideo:           dto.IntroductionVideo,
@@ -89,13 +89,18 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 		Level:                       dto.Level,
 		MaxDiscountAmount:           dto.MaxDiscountAmount,
 		Prerequisite:                dto.Prerequisite,
-		Price:                       dto.Price,
 		Status:                      entity.CourseStatus_Starting,
 		Tags:                        dto.Tags,
 		TeacherID:                   &teacher.ID,
 		ThumbnailImage:              dto.ThumbnailImage,
 		VerifiedDate:                &verifiedDate,
 		VerifiedByID:                &authUser.ID,
+	}
+	if dto.Price == nil {
+		course.Price = 0
+	}
+	if dto.Fee == nil {
+		course.Fee = 0
 	}
 	if err := svc.courseRepo.Create(course); err != nil {
 		return nil, types.NewServerError(
@@ -175,6 +180,18 @@ func (svc CourseServiceImpl) FindDetailById(id uint) (*entity.Course, error) {
 		return nil, types.NewServerError(
 			"Find Course Detail By ID Throw Error",
 			"CourseServiceImpl.FindDetailByID",
+			courseErr,
+		)
+	}
+	return course, nil
+}
+
+func (svc CourseServiceImpl) FindByVideoId(id uint) (*entity.Course, error) {
+	course, courseErr := svc.courseRepo.FindByVideoId(id)
+	if courseErr != nil {
+		return nil, types.NewServerError(
+			"Error in happen in find course by video id",
+			"CourseServiceImpl.FindByVideoId",
 			courseErr,
 		)
 	}
