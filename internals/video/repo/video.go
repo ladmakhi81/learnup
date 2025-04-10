@@ -10,6 +10,7 @@ import (
 type VideoRepo interface {
 	Create(video *videoEntity.Video) error
 	FindByTitle(title string) (*videoEntity.Video, error)
+	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
 }
 
 type VideoRepoImpl struct {
@@ -37,4 +38,17 @@ func (repo VideoRepoImpl) FindByTitle(title string) (*videoEntity.Video, error) 
 		return nil, tx.Error
 	}
 	return video, nil
+}
+
+func (repo VideoRepoImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error) {
+	videos := make([]*videoEntity.Video, 0)
+	tx := repo.dbClient.Core.
+		Preload("VerifiedBy").
+		Where("course_id = ?", courseID).
+		Order("created_at desc").
+		Find(&videos)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return videos, nil
 }

@@ -7,13 +7,13 @@
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/repo/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/repo/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/admin.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/handler/admin.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/repo/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/repo/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,24 +48,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/add__video__to__course&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/codyproo&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CodeWithMe&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/home/codyproo",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CodeWithMe"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/cmd/app" />

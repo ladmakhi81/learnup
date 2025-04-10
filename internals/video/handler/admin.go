@@ -26,15 +26,16 @@ func NewVideoAdminHandler(
 }
 
 // AddNewVideoToCourse godoc
+//
 //	@Summary	Add a new video to a course
 //	@Tags		videos
 //	@Accept		json
 //	@Produce	json
 //	@Param		video	body		dtoreq.AddVideoToCourse	true	" "
 //	@Success	201		{object}	types.ApiResponse{data=dtores.CreateCourseRes}
-//	@Failure	400		{object}	types.ApiResponse
-//	@Failure	409		{object}	types.ApiResponse
-//	@Failure	500		{object}	types.ApiResponse
+//	@Failure	400		{object}	types.ApiError
+//	@Failure	409		{object}	types.ApiError
+//	@Failure	500		{object}	types.ApiError
 //	@Router		/videos/admin/ [post]
 func (h VideoAdminHandler) AddNewVideoToCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := &dtoreq.AddVideoToCourse{}

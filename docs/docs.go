@@ -356,25 +356,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     }
                 }
@@ -450,13 +450,61 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/admin/{course-id}/videos": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get Videos by Course ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course ID",
+                        "name": "course-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     }
                 }
@@ -575,19 +623,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "$ref": "#/definitions/types.ApiError"
                         }
                     }
                 }
@@ -865,6 +913,20 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "integer"
+                },
+                "videos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem"
+                    }
+                }
+            }
+        },
         "github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory": {
             "type": "object",
             "properties": {
@@ -956,6 +1018,64 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser": {
+            "type": "object",
+            "properties": {
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem": {
+            "type": "object",
+            "properties": {
+                "accessLevel": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isVerified": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "verifiedBy": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser"
+                },
+                "verifiedDate": {
                     "type": "string"
                 }
             }
@@ -1087,6 +1207,19 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "VideoAccessLevel_Private",
                 "VideoAccessLevel_Public"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_video_entity.VideoStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "fail",
+                "done"
+            ],
+            "x-enum-varnames": [
+                "VideoStatus_Pending",
+                "VideoStatus_Fail",
+                "VideoStatus_Done"
             ]
         },
         "types.ApiError": {
