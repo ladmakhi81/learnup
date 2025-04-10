@@ -432,7 +432,7 @@ const docTemplate = `{
                                                 {
                                                     "type": "object",
                                                     "properties": {
-                                                        "data": {
+                                                        "row": {
                                                             "type": "array",
                                                             "items": {
                                                                 "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes"
@@ -525,6 +525,69 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/videos/admin/": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "videos"
+                ],
+                "summary": "Add a new video to a course",
+                "parameters": [
+                    {
+                        "description": " ",
+                        "name": "video",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_video_dto_req.AddVideoToCourse"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_video_dto_res.CreateCourseRes"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
                         }
                     }
                 }
@@ -962,6 +1025,69 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "github_com_ladmakhi81_learnup_internals_video_dto_req.AddVideoToCourse": {
+            "type": "object",
+            "required": [
+                "accessLevel",
+                "courseId",
+                "description",
+                "isPublished",
+                "title"
+            ],
+            "properties": {
+                "accessLevel": {
+                    "enum": [
+                        "private",
+                        "public"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel"
+                        }
+                    ]
+                },
+                "courseId": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "description": {
+                    "type": "string",
+                    "minLength": 10
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_video_dto_res.CreateCourseRes": {
+            "type": "object",
+            "properties": {
+                "courseId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel": {
+            "type": "string",
+            "enum": [
+                "private",
+                "public"
+            ],
+            "x-enum-varnames": [
+                "VideoAccessLevel_Private",
+                "VideoAccessLevel_Public"
+            ]
         },
         "types.ApiError": {
             "type": "object",

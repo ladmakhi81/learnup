@@ -26,7 +26,7 @@ func (m Module) Register(api *gin.RouterGroup) {
 	usersApi := api.Group("/users")
 	usersAdminApi := usersApi.Group("/admin")
 
-	usersAdminApi.Use(m.middleware.CheckAccessToken())
+	//usersAdminApi.Use(m.middleware.CheckAccessToken())
 
 	usersAdminApi.POST("/basic", utils.JsonHandler(m.userAdminHandler.CreateBasicUser))
 }

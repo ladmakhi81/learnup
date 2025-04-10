@@ -5,24 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
-      <change afterPath="$PROJECT_DIR$/internals/tus/dto/webhook.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/tus/handler/hook.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/tus/module.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/tus/service/tus.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/ffmpeg/contract.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/ffmpeg/v1/svc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_doc.sh" beforeDir="false" afterPath="$PROJECT_DIR$/generate_doc.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/env/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/env/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/storage/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/storage/contract.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/repo/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/repo/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,7 +56,7 @@
     &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/tus&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feat/add__video__to__course&quot;,
     &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
     &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/codyproo&quot;,
