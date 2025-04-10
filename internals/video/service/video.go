@@ -22,6 +22,7 @@ type VideoService interface {
 	AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity.Video, error)
 	FindByTitle(title string) (*videoEntity.Video, error)
 	IsVideoTitleExist(title string) (bool, error)
+	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
 }
 
 type VideoServiceImpl struct {
@@ -204,4 +205,23 @@ func (svc VideoServiceImpl) removeUnusedVideoFiles(objectID, storeLocation strin
 		)
 	}
 	return nil
+}
+
+func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error) {
+	course, courseErr := svc.courseSvc.FindById(courseID)
+	if courseErr != nil {
+		return nil, courseErr
+	}
+	if course == nil {
+		return nil, types.NewNotFoundError("course not found")
+	}
+	videos, videosErr := svc.videoRepo.FindVideosByCourseID(courseID)
+	if videosErr != nil {
+		return nil, types.NewServerError(
+			"Finding videos by course id throw error",
+			"VideoServiceImpl.FindVideosByCourseID",
+			videosErr,
+		)
+	}
+	return videos, nil
 }

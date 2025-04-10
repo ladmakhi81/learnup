@@ -122,7 +122,7 @@ func main() {
 	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc)
+	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
 	videoAdminHandler := videoHandler.NewVideoAdminHandler(validationSvc, videoSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
 
