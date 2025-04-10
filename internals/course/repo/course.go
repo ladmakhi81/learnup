@@ -13,6 +13,7 @@ type CourseRepo interface {
 	GetCourses(page, pageSize int) ([]*entity.Course, error)
 	GetCoursesCount() (int, error)
 	FindById(id uint) (*entity.Course, error)
+	FindDetailById(id uint) (*entity.Course, error)
 }
 
 type CourseRepoImpl struct {
@@ -69,6 +70,23 @@ func (repo CourseRepoImpl) GetCoursesCount() (int, error) {
 func (repo CourseRepoImpl) FindById(id uint) (*entity.Course, error) {
 	course := &entity.Course{}
 	tx := repo.dbClient.Core.Where("id = ?", id).First(course)
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, tx.Error
+	}
+	return course, nil
+}
+
+func (repo CourseRepoImpl) FindDetailById(id uint) (*entity.Course, error) {
+	course := &entity.Course{}
+	tx := repo.dbClient.Core.
+		Where("id = ?", id).
+		Preload("Teacher").
+		Preload("Category").
+		Preload("VerifiedBy").
+		First(course)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, nil

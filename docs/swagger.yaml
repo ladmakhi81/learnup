@@ -180,6 +180,63 @@ definitions:
       verifiedDate:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes:
+    properties:
+      abilityToAddComment:
+        type: boolean
+      canHaveDiscount:
+        type: boolean
+      category:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.categoryItem'
+      commentAccessMode:
+        type: string
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      description:
+        type: string
+      discountFeeAmountPercentage:
+        type: number
+      fee:
+        type: number
+      id:
+        type: integer
+      image:
+        type: string
+      introductionVideo:
+        type: string
+      isPublished:
+        type: boolean
+      isVerifiedByAdmin:
+        type: boolean
+      level:
+        type: string
+      maxDiscountAmount:
+        type: number
+      prerequisite:
+        type: string
+      price:
+        type: number
+      status:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus'
+      statusChangedAt:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      teacher:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.teacherUser'
+      thumbnailImage:
+        type: string
+      updatedAt:
+        type: string
+      verifiedBy:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByItem'
+      verifiedDate:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes:
     properties:
       courses:
@@ -195,6 +252,15 @@ definitions:
         items:
           $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem'
         type: array
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.categoryItem:
+    properties:
+      id:
+        type: integer
+      isPublished:
+        type: boolean
+      name:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory:
     properties:
@@ -257,6 +323,20 @@ definitions:
         type: integer
       phone:
         type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.teacherUser:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser:
     properties:
@@ -643,6 +723,36 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a new course
+      tags:
+      - courses
+  /courses/admin/{course-id}:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get Course by ID
       tags:
       - courses
   /courses/admin/{course-id}/videos:

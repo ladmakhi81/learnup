@@ -462,6 +462,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/courses/admin/{course-id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get Course by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course ID",
+                        "name": "course-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/courses/admin/{course-id}/videos": {
             "get": {
                 "security": [
@@ -902,6 +950,92 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes": {
+            "type": "object",
+            "properties": {
+                "abilityToAddComment": {
+                    "type": "boolean"
+                },
+                "canHaveDiscount": {
+                    "type": "boolean"
+                },
+                "category": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.categoryItem"
+                },
+                "commentAccessMode": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discountFeeAmountPercentage": {
+                    "type": "number"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "introductionVideo": {
+                    "type": "string"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isVerifiedByAdmin": {
+                    "type": "boolean"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "maxDiscountAmount": {
+                    "type": "number"
+                },
+                "prerequisite": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus"
+                },
+                "statusChangedAt": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "teacher": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.teacherUser"
+                },
+                "thumbnailImage": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "verifiedBy": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByItem"
+                },
+                "verifiedDate": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes": {
             "type": "object",
             "properties": {
@@ -924,6 +1058,20 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem"
                     }
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.categoryItem": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1019,6 +1167,28 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.teacherUser": {
+            "type": "object",
+            "properties": {
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByItem": {
+            "type": "object",
+            "properties": {
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         },
