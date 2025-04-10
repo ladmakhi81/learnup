@@ -31,4 +31,5 @@ func (m Module) Register(api *gin.RouterGroup) {
 	adminCoursesApi.POST("/", utils.JsonHandler(m.courseAdminHandler.CreateCourse))
 	adminCoursesApi.GET("/page", utils.JsonHandler(m.courseAdminHandler.GetCourses))
 	adminCoursesApi.GET("/:course-id/videos", utils.JsonHandler(m.courseAdminHandler.GetVideosByCourseID))
+	adminCoursesApi.GET("/:course-id", utils.JsonHandler(m.courseAdminHandler.GetCourseById))
 }

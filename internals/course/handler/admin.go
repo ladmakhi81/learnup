@@ -154,3 +154,29 @@ func (h CourseAdminHandler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiRes
 	videosRes := dtores.NewGetVideosByCourseIDRes(videos, uint(courseID))
 	return types.NewApiResponse(http.StatusOK, videosRes), nil
 }
+
+// GetCourseById godoc
+//
+//	@Summary	Get Course by ID
+//	@Tags		courses
+//	@Param		course-id	path		int	true	"Course ID"
+//	@Success	200			{object}	dtores.GetCourseByIdRes
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/admin/{course-id} [get]
+//
+//	@Security	BearerAuth
+func (h CourseAdminHandler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseIDParam := ctx.Param("course-id")
+	courseID, courseIDErr := strconv.Atoi(courseIDParam)
+	if courseIDErr != nil {
+		return nil, types.NewBadRequestError("invalid course id provided")
+	}
+	course, courseErr := h.courseSvc.FindDetailById(uint(courseID))
+	if courseErr != nil {
+		return nil, courseErr
+	}
+	courseRes := dtores.NewGetCourseByIdRes(course)
+	return types.NewApiResponse(http.StatusOK, courseRes), nil
+}
