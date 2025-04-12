@@ -113,11 +113,11 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 }
 
 func (svc CourseServiceImpl) FindByName(name string) (*entity.Course, error) {
-	course, courseErr := svc.courseRepo.FindByName(name)
+	course, courseErr := svc.courseRepo.FetchByName(name)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in finding course by name throw error",
-			"CourseServiceImpl.FindByName",
+			"CourseServiceImpl.FetchByName",
 			courseErr,
 		)
 	}
@@ -139,11 +139,11 @@ func (svc CourseServiceImpl) IsCourseNameExist(name string) (bool, error) {
 }
 
 func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entity.Course, error) {
-	courses, coursesErr := svc.courseRepo.GetCourses(page, pageSize)
+	courses, coursesErr := svc.courseRepo.FetchPage(page, pageSize)
 	if coursesErr != nil {
 		return nil, types.NewServerError(
 			"Find All Pageable Courses Throw Error",
-			"CourseServiceImpl.GetCourses",
+			"CourseServiceImpl.FetchPage",
 			coursesErr,
 		)
 	}
@@ -151,11 +151,11 @@ func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entity.Course, e
 }
 
 func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
-	count, countErr := svc.courseRepo.GetCoursesCount()
+	count, countErr := svc.courseRepo.FetchCount()
 	if countErr != nil {
 		return 0, types.NewServerError(
 			"Get Count Of Courses Throw Error",
-			"CourseServiceImpl.GetCourses",
+			"CourseServiceImpl.FetchPage",
 			countErr,
 		)
 	}
@@ -163,11 +163,11 @@ func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
 }
 
 func (svc CourseServiceImpl) FindById(id uint) (*entity.Course, error) {
-	course, courseErr := svc.courseRepo.FindById(id)
+	course, courseErr := svc.courseRepo.FetchById(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Find Course By ID Throw Error",
-			"CourseServiceImpl.FindById",
+			"CourseServiceImpl.FetchById",
 			courseErr,
 		)
 	}
@@ -175,7 +175,7 @@ func (svc CourseServiceImpl) FindById(id uint) (*entity.Course, error) {
 }
 
 func (svc CourseServiceImpl) FindDetailById(id uint) (*entity.Course, error) {
-	course, courseErr := svc.courseRepo.FindDetailById(id)
+	course, courseErr := svc.courseRepo.FetchDetailById(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Find Course Detail By ID Throw Error",
@@ -187,11 +187,11 @@ func (svc CourseServiceImpl) FindDetailById(id uint) (*entity.Course, error) {
 }
 
 func (svc CourseServiceImpl) FindByVideoId(id uint) (*entity.Course, error) {
-	course, courseErr := svc.courseRepo.FindByVideoId(id)
+	course, courseErr := svc.courseRepo.FetchByVideoId(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in happen in find course by video id",
-			"CourseServiceImpl.FindByVideoId",
+			"CourseServiceImpl.FetchByVideoId",
 			courseErr,
 		)
 	}

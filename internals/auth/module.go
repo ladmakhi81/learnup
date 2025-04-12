@@ -7,10 +7,10 @@ import (
 )
 
 type Module struct {
-	userAuthHandler *handler.UserAuthHandler
+	userAuthHandler *handler.Handler
 }
 
-func NewModule(userAuthHandler *handler.UserAuthHandler) *Module {
+func NewModule(userAuthHandler *handler.Handler) *Module {
 	return &Module{
 		userAuthHandler: userAuthHandler,
 	}

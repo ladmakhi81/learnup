@@ -14,20 +14,20 @@ import (
 	"strconv"
 )
 
-type CourseAdminHandler struct {
+type Handler struct {
 	courseSvc     courseService.CourseService
 	validationSvc validation.Validation
 	translateSvc  translations.Translator
 	videoSvc      videoService.VideoService
 }
 
-func NewCourseAdminHandler(
+func NewHandler(
 	courseSvc courseService.CourseService,
 	validationSvc validation.Validation,
 	translateSvc translations.Translator,
 	videosSvc videoService.VideoService,
-) *CourseAdminHandler {
-	return &CourseAdminHandler{
+) *Handler {
+	return &Handler{
 		courseSvc:     courseSvc,
 		validationSvc: validationSvc,
 		translateSvc:  translateSvc,
@@ -47,9 +47,9 @@ func NewCourseAdminHandler(
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	409			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/courses/admin [post]
+//	@Router		/courses [post]
 //	@Security	BearerAuth
-func (h CourseAdminHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := &dtoreq.CreateCourseReq{}
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
@@ -103,10 +103,10 @@ func (h CourseAdminHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, 
 //	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.GetCoursesRes}}
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/courses/admin/page [get]
+//	@Router		/courses/page [get]
 //
 //	@Security	BearerAuth
-func (h CourseAdminHandler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
@@ -138,14 +138,14 @@ func (h CourseAdminHandler) GetCourses(ctx *gin.Context) (*types.ApiResponse, er
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/courses/admin/{course-id}/videos [get]
+//	@Router		/courses/{course-id}/videos [get]
 //
 //	@Security	BearerAuth
-func (h CourseAdminHandler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, error) {
 	courseIDParam := ctx.Param("course-id")
 	courseID, courseIDErr := strconv.Atoi(courseIDParam)
 	if courseIDErr != nil {
-		return nil, types.NewBadRequestError("invalid course id provided")
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	videos, videosErr := h.videoSvc.FindVideosByCourseID(uint(courseID))
 	if videosErr != nil {
@@ -164,14 +164,14 @@ func (h CourseAdminHandler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiRes
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/courses/admin/{course-id} [get]
+//	@Router		/courses/{course-id} [get]
 //
 //	@Security	BearerAuth
-func (h CourseAdminHandler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 	courseIDParam := ctx.Param("course-id")
 	courseID, courseIDErr := strconv.Atoi(courseIDParam)
 	if courseIDErr != nil {
-		return nil, types.NewBadRequestError("invalid course id provided")
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	course, courseErr := h.courseSvc.FindDetailById(uint(courseID))
 	if courseErr != nil {

@@ -4,19 +4,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ladmakhi81/learnup/internals/notification/dto/res"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
 	"strconv"
 )
 
-type NotificationAdminHandler struct {
+type Handler struct {
 	notificationSvc notificationService.NotificationService
+	translationSvc  translations.Translator
 }
 
-func NewNotificationAdminHandler(notificationSvc notificationService.NotificationService) *NotificationAdminHandler {
-	return &NotificationAdminHandler{
+func NewHandler(
+	notificationSvc notificationService.NotificationService,
+	translationSvc translations.Translator,
+) *Handler {
+	return &Handler{
 		notificationSvc: notificationSvc,
+		translationSvc:  translationSvc,
 	}
 }
 
@@ -29,14 +35,14 @@ func NewNotificationAdminHandler(notificationSvc notificationService.Notificatio
 //	@Failure	400				{object}	types.ApiError
 //	@Failure	404				{object}	types.ApiError
 //	@Failure	500				{object}	types.ApiError
-//	@Router		/notifications/admin/{notification-id}/seen [patch]
+//	@Router		/notifications/{notification-id}/seen [patch]
 //
 //	@Security	BearerAuth
-func (h NotificationAdminHandler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) {
 	notificationIdParam := ctx.Param("notification-id")
 	notificationID, notificationIDErr := strconv.Atoi(notificationIdParam)
 	if notificationIDErr != nil {
-		return nil, types.NewBadRequestError("invalid notification id")
+		return nil, types.NewBadRequestError(h.translationSvc.Translate("notifications.errors.invalid_notification_id"))
 	}
 	if err := h.notificationSvc.SeenById(uint(notificationID)); err != nil {
 		return nil, err
@@ -53,10 +59,10 @@ func (h NotificationAdminHandler) SeenNotification(ctx *gin.Context) (*types.Api
 //	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.NotificationPageItem}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/notifications/admin/page [get]
+//	@Router		/notifications/page [get]
 //
 //	@Security	BearerAuth
-func (h NotificationAdminHandler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(
 		ctx.Query("page"),
 		ctx.Query("pageSize"),

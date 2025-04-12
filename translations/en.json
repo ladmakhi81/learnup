@@ -1,27 +1,41 @@
 {
   "user": {
     "errors": {
-      "phone_duplicate": "user phone already exists"
+      "phone_duplicate": "phone number already exists"
     }
   },
   "auth": {
     "errors": {
-      "invalid_credentials": "user not found with provided phone and password"
+      "invalid_credentials": "user not found with provided phone number and password"
     }
   },
   "category": {
     "errors": {
-      "name_duplicate": "category name already exists",
-      "parent_category_id_not_found": "category not found with provided parent id",
+      "name_duplicate": "category already exists",
+      "parent_category_id_not_found": "parent category not found with provided id",
       "invalid_category_id": "invalid category id",
-      "not_found": "category not found"
+      "not_found": "category is not found"
     }
   },
   "course": {
     "errors": {
       "name_duplicate": "course name already exists",
-      "not_found_category": "selected category is not found",
-      "not_found_teacher": "selected teacher is not found"
+      "not_found_category": "course category not found",
+      "not_found_teacher": "teacher course not found",
+      "invalid_course_id": "invalid course id that provided",
+      "not_found": "course not found"
+    }
+  },
+  "notification": {
+    "errors": {
+      "invalid_notification_id": "notification id is invalid",
+      "not_found": "notification not found"
+    }
+  },
+  "video": {
+    "errors": {
+      "title_duplicated": "video title is already exist",
+      "not_found": "video not found"
     }
   },
   "common": {

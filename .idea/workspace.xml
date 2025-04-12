@@ -10,8 +10,36 @@
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/handler/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/handler/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/auth/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/entity/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/entity/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/repo/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/repo/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/entity/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/entity/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/repo/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/repo/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/notification/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/handler/notification.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/notification/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/module.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/notification/repo/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/repo/notification.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/notification/service/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/service/notification.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/entity/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/entity/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/handler/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/repo/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/repo/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/entity/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/entity/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/handler/admin.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/handler/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/repo/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/repo/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/logger/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/logger/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/storage/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/storage/contract.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/en.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/en.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,24 +73,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/seen__notification",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/codyproo",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CodeWithMe"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;refactor/interfaces-i18n-admin-routing&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/codyproo&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CodeWithMe&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/cmd/app" />

@@ -9,12 +9,12 @@ import (
 
 type CourseRepo interface {
 	Create(course *entity.Course) error
-	FindByName(name string) (*entity.Course, error)
-	GetCourses(page, pageSize int) ([]*entity.Course, error)
-	GetCoursesCount() (int, error)
-	FindById(id uint) (*entity.Course, error)
-	FindDetailById(id uint) (*entity.Course, error)
-	FindByVideoId(id uint) (*entity.Course, error)
+	FetchByName(name string) (*entity.Course, error)
+	FetchPage(page, pageSize int) ([]*entity.Course, error)
+	FetchCount() (int, error)
+	FetchById(id uint) (*entity.Course, error)
+	FetchDetailById(id uint) (*entity.Course, error)
+	FetchByVideoId(id uint) (*entity.Course, error)
 }
 
 type CourseRepoImpl struct {
@@ -32,7 +32,7 @@ func (repo CourseRepoImpl) Create(course *entity.Course) error {
 	return tx.Error
 }
 
-func (repo CourseRepoImpl) FindByName(name string) (*entity.Course, error) {
+func (repo CourseRepoImpl) FetchByName(name string) (*entity.Course, error) {
 	course := &entity.Course{}
 	tx := repo.dbClient.Core.Where("name = ?", name).First(course)
 	if tx.Error != nil {
@@ -43,7 +43,7 @@ func (repo CourseRepoImpl) FindByName(name string) (*entity.Course, error) {
 	return course, nil
 }
 
-func (repo CourseRepoImpl) GetCourses(page, pageSize int) ([]*entity.Course, error) {
+func (repo CourseRepoImpl) FetchPage(page, pageSize int) ([]*entity.Course, error) {
 	var courses []*entity.Course
 	tx := repo.dbClient.Core.
 		Preload("Teacher").
@@ -59,7 +59,7 @@ func (repo CourseRepoImpl) GetCourses(page, pageSize int) ([]*entity.Course, err
 	return courses, nil
 }
 
-func (repo CourseRepoImpl) GetCoursesCount() (int, error) {
+func (repo CourseRepoImpl) FetchCount() (int, error) {
 	count := int64(0)
 	tx := repo.dbClient.Core.Model(&entity.Course{}).Count(&count)
 	if tx.Error != nil {
@@ -68,7 +68,7 @@ func (repo CourseRepoImpl) GetCoursesCount() (int, error) {
 	return int(count), nil
 }
 
-func (repo CourseRepoImpl) FindById(id uint) (*entity.Course, error) {
+func (repo CourseRepoImpl) FetchById(id uint) (*entity.Course, error) {
 	course := &entity.Course{}
 	tx := repo.dbClient.Core.Where("id = ?", id).First(course)
 	if tx.Error != nil {
@@ -80,7 +80,7 @@ func (repo CourseRepoImpl) FindById(id uint) (*entity.Course, error) {
 	return course, nil
 }
 
-func (repo CourseRepoImpl) FindDetailById(id uint) (*entity.Course, error) {
+func (repo CourseRepoImpl) FetchDetailById(id uint) (*entity.Course, error) {
 	course := &entity.Course{}
 	tx := repo.dbClient.Core.
 		Where("id = ?", id).
@@ -97,7 +97,7 @@ func (repo CourseRepoImpl) FindDetailById(id uint) (*entity.Course, error) {
 	return course, nil
 }
 
-func (repo CourseRepoImpl) FindByVideoId(id uint) (*entity.Course, error) {
+func (repo CourseRepoImpl) FetchByVideoId(id uint) (*entity.Course, error) {
 	course := &entity.Course{}
 	tx := repo.dbClient.Core.
 		Joins("JOIN _videos ON _courses.id = _videos.course_id").

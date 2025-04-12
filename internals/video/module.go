@@ -7,11 +7,11 @@ import (
 )
 
 type Module struct {
-	videoAdminHandler *handler.VideoAdminHandler
+	videoAdminHandler *handler.Handler
 }
 
 func NewModule(
-	videoAdminHandler *handler.VideoAdminHandler,
+	videoAdminHandler *handler.Handler,
 ) *Module {
 	return &Module{
 		videoAdminHandler: videoAdminHandler,
@@ -20,7 +20,6 @@ func NewModule(
 
 func (m Module) Register(api *gin.RouterGroup) {
 	videosApi := api.Group("/videos")
-	videosAdminApi := videosApi.Group("/admin")
 
-	videosAdminApi.POST("/", utils.JsonHandler(m.videoAdminHandler.AddNewVideoToCourse))
+	videosApi.POST("/", utils.JsonHandler(m.videoAdminHandler.AddNewVideoToCourse))
 }

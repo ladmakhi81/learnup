@@ -9,9 +9,9 @@ import (
 
 type VideoRepo interface {
 	Create(video *videoEntity.Video) error
-	FindByTitle(title string) (*videoEntity.Video, error)
-	FindById(id uint) (*videoEntity.Video, error)
-	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
+	FetchByTitle(title string) (*videoEntity.Video, error)
+	FetchById(id uint) (*videoEntity.Video, error)
+	FetchByCourseId(courseID uint) ([]*videoEntity.Video, error)
 	Update(video *videoEntity.Video) error
 }
 
@@ -30,7 +30,7 @@ func (repo VideoRepoImpl) Create(video *videoEntity.Video) error {
 	return tx.Error
 }
 
-func (repo VideoRepoImpl) FindByTitle(title string) (*videoEntity.Video, error) {
+func (repo VideoRepoImpl) FetchByTitle(title string) (*videoEntity.Video, error) {
 	video := &videoEntity.Video{}
 	tx := repo.dbClient.Core.Where("title = ?", title).First(video)
 	if tx.Error != nil {
@@ -42,7 +42,7 @@ func (repo VideoRepoImpl) FindByTitle(title string) (*videoEntity.Video, error) 
 	return video, nil
 }
 
-func (repo VideoRepoImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error) {
+func (repo VideoRepoImpl) FetchByCourseId(courseID uint) ([]*videoEntity.Video, error) {
 	videos := make([]*videoEntity.Video, 0)
 	tx := repo.dbClient.Core.
 		Preload("VerifiedBy").
@@ -60,7 +60,7 @@ func (repo VideoRepoImpl) Update(video *videoEntity.Video) error {
 	return tx.Error
 }
 
-func (repo VideoRepoImpl) FindById(id uint) (*videoEntity.Video, error) {
+func (repo VideoRepoImpl) FetchById(id uint) (*videoEntity.Video, error) {
 	video := &videoEntity.Video{}
 	tx := repo.dbClient.Core.
 		Where("id = ?", id).

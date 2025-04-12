@@ -5,23 +5,27 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/video/dto/res"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/pkg/validation"
 	"github.com/ladmakhi81/learnup/types"
 	"net/http"
 )
 
-type VideoAdminHandler struct {
-	validationSvc validation.Validation
-	videoSvc      videoService.VideoService
+type Handler struct {
+	validationSvc  validation.Validation
+	videoSvc       videoService.VideoService
+	translationSvc translations.Translator
 }
 
-func NewVideoAdminHandler(
+func NewHandler(
 	validationSvc validation.Validation,
 	videoSvc videoService.VideoService,
-) *VideoAdminHandler {
-	return &VideoAdminHandler{
-		validationSvc: validationSvc,
-		videoSvc:      videoSvc,
+	translationSvc translations.Translator,
+) *Handler {
+	return &Handler{
+		validationSvc:  validationSvc,
+		videoSvc:       videoSvc,
+		translationSvc: translationSvc,
 	}
 }
 
@@ -36,11 +40,11 @@ func NewVideoAdminHandler(
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	409		{object}	types.ApiError
 //	@Failure	500		{object}	types.ApiError
-//	@Router		/videos/admin/ [post]
-func (h VideoAdminHandler) AddNewVideoToCourse(ctx *gin.Context) (*types.ApiResponse, error) {
+//	@Router		/videos/ [post]
+func (h Handler) AddNewVideoToCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := &dtoreq.AddVideoToCourse{}
 	if err := ctx.Bind(dto); err != nil {
-		return nil, types.NewBadRequestError("Invalid request body")
+		return nil, types.NewBadRequestError(h.translationSvc.Translate("common.errors.invalid_request_body"))
 	}
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err

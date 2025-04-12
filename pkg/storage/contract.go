@@ -6,11 +6,11 @@ import (
 )
 
 type Storage interface {
-	BucketExist(context.Context, string) (bool, *StorageError)
-	CreateBucket(context.Context, string) *StorageError
-	DeleteBucket(context.Context, string) *StorageError
-	UploadFileByContent(context.Context, string, string, string, []byte) (*UploadResult, *StorageError)
-	GetFile(context.Context, string, string) ([]byte, *StorageError)
-	GetFileReader(context.Context, string, string) (io.Reader, *StorageError)
-	DeleteObject(context.Context, string, string) error
+	BucketExist(ctx context.Context, bucketName string) (bool, *StorageError)
+	CreateBucket(ctx context.Context, bucketName string) *StorageError
+	DeleteBucket(ctx context.Context, bucketName string) *StorageError
+	UploadFileByContent(ctx context.Context, bucketName string, objectPath string, contentType string, fileContents []byte) (*UploadResult, *StorageError)
+	GetFile(ctx context.Context, bucketName string, fileName string) ([]byte, *StorageError)
+	GetFileReader(ctx context.Context, bucketName string, fileName string) (io.Reader, *StorageError)
+	DeleteObject(ctx context.Context, bucketName string, objectId string) error
 }

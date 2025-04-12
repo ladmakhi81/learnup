@@ -10,7 +10,7 @@ import (
 type Course struct {
 	gorm.Model
 
-	Name                        string                   `gorm:"column:name;unique;not null;type:varchar(255)"`
+	Name                        string                   `gorm:"column:name;index;not null;type:varchar(255)"`
 	TeacherID                   *uint                    `gorm:"column:teacher_id;type:int unsigned;not null"`
 	Teacher                     *userEntity.User         `gorm:"foreignKey:teacher_id;"`
 	CategoryID                  *uint                    `gorm:"column:category_id;type:int unsigned; not null;"`

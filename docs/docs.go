@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/categories/admin/": {
+        "/categories/": {
             "post": {
                 "security": [
                     {
@@ -152,7 +152,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/categories/admin/page": {
+        "/categories/page": {
             "get": {
                 "security": [
                     {
@@ -213,7 +213,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/categories/admin/tree": {
+        "/categories/tree": {
             "get": {
                 "security": [
                     {
@@ -258,7 +258,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/categories/admin/{categoryId}": {
+        "/categories/{categoryId}": {
             "delete": {
                 "security": [
                     {
@@ -306,7 +306,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/courses/admin": {
+        "/courses": {
             "post": {
                 "security": [
                     {
@@ -380,7 +380,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/courses/admin/page": {
+        "/courses/page": {
             "get": {
                 "security": [
                     {
@@ -462,7 +462,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/courses/admin/{course-id}": {
+        "/courses/{course-id}": {
             "get": {
                 "security": [
                     {
@@ -510,7 +510,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/courses/admin/{course-id}/videos": {
+        "/courses/{course-id}/videos": {
             "get": {
                 "security": [
                     {
@@ -558,7 +558,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notifications/admin/page": {
+        "/notifications/page": {
             "get": {
                 "security": [
                     {
@@ -634,7 +634,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notifications/admin/{notification-id}/seen": {
+        "/notifications/{notification-id}/seen": {
             "patch": {
                 "security": [
                     {
@@ -682,7 +682,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/admin/basic": {
+        "/users/basic": {
             "post": {
                 "security": [
                     {
@@ -750,7 +750,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/videos/admin/": {
+        "/videos/": {
             "post": {
                 "consumes": [
                     "application/json"
