@@ -77,11 +77,11 @@ func (svc UserSvcImpl) IsPhoneDuplicated(phone string) (bool, error) {
 }
 
 func (svc UserSvcImpl) FindByPhone(phone string) (*entity.User, error) {
-	user, userErr := svc.userRepo.FindByPhone(phone)
+	user, userErr := svc.userRepo.FetchByPhone(phone)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Find User By Phone Throw Error",
-			"UserSvcImpl.FindByPhone",
+			"UserSvcImpl.FetchByPhone",
 			userErr,
 		)
 	}
@@ -89,11 +89,11 @@ func (svc UserSvcImpl) FindByPhone(phone string) (*entity.User, error) {
 }
 
 func (svc UserSvcImpl) FindById(id uint) (*entity.User, error) {
-	user, userErr := svc.userRepo.FindById(id)
+	user, userErr := svc.userRepo.FetchById(id)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Find User By Id Throw Error",
-			"UserServiceImpl.FindById",
+			"UserServiceImpl.FetchById",
 			userErr,
 		)
 	}

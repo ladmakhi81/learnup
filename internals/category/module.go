@@ -8,12 +8,12 @@ import (
 )
 
 type Module struct {
-	categoryAdminHandler *handler.CategoryAdminHandler
+	categoryAdminHandler *handler.Handler
 	middleware           *middleware.Middleware
 }
 
 func NewModule(
-	categoryAdminHandler *handler.CategoryAdminHandler,
+	categoryAdminHandler *handler.Handler,
 	middleware *middleware.Middleware,
 ) *Module {
 	return &Module{
@@ -24,12 +24,11 @@ func NewModule(
 
 func (m Module) Register(api *gin.RouterGroup) {
 	categoriesApi := api.Group("/categories")
-	categoriesAdminApi := categoriesApi.Group("/admin")
 
-	categoriesAdminApi.Use(m.middleware.CheckAccessToken())
+	categoriesApi.Use(m.middleware.CheckAccessToken())
 
-	categoriesAdminApi.POST("/", utils.JsonHandler(m.categoryAdminHandler.CreateCategory))
-	categoriesAdminApi.GET("/tree", utils.JsonHandler(m.categoryAdminHandler.GetCategoriesTree))
-	categoriesAdminApi.GET("/page", utils.JsonHandler(m.categoryAdminHandler.GetCategories))
-	categoriesAdminApi.DELETE("/:categoryId", utils.JsonHandler(m.categoryAdminHandler.DeleteCategory))
+	categoriesApi.POST("/", utils.JsonHandler(m.categoryAdminHandler.CreateCategory))
+	categoriesApi.GET("/tree", utils.JsonHandler(m.categoryAdminHandler.GetCategoriesTree))
+	categoriesApi.GET("/page", utils.JsonHandler(m.categoryAdminHandler.GetCategories))
+	categoriesApi.DELETE("/:categoryId", utils.JsonHandler(m.categoryAdminHandler.DeleteCategory))
 }

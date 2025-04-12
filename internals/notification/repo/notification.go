@@ -10,7 +10,7 @@ import (
 type NotificationRepo interface {
 	Create(notification *notificationEntity.Notification) error
 	Update(notification *notificationEntity.Notification) error
-	FindById(id uint) (*notificationEntity.Notification, error)
+	FetchById(id uint) (*notificationEntity.Notification, error)
 	FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, error)
 	FetchCount() (int, error)
 }
@@ -35,7 +35,7 @@ func (repo NotificationRepoImpl) Update(notification *notificationEntity.Notific
 	return tx.Error
 }
 
-func (repo NotificationRepoImpl) FindById(id uint) (*notificationEntity.Notification, error) {
+func (repo NotificationRepoImpl) FetchById(id uint) (*notificationEntity.Notification, error) {
 	notification := &notificationEntity.Notification{}
 	tx := repo.dbClient.Core.Where("id = ?", id).First(&notification)
 	if tx.Error != nil {

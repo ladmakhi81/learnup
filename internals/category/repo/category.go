@@ -10,12 +10,12 @@ import (
 type CategoryRepo interface {
 	Create(category *entity.Category) error
 	Delete(category *entity.Category) error
-	FindByID(categoryID uint) (*entity.Category, error)
-	FindByName(name string) (*entity.Category, error)
-	GetCategories(page, pageSize int) ([]*entity.Category, error)
-	GetCategoriesCount() (int, error)
-	GetRootCategories() ([]*entity.Category, error)
-	GetSubCategories(categoryID uint) ([]*entity.Category, error)
+	FetchById(categoryID uint) (*entity.Category, error)
+	FetchByName(name string) (*entity.Category, error)
+	FetchPage(page, pageSize int) ([]*entity.Category, error)
+	FetchCount() (int, error)
+	FetchRoot() ([]*entity.Category, error)
+	FetchChildren(categoryID uint) ([]*entity.Category, error)
 }
 
 type CategoryRepoImpl struct {
@@ -41,7 +41,7 @@ func (repo CategoryRepoImpl) Delete(category *entity.Category) error {
 	return nil
 }
 
-func (repo CategoryRepoImpl) FindByID(categoryID uint) (*entity.Category, error) {
+func (repo CategoryRepoImpl) FetchById(categoryID uint) (*entity.Category, error) {
 	category := &entity.Category{}
 	tx := repo.db.Core.Where("id = ?", categoryID).First(category)
 	if tx.Error != nil {
@@ -53,7 +53,7 @@ func (repo CategoryRepoImpl) FindByID(categoryID uint) (*entity.Category, error)
 	return category, nil
 }
 
-func (repo CategoryRepoImpl) FindByName(name string) (*entity.Category, error) {
+func (repo CategoryRepoImpl) FetchByName(name string) (*entity.Category, error) {
 	category := &entity.Category{}
 	tx := repo.db.Core.Where("name = ?", name).First(category)
 	if tx.Error != nil {
@@ -65,7 +65,7 @@ func (repo CategoryRepoImpl) FindByName(name string) (*entity.Category, error) {
 	return category, nil
 }
 
-func (repo CategoryRepoImpl) GetRootCategories() ([]*entity.Category, error) {
+func (repo CategoryRepoImpl) FetchRoot() ([]*entity.Category, error) {
 	var categories []*entity.Category
 	tx := repo.db.Core.Where("parent_category_id IS NULL").Find(&categories)
 	if tx.Error != nil {
@@ -74,7 +74,7 @@ func (repo CategoryRepoImpl) GetRootCategories() ([]*entity.Category, error) {
 	return categories, nil
 }
 
-func (repo CategoryRepoImpl) GetSubCategories(categoryID uint) ([]*entity.Category, error) {
+func (repo CategoryRepoImpl) FetchChildren(categoryID uint) ([]*entity.Category, error) {
 	var categories []*entity.Category
 	tx := repo.db.Core.
 		Preload("Children").
@@ -86,7 +86,7 @@ func (repo CategoryRepoImpl) GetSubCategories(categoryID uint) ([]*entity.Catego
 	return categories, nil
 }
 
-func (repo CategoryRepoImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
+func (repo CategoryRepoImpl) FetchPage(page, pageSize int) ([]*entity.Category, error) {
 	var categories []*entity.Category
 	tx := repo.db.Core.
 		Order("created_at desc").
@@ -99,7 +99,7 @@ func (repo CategoryRepoImpl) GetCategories(page, pageSize int) ([]*entity.Catego
 	return categories, nil
 }
 
-func (repo CategoryRepoImpl) GetCategoriesCount() (int, error) {
+func (repo CategoryRepoImpl) FetchCount() (int, error) {
 	count := int64(0)
 	tx := repo.db.Core.Model(&entity.Category{}).Count(&count)
 	if tx.Error != nil {

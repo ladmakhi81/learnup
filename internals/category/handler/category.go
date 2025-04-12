@@ -13,18 +13,18 @@ import (
 	"strconv"
 )
 
-type CategoryAdminHandler struct {
+type Handler struct {
 	categorySvc    categoryService.CategoryService
 	translationSvc translations.Translator
 	validationSvc  validation.Validation
 }
 
-func NewCategoryAdminHandler(
+func NewHandler(
 	categorySvc categoryService.CategoryService,
 	translationSvc translations.Translator,
 	validationSvc validation.Validation,
-) *CategoryAdminHandler {
-	return &CategoryAdminHandler{
+) *Handler {
+	return &Handler{
 		categorySvc:    categorySvc,
 		translationSvc: translationSvc,
 		validationSvc:  validationSvc,
@@ -43,10 +43,10 @@ func NewCategoryAdminHandler(
 //	@Failure	404		{object}	types.ApiError
 //	@Failure	409		{object}	types.ApiError
 //	@Failure	500		{object}	types.ApiError
-//	@Router		/categories/admin/ [post]
+//	@Router		/categories/ [post]
 //
 // @Security BearerAuth
-func (h CategoryAdminHandler) CreateCategory(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) CreateCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.CreateCategoryReq)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
@@ -76,16 +76,16 @@ func (h CategoryAdminHandler) CreateCategory(ctx *gin.Context) (*types.ApiRespon
 //	@Produce	json
 //	@Success	200	{object}	types.ApiResponse{data=dtores.GetCategoriesTreeRes}
 //	@Failure	500	{object}	types.ApiResponse
-//	@Router		/categories/admin/tree [get]
+//	@Router		/categories/tree [get]
 //
 // @Security BearerAuth
-func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetCategoriesTree(_ *gin.Context) (*types.ApiResponse, error) {
 	categoriesTree, categoriesTreeErr := h.categorySvc.GetCategoriesTree()
 	if categoriesTreeErr != nil {
 		return nil, categoriesTreeErr
 	}
-	//categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
-	return types.NewApiResponse(http.StatusOK, categoriesTree), nil
+	categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
+	return types.NewApiResponse(http.StatusOK, categoriesTreeRes), nil
 }
 
 // GetCategories godoc
@@ -98,10 +98,10 @@ func (h CategoryAdminHandler) GetCategoriesTree(ctx *gin.Context) (*types.ApiRes
 //	@Param		pageSize	query		int											false	"Number of items per page"	default(10)
 //	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes}	" "
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/categories/admin/page [get]
+//	@Router		/categories/page [get]
 //
 // @Security BearerAuth
-func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
@@ -135,10 +135,10 @@ func (h CategoryAdminHandler) GetCategories(ctx *gin.Context) (*types.ApiRespons
 //	@Success	200			{object}	types.ApiResponse
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
-//	@Router		/categories/admin/{categoryId} [delete]
+//	@Router		/categories/{categoryId} [delete]
 //
 // @Security BearerAuth
-func (h CategoryAdminHandler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 	categoryIDParam := ctx.Param("categoryId")
 	categoryId, categoryIdErr := strconv.Atoi(categoryIDParam)
 	if categoryIdErr != nil {

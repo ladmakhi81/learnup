@@ -8,12 +8,12 @@ import (
 )
 
 type Module struct {
-	notificationAdminHandler *handler.NotificationAdminHandler
+	notificationAdminHandler *handler.Handler
 	middlewares              *middleware.Middleware
 }
 
 func NewModule(
-	notificationAdminHandler *handler.NotificationAdminHandler,
+	notificationAdminHandler *handler.Handler,
 	middlewares *middleware.Middleware,
 ) *Module {
 	return &Module{
@@ -24,10 +24,9 @@ func NewModule(
 
 func (m Module) Register(api *gin.RouterGroup) {
 	notificationsApi := api.Group("/notifications")
-	adminNotificationsApi := notificationsApi.Group("/admin")
 
-	adminNotificationsApi.Use(m.middlewares.CheckAccessToken())
+	notificationsApi.Use(m.middlewares.CheckAccessToken())
 
-	adminNotificationsApi.PATCH("/:notification-id/seen", utils.JsonHandler(m.notificationAdminHandler.SeenNotification))
-	adminNotificationsApi.GET("/page", utils.JsonHandler(m.notificationAdminHandler.GetNotificationsPage))
+	notificationsApi.PATCH("/:notification-id/seen", utils.JsonHandler(m.notificationAdminHandler.SeenNotification))
+	notificationsApi.GET("/page", utils.JsonHandler(m.notificationAdminHandler.GetNotificationsPage))
 }

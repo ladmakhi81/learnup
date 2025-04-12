@@ -14,6 +14,7 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/ffmpeg"
 	"github.com/ladmakhi81/learnup/pkg/logger"
 	"github.com/ladmakhi81/learnup/pkg/storage"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"os"
 	"path"
@@ -38,6 +39,7 @@ type VideoServiceImpl struct {
 	courseSvc       courseService.CourseService
 	videoRepo       repo.VideoRepo
 	notificationSvc notificationService.NotificationService
+	translationSvc  translations.Translator
 }
 
 func NewVideoServiceImpl(
@@ -47,6 +49,7 @@ func NewVideoServiceImpl(
 	courseSvc courseService.CourseService,
 	videoRepo repo.VideoRepo,
 	notificationSvc notificationService.NotificationService,
+	translationSvc translations.Translator,
 ) *VideoServiceImpl {
 	return &VideoServiceImpl{
 		minioClient:     minioClient,
@@ -54,7 +57,9 @@ func NewVideoServiceImpl(
 		logSvc:          logSvc,
 		courseSvc:       courseSvc,
 		videoRepo:       videoRepo,
-		notificationSvc: notificationSvc}
+		notificationSvc: notificationSvc,
+		translationSvc:  translationSvc,
+	}
 }
 
 func (svc VideoServiceImpl) EncodeVideoWithObjectID(videoID uint, objectID string) error {
@@ -84,14 +89,14 @@ func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity
 		return nil, titleDuplicatedErr
 	}
 	if isTitleDuplicated {
-		return nil, types.NewConflictError("video title is duplicated")
+		return nil, types.NewConflictError(svc.translationSvc.Translate("video.errors.title_duplicated"))
 	}
 	course, courseErr := svc.courseSvc.FindById(dto.CourseID)
 	if courseErr != nil {
 		return nil, courseErr
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError("course not found")
+		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
 	}
 	video := &videoEntity.Video{
 		Title:       dto.Title,
@@ -113,11 +118,11 @@ func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity
 }
 
 func (svc VideoServiceImpl) FindByTitle(title string) (*videoEntity.Video, error) {
-	video, videoErr := svc.videoRepo.FindByTitle(title)
+	video, videoErr := svc.videoRepo.FetchByTitle(title)
 	if videoErr != nil {
 		return nil, types.NewServerError(
 			"Find Video By Title Throw Error",
-			"VideoServiceImpl.FindByTitle",
+			"VideoServiceImpl.FetchByTitle",
 			videoErr,
 		)
 	}
@@ -125,7 +130,7 @@ func (svc VideoServiceImpl) FindByTitle(title string) (*videoEntity.Video, error
 }
 
 func (svc VideoServiceImpl) IsVideoTitleExist(title string) (bool, error) {
-	video, videoErr := svc.videoRepo.FindByTitle(title)
+	video, videoErr := svc.videoRepo.FetchByTitle(title)
 	if videoErr != nil {
 		return false, videoErr
 	}
@@ -249,13 +254,13 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.
 		return nil, courseErr
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError("course not found")
+		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
 	}
-	videos, videosErr := svc.videoRepo.FindVideosByCourseID(courseID)
+	videos, videosErr := svc.videoRepo.FetchByCourseId(courseID)
 	if videosErr != nil {
 		return nil, types.NewServerError(
 			"Finding videos by course id throw error",
-			"VideoServiceImpl.FindVideosByCourseID",
+			"VideoServiceImpl.FetchByCourseId",
 			videosErr,
 		)
 	}
@@ -268,7 +273,7 @@ func (svc VideoServiceImpl) UpdateVideoURL(id uint, url string) (*videoEntity.Vi
 		return nil, videoErr
 	}
 	if video == nil {
-		return nil, types.NewNotFoundError("video is not found")
+		return nil, types.NewNotFoundError(svc.translationSvc.Translate("video.errors.not_found"))
 	}
 	video.URL = url
 	video.Status = videoEntity.VideoStatus_Done
@@ -283,11 +288,11 @@ func (svc VideoServiceImpl) UpdateVideoURL(id uint, url string) (*videoEntity.Vi
 }
 
 func (svc VideoServiceImpl) FindById(id uint) (*videoEntity.Video, error) {
-	video, videoErr := svc.videoRepo.FindById(id)
+	video, videoErr := svc.videoRepo.FetchById(id)
 	if videoErr != nil {
 		return nil, types.NewServerError(
 			"Error in finding video by id",
-			"VideoServiceImpl.FindById",
+			"VideoServiceImpl.FetchById",
 			videoErr,
 		)
 	}

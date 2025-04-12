@@ -11,18 +11,18 @@ import (
 	"net/http"
 )
 
-type UserAdminHandler struct {
+type Handler struct {
 	userSvc        service.UserSvc
 	validationSvc  validation.Validation
 	translationSvc translations.Translator
 }
 
-func NewUserAdminHandler(
+func NewHandler(
 	userSvc service.UserSvc,
 	validationSvc validation.Validation,
 	translationSvc translations.Translator,
-) *UserAdminHandler {
-	return &UserAdminHandler{
+) *Handler {
+	return &Handler{
 		userSvc:        userSvc,
 		validationSvc:  validationSvc,
 		translationSvc: translationSvc,
@@ -40,10 +40,10 @@ func NewUserAdminHandler(
 //	@Failure	400					{object}	types.ApiError
 //	@Failure	409					{object}	types.ApiError
 //	@Failure	500					{object}	types.ApiError
-//	@Router		/users/admin/basic [post]
+//	@Router		/users/basic [post]
 //
 // @Security BearerAuth
-func (h UserAdminHandler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.CreateBasicUserReq)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(

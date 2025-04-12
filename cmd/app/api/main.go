@@ -112,26 +112,26 @@ func main() {
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
 	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
-	notificationSvc := notificationService.NewNotificationServiceImpl(notificationRepo, userSvc)
+	notificationSvc := notificationService.NewNotificationServiceImpl(notificationRepo, userSvc, i18nTranslatorSvc)
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc)
+	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
 
 	// handlers
-	userAdminHandler := userHandler.NewUserAdminHandler(userSvc, validationSvc, i18nTranslatorSvc)
-	userAuthHandler := authHandler.NewUserAuthHandler(authSvc, validationSvc, i18nTranslatorSvc)
-	categoryAdminHandler := categoryHandler.NewCategoryAdminHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
-	videoAdminHandler := videoHandler.NewVideoAdminHandler(validationSvc, videoSvc)
+	userAdminHandler := userHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
+	userAuthHandler := authHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
+	categoryAdminHandler := categoryHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
+	courseAdminHandler := courseHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
+	videoAdminHandler := videoHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
-	notificationAdminHandler := notificationHandler.NewNotificationAdminHandler(notificationSvc)
+	notificationAdminHandler := notificationHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)

@@ -1,7 +1,7 @@
 package logger
 
 type Log interface {
-	Print(LogMessage)
-	Error(LogMessage)
-	Warning(LogMessage)
+	Print(message LogMessage)
+	Error(message LogMessage)
+	Warning(message LogMessage)
 }

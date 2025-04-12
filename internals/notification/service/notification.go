@@ -5,6 +5,7 @@ import (
 	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
 	"github.com/ladmakhi81/learnup/internals/notification/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	"github.com/ladmakhi81/learnup/pkg/translations"
 	"github.com/ladmakhi81/learnup/types"
 	"time"
 )
@@ -20,15 +21,18 @@ type NotificationService interface {
 type NotificationServiceImpl struct {
 	notificationRepo repo.NotificationRepo
 	userSvc          userService.UserSvc
+	translationSvc   translations.Translator
 }
 
 func NewNotificationServiceImpl(
 	notificationRepo repo.NotificationRepo,
 	userSvc userService.UserSvc,
+	translationSvc translations.Translator,
 ) *NotificationServiceImpl {
 	return &NotificationServiceImpl{
 		userSvc:          userSvc,
 		notificationRepo: notificationRepo,
+		translationSvc:   translationSvc,
 	}
 }
 
@@ -59,7 +63,7 @@ func (svc NotificationServiceImpl) SeenById(id uint) error {
 		return notificationErr
 	}
 	if notification == nil {
-		return types.NewNotFoundError("notification is not found")
+		return types.NewNotFoundError(svc.translationSvc.Translate("notification.errors.not_found"))
 	}
 	notification.IsSeen = true
 	now := time.Now()
@@ -75,11 +79,11 @@ func (svc NotificationServiceImpl) SeenById(id uint) error {
 }
 
 func (svc NotificationServiceImpl) FindById(id uint) (*notificationEntity.Notification, error) {
-	notification, notificationErr := svc.notificationRepo.FindById(id)
+	notification, notificationErr := svc.notificationRepo.FetchById(id)
 	if notificationErr != nil {
 		return nil, types.NewServerError(
 			"Error in finding notification by id",
-			"NotificationServiceImpl.FindById",
+			"NotificationServiceImpl.FetchById",
 			notificationErr,
 		)
 	}

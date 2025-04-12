@@ -566,7 +566,7 @@ paths:
       summary: Login a user and return an access token
       tags:
       - auth
-  /categories/admin/:
+  /categories/:
     post:
       consumes:
       - application/json
@@ -610,7 +610,7 @@ paths:
       summary: Create a new category
       tags:
       - categories
-  /categories/admin/{categoryId}:
+  /categories/{categoryId}:
     delete:
       consumes:
       - application/json
@@ -640,7 +640,7 @@ paths:
       summary: Delete a category by ID
       tags:
       - categories
-  /categories/admin/page:
+  /categories/page:
     get:
       consumes:
       - application/json
@@ -676,7 +676,7 @@ paths:
       summary: Get a paginated list of categories
       tags:
       - categories
-  /categories/admin/tree:
+  /categories/tree:
     get:
       consumes:
       - application/json
@@ -701,7 +701,7 @@ paths:
       summary: Get categories as a tree structure
       tags:
       - categories
-  /courses/admin:
+  /courses:
     post:
       consumes:
       - application/json
@@ -745,7 +745,7 @@ paths:
       summary: Create a new course
       tags:
       - courses
-  /courses/admin/{course-id}:
+  /courses/{course-id}:
     get:
       parameters:
       - description: Course ID
@@ -775,7 +775,7 @@ paths:
       summary: Get Course by ID
       tags:
       - courses
-  /courses/admin/{course-id}/videos:
+  /courses/{course-id}/videos:
     get:
       parameters:
       - description: Course ID
@@ -805,7 +805,7 @@ paths:
       summary: Get Videos by Course ID
       tags:
       - courses
-  /courses/admin/page:
+  /courses/page:
     get:
       consumes:
       - application/json
@@ -852,7 +852,7 @@ paths:
       summary: Get list of paginated courses
       tags:
       - courses
-  /notifications/admin/{notification-id}/seen:
+  /notifications/{notification-id}/seen:
     patch:
       parameters:
       - description: Notification ID
@@ -882,7 +882,7 @@ paths:
       summary: Mark notification as seen
       tags:
       - notifications
-  /notifications/admin/page:
+  /notifications/page:
     get:
       parameters:
       - default: 0
@@ -925,7 +925,7 @@ paths:
       summary: Get paginated notifications
       tags:
       - notifications
-  /users/admin/basic:
+  /users/basic:
     post:
       consumes:
       - application/json
@@ -965,7 +965,7 @@ paths:
       summary: Create Basic User
       tags:
       - users
-  /videos/admin/:
+  /videos/:
     post:
       consumes:
       - application/json

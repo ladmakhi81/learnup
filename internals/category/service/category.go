@@ -92,10 +92,10 @@ func (svc CategoryServiceImpl) DeleteById(id uint) error {
 }
 
 func (svc CategoryServiceImpl) FindByID(id uint) (*entity.Category, error) {
-	category, categoryErr := svc.repo.FindByID(id)
+	category, categoryErr := svc.repo.FetchById(id)
 	if categoryErr != nil {
 		return nil, types.NewServerError("Find Category By Id Throw Error",
-			"CategoryServiceImpl.FindById",
+			"CategoryServiceImpl.FetchById",
 			categoryErr,
 		)
 	}
@@ -103,10 +103,10 @@ func (svc CategoryServiceImpl) FindByID(id uint) (*entity.Category, error) {
 }
 
 func (svc CategoryServiceImpl) FindByName(name string) (*entity.Category, error) {
-	category, categoryErr := svc.repo.FindByName(name)
+	category, categoryErr := svc.repo.FetchByName(name)
 	if categoryErr != nil {
 		return nil, types.NewServerError("Find Category By Name Throw Error",
-			"CategoryServiceImpl.FindByName",
+			"CategoryServiceImpl.FetchByName",
 			categoryErr,
 		)
 	}
@@ -125,7 +125,7 @@ func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
 }
 
 func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*entity.Category, error) {
-	subCategories, subCategoriesErr := svc.repo.GetSubCategories(category.ID)
+	subCategories, subCategoriesErr := svc.repo.FetchChildren(category.ID)
 	if subCategoriesErr != nil {
 		return nil, subCategoriesErr
 	}
@@ -140,7 +140,7 @@ func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*e
 }
 
 func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
-	rootCategories, rootCategoriesErr := svc.repo.GetRootCategories()
+	rootCategories, rootCategoriesErr := svc.repo.FetchRoot()
 	if rootCategoriesErr != nil {
 		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
 			"CategoryServiceImpl.GetCategoriesTree",
@@ -160,10 +160,10 @@ func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
 }
 
 func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
-	categories, categoriesErr := svc.repo.GetCategories(page, pageSize)
+	categories, categoriesErr := svc.repo.FetchPage(page, pageSize)
 	if categoriesErr != nil {
 		return nil, types.NewServerError("Get Categories List Throw Error",
-			"CategoryServiceImpl.GetCategories",
+			"CategoryServiceImpl.FetchPage",
 			categoriesErr,
 		)
 	}
@@ -171,10 +171,10 @@ func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Cate
 }
 
 func (svc CategoryServiceImpl) GetCategoriesCount() (int, error) {
-	count, countErr := svc.repo.GetCategoriesCount()
+	count, countErr := svc.repo.FetchCount()
 	if countErr != nil {
 		return 0, types.NewServerError("Get Count Of Categories Throw Error",
-			"CategoryServiceImpl.GetCategoriesCount",
+			"CategoryServiceImpl.FetchCount",
 			countErr,
 		)
 	}

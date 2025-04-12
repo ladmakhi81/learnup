@@ -70,7 +70,7 @@
                 }
             }
         },
-        "/categories/admin/": {
+        "/categories/": {
             "post": {
                 "security": [
                     {
@@ -144,7 +144,7 @@
                 }
             }
         },
-        "/categories/admin/page": {
+        "/categories/page": {
             "get": {
                 "security": [
                     {
@@ -205,7 +205,7 @@
                 }
             }
         },
-        "/categories/admin/tree": {
+        "/categories/tree": {
             "get": {
                 "security": [
                     {
@@ -250,7 +250,7 @@
                 }
             }
         },
-        "/categories/admin/{categoryId}": {
+        "/categories/{categoryId}": {
             "delete": {
                 "security": [
                     {
@@ -298,7 +298,7 @@
                 }
             }
         },
-        "/courses/admin": {
+        "/courses": {
             "post": {
                 "security": [
                     {
@@ -372,7 +372,7 @@
                 }
             }
         },
-        "/courses/admin/page": {
+        "/courses/page": {
             "get": {
                 "security": [
                     {
@@ -454,7 +454,7 @@
                 }
             }
         },
-        "/courses/admin/{course-id}": {
+        "/courses/{course-id}": {
             "get": {
                 "security": [
                     {
@@ -502,7 +502,7 @@
                 }
             }
         },
-        "/courses/admin/{course-id}/videos": {
+        "/courses/{course-id}/videos": {
             "get": {
                 "security": [
                     {
@@ -550,7 +550,7 @@
                 }
             }
         },
-        "/notifications/admin/page": {
+        "/notifications/page": {
             "get": {
                 "security": [
                     {
@@ -626,7 +626,7 @@
                 }
             }
         },
-        "/notifications/admin/{notification-id}/seen": {
+        "/notifications/{notification-id}/seen": {
             "patch": {
                 "security": [
                     {
@@ -674,7 +674,7 @@
                 }
             }
         },
-        "/users/admin/basic": {
+        "/users/basic": {
             "post": {
                 "security": [
                     {
@@ -742,7 +742,7 @@
                 }
             }
         },
-        "/videos/admin/": {
+        "/videos/": {
             "post": {
                 "consumes": [
                     "application/json"

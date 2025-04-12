@@ -12,7 +12,7 @@ type Video struct {
 
 	CourseId     *uint                `gorm:"column:course_id;type:int;index;"`
 	Course       *courseEntity.Course `gorm:"foreignKey:course_id"`
-	Title        string               `gorm:"column:title;type:varchar(255);unique;not null;"`
+	Title        string               `gorm:"column:title;type:varchar(255);index;not null;"`
 	Description  string               `gorm:"column:description;type:text;not null;"`
 	AccessLevel  VideoAccessLevel     `gorm:"column:access_level;type:varchar(255);not null;"`
 	IsPublished  bool                 `gorm:"column:is_published;type:boolean;default:false;"`

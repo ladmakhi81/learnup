@@ -11,18 +11,18 @@ import (
 	"net/http"
 )
 
-type UserAuthHandler struct {
+type Handler struct {
 	authSvc        service.AuthService
 	validationSvc  validation.Validation
 	translationSvc translations.Translator
 }
 
-func NewUserAuthHandler(
+func NewHandler(
 	authSvc service.AuthService,
 	validationSvc validation.Validation,
 	translationSvc translations.Translator,
-) *UserAuthHandler {
-	return &UserAuthHandler{
+) *Handler {
+	return &Handler{
 		authSvc:        authSvc,
 		validationSvc:  validationSvc,
 		translationSvc: translationSvc,
@@ -41,7 +41,7 @@ func NewUserAuthHandler(
 //	@Failure	404				{object}	types.ApiError
 //	@Failure	500				{object}	types.ApiError
 //	@Router		/auth/login [post]
-func (h UserAuthHandler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h Handler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.LoginReq)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(

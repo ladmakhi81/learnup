@@ -21,7 +21,21 @@
     "errors": {
       "name_duplicate": "نام دوره‌ی وارد شده قبلا ثبت شده است",
       "not_found_category": "دسته بندی انتخاب شده یافت نشد",
-      "not_found_teacher": "مدرس مربوط به دوره یافت نشد"
+      "not_found_teacher": "مدرس مربوط به دوره یافت نشد",
+      "invalid_course_id": "شناسه مربوط به دوره نادرست میباشد",
+      "not_found": "دوره ای یافت نشد"
+    }
+  },
+  "notification": {
+    "errors": {
+      "invalid_notification_id": "شناسه مربوط به اعلان ها نادرست میباشد",
+      "not_found": "اعلانی یافت نشد"
+    }
+  },
+  "video": {
+    "errors": {
+      "title_duplicated": "موضوع مربوط به ویدیو تکراری میباشد",
+      "not_found": "ویدیو یافت نشد"
     }
   },
   "common": {

@@ -8,12 +8,12 @@ import (
 )
 
 type Module struct {
-	userAdminHandler *handler.UserAdminHandler
+	userAdminHandler *handler.Handler
 	middleware       *middleware.Middleware
 }
 
 func NewModule(
-	userAdminHandler *handler.UserAdminHandler,
+	userAdminHandler *handler.Handler,
 	middleware *middleware.Middleware,
 ) *Module {
 	return &Module{
@@ -24,9 +24,6 @@ func NewModule(
 
 func (m Module) Register(api *gin.RouterGroup) {
 	usersApi := api.Group("/users")
-	usersAdminApi := usersApi.Group("/admin")
 
-	//usersAdminApi.Use(m.middleware.CheckAccessToken())
-
-	usersAdminApi.POST("/basic", utils.JsonHandler(m.userAdminHandler.CreateBasicUser))
+	usersApi.POST("/basic", utils.JsonHandler(m.userAdminHandler.CreateBasicUser))
 }
