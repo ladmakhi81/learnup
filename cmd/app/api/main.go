@@ -19,6 +19,8 @@ import (
 	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
+	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
+	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
 	tusHookHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
@@ -99,6 +101,7 @@ func main() {
 	userRepo := userRepository.NewUserRepoImpl(dbClient)
 	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
 	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
+	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -106,13 +109,14 @@ func main() {
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
-	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
+	notificationSvc := notificationService.NewNotificationServiceImpl(notificationRepo, userSvc)
+	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
 	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo)
+	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc)
 
 	// middlewares

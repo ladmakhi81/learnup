@@ -14,6 +14,7 @@ type CourseRepo interface {
 	GetCoursesCount() (int, error)
 	FindById(id uint) (*entity.Course, error)
 	FindDetailById(id uint) (*entity.Course, error)
+	FindByVideoId(id uint) (*entity.Course, error)
 }
 
 type CourseRepoImpl struct {
@@ -93,5 +94,22 @@ func (repo CourseRepoImpl) FindDetailById(id uint) (*entity.Course, error) {
 		}
 		return nil, tx.Error
 	}
+	return course, nil
+}
+
+func (repo CourseRepoImpl) FindByVideoId(id uint) (*entity.Course, error) {
+	course := &entity.Course{}
+	tx := repo.dbClient.Core.
+		Joins("JOIN _videos ON _courses.id = _videos.course_id").
+		Where("_videos.id = ?", id).
+		First(course)
+
+	if tx.Error != nil {
+		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, tx.Error
+	}
+
 	return course, nil
 }
