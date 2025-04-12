@@ -102,6 +102,7 @@ definitions:
         minLength: 20
         type: string
       price:
+        minimum: 0
         type: number
       tags:
         items:
@@ -390,6 +391,25 @@ definitions:
     - CourseStatus_Done
     - CourseStatus_Pause
     - CourseStatus_Cancel
+  github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem:
+    properties:
+      isSeen:
+        type: boolean
+      metadata: {}
+      seenAt:
+        type: string
+      type:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.userItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_notification_dto_res.userItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+    type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
       firstName:
@@ -832,6 +852,79 @@ paths:
       summary: Get list of paginated courses
       tags:
       - courses
+  /notifications/admin/{notification-id}/seen:
+    patch:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: notification-id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Mark notification as seen
+      tags:
+      - notifications
+  /notifications/admin/page:
+    get:
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number per page
+        in: query
+        name: pageSize
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      row:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated notifications
+      tags:
+      - notifications
   /users/admin/basic:
     post:
       consumes:

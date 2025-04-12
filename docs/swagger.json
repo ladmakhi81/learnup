@@ -550,6 +550,130 @@
                 }
             }
         },
+        "/notifications/admin/page": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Get paginated notifications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Number per page",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.PaginationRes"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "row": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/notifications/admin/{notification-id}/seen": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Mark notification as seen",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Notification ID",
+                        "name": "notification-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/users/admin/basic": {
             "post": {
                 "security": [
@@ -845,7 +969,8 @@
                     "minLength": 20
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 0
                 },
                 "tags": {
                     "type": "array",
@@ -1258,6 +1383,35 @@
                 "CourseStatus_Pause",
                 "CourseStatus_Cancel"
             ]
+        },
+        "github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem": {
+            "type": "object",
+            "properties": {
+                "isSeen": {
+                    "type": "boolean"
+                },
+                "metadata": {},
+                "seenAt": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.userItem"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_notification_dto_res.userItem": {
+            "type": "object",
+            "properties": {
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
         },
         "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq": {
             "type": "object",

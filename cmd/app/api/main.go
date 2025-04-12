@@ -19,6 +19,8 @@ import (
 	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
+	"github.com/ladmakhi81/learnup/internals/notification"
+	notificationHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
@@ -129,6 +131,7 @@ func main() {
 	courseAdminHandler := courseHandler.NewCourseAdminHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
 	videoAdminHandler := videoHandler.NewVideoAdminHandler(validationSvc, videoSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
+	notificationAdminHandler := notificationHandler.NewNotificationAdminHandler(notificationSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)
@@ -137,6 +140,7 @@ func main() {
 	courseModule := course.NewModule(courseAdminHandler, middlewares)
 	tusModule := tus.NewModule(tusHandler)
 	videoModule := video.NewModule(videoAdminHandler)
+	notificationModule := notification.NewModule(notificationAdminHandler, middlewares)
 
 	// register module
 	userModule.Register(api)
@@ -145,6 +149,7 @@ func main() {
 	courseModule.Register(api)
 	tusModule.Register(api)
 	videoModule.Register(api)
+	notificationModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
