@@ -1,6 +1,7 @@
 package ffmpegv1
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -45,4 +46,24 @@ func (svc FfmpegSvc) EncodeVideo(videoReader io.Reader) (string, error) {
 		return "", fmt.Errorf("Error in encode video by ffmpeg: %s", err.Error())
 	}
 	return tmpDir, nil
+}
+
+func (svc FfmpegSvc) GetVideoDuration(videoReader io.Reader) (string, error) {
+	output, err := ffmpeg.ProbeReader(videoReader, ffmpeg.KwArgs{
+		"v":            "error",
+		"show_entries": "format=duration",
+		"of":           "json",
+	})
+	if err != nil {
+		return "", fmt.Errorf("Error in calculating the video duration: %w", err)
+	}
+	var result struct {
+		Format struct {
+			Duration string `json:"duration"`
+		} `json:"format"`
+	}
+	if err := json.Unmarshal([]byte(output), &result); err != nil {
+		return "", fmt.Errorf("Error in converting result of calculating video duration : %w", err)
+	}
+	return result.Format.Duration, nil
 }
