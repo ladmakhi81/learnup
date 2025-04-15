@@ -5,17 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
+      <change beforePath="$PROJECT_DIR$/.env.example" beforeDir="false" afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_videos_by_course_id.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_videos_by_course_id.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/tus/handler/hook.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/handler/hook.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/tus/service/tus.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/service/tus.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/dto/req/video_course_workflow.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/dto/req/video_course_workflow.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/entity/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/entity/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/env/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/env/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/ffmpeg/contract.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/ffmpeg/contract.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/ffmpeg/v1/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/ffmpeg/v1/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/workflow/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/workflow/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/storage/minio/v7/svc.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/server_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/types/server_error.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +30,7 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file:///snap/go/10866" />
+  <component name="GOROOT" url="file:///snap/go/10888" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -74,6 +75,14 @@
       <recent name="$PROJECT_DIR$/utils" />
       <recent name="$PROJECT_DIR$/utils/x1" />
     </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-d297c17c1fbd-57c114c3cede-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-243.26053.20" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-GO-243.26053.20" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">

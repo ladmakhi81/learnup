@@ -158,7 +158,9 @@ func main() {
 		videoWorkflowSvc.VideoCourseWorkflow,
 		videoSvc.CalculateDuration,
 		videoSvc.Encode,
-		videoSvc.AttachSubtitle,
+		videoSvc.UpdateURLAndDuration,
+		notificationSvc.Create,
+		videoSvc.CreateCompleteUploadVideoNotification,
 	); err != nil {
 		log.Printf("Error in add worker: %+v", err)
 	}

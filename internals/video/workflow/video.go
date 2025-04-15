@@ -1,15 +1,15 @@
 package workflow
 
 import (
-	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
+	videoDtoReq "github.com/ladmakhi81/learnup/internals/video/dto/req"
+	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/temporal"
 	"go.temporal.io/sdk/workflow"
-	"log"
 )
 
 type VideoWorkflow interface {
-	VideoCourseWorkflow(ctx workflow.Context, dto dtoreq.VideoCourseWorkflowDto) error
+	VideoCourseWorkflow(ctx workflow.Context, dto videoDtoReq.VideoCourseWorkflowDto) error
 }
 
 type VideoWorkflowImpl struct {
@@ -27,8 +27,9 @@ func NewVideoWorkflowImpl(
 	}
 }
 
-func (svc VideoWorkflowImpl) VideoCourseWorkflow(ctx workflow.Context, dto dtoreq.VideoCourseWorkflowDto) error {
-	calculateDurationDto := dtoreq.CalculateVideoDurationReq{
+func (svc VideoWorkflowImpl) VideoCourseWorkflow(ctx workflow.Context, dto videoDtoReq.VideoCourseWorkflowDto) error {
+	// calculate duration
+	calculateDurationDto := videoDtoReq.CalculateVideoDurationReq{
 		ObjectId: dto.ObjectID,
 	}
 	var videoDuration string
@@ -36,15 +37,31 @@ func (svc VideoWorkflowImpl) VideoCourseWorkflow(ctx workflow.Context, dto dtore
 	if calculateDurationErr != nil {
 		return calculateDurationErr
 	}
-	attachSubtitleErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.AttachSubtitle, map[string]any{}, nil)
-	if attachSubtitleErr != nil {
-		return attachSubtitleErr
+	// encode
+	var videoURL string
+	encodeVideoDto := videoDtoReq.EncodeVideoReq{
+		ObjectId: dto.ObjectID,
 	}
-	encodeErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.Encode, map[string]any{}, nil)
+	encodeErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.Encode, encodeVideoDto, &videoURL)
 	if encodeErr != nil {
 		return encodeErr
 	}
+	// update url and duration
+	var video *videoEntity.Video
+	updateVideoDto := videoDtoReq.UpdateURLAndDurationVideoReq{
+		Duration: videoDuration,
+		URL:      videoURL,
+		ID:       dto.VideoID,
+	}
+	updateErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.UpdateURLAndDuration, updateVideoDto, &video)
+	if updateErr != nil {
+		return updateErr
+	}
 
-	log.Println("video duration: ", videoDuration)
+	// teacher notification
+	teacherNotificationErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.CreateCompleteUploadVideoNotification, video.ID, nil)
+	if teacherNotificationErr != nil {
+		return teacherNotificationErr
+	}
 	return nil
 }

@@ -29,11 +29,10 @@ type VideoService interface {
 	FindByTitle(title string) (*videoEntity.Video, error)
 	IsVideoTitleExist(title string) (bool, error)
 	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
-	UpdateVideoURL(id uint, url string) (*videoEntity.Video, error)
+	UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*videoEntity.Video, error)
 	FindById(id uint) (*videoEntity.Video, error)
 	CreateCompleteUploadVideoNotification(videoID uint) error
-	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) error
-	AttachSubtitle() error
+	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error)
 	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error)
 }
 
@@ -164,15 +163,16 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.
 	return videos, nil
 }
 
-func (svc VideoServiceImpl) UpdateVideoURL(id uint, url string) (*videoEntity.Video, error) {
-	video, videoErr := svc.FindById(id)
+func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*videoEntity.Video, error) {
+	video, videoErr := svc.FindById(dto.ID)
 	if videoErr != nil {
 		return nil, videoErr
 	}
 	if video == nil {
 		return nil, types.NewNotFoundError(svc.translationSvc.Translate("video.errors.not_found"))
 	}
-	video.URL = url
+	video.URL = dto.URL
+	video.Duration = &dto.Duration
 	video.Status = videoEntity.VideoStatus_Done
 	if err := svc.videoRepo.Update(video); err != nil {
 		return nil, types.NewServerError(
@@ -228,17 +228,12 @@ func (svc VideoServiceImpl) CalculateDuration(ctx context.Context, dto dtoreq.Ca
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds), nil
 }
 
-func (svc VideoServiceImpl) AttachSubtitle() error {
-	log.Println("attach subtitle function execute")
-	return nil
-}
-
-func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) error {
+func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error) {
 	log.Println("encode function execute")
 	// encode
 	file, fileErr := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
 	if fileErr != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in get file from minio",
 			"VideoServiceImpl.Encode",
 			fileErr,
@@ -246,7 +241,7 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 	}
 	storeLocation, storeLocationErr := svc.ffmpegSvc.EncodeVideo(file)
 	if storeLocationErr != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in encoding video file",
 			"VideoServiceImpl.Encode",
 			storeLocationErr,
@@ -256,7 +251,7 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 	// move from local to minio
 	dirFiles, dirErr := os.ReadDir(storeLocation)
 	if dirErr != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in finding directories of encoded files",
 			"VideoServiceImpl.Encode",
 			dirErr,
@@ -270,7 +265,7 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 	for _, dirFile := range dirFiles {
 		file, fileErr := os.ReadFile(path.Join(storeLocation, dirFile.Name()))
 		if fileErr != nil {
-			return types.NewServerError(
+			return "", types.NewServerError(
 				"Error in finding file of directories of encoded files",
 				"VideoServiceImpl.Encode",
 				fileErr,
@@ -285,7 +280,7 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 			currentContentType,
 			file,
 		); err != nil {
-			return types.NewServerError(
+			return "", types.NewServerError(
 				"Error in storing encoded video into storage",
 				"VideoServiceImpl.Encode",
 				err,
@@ -295,25 +290,25 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 
 	// remove unused files
 	if err := os.RemoveAll(storeLocation); err != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in deleting file from disk",
 			"VideoServiceImpl.EncodeVideoWithObjectID",
 			err,
 		)
 	}
-	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", objectId); err != nil {
-		return types.NewServerError(
+	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", dto.ObjectId); err != nil {
+		return "", types.NewServerError(
 			"Error in deleting file from minio",
 			"VideoServiceImpl.EncodeVideoWithObjectID",
 			err,
 		)
 	}
-	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", fmt.Sprintf("%s.info", objectId)); err != nil {
-		return types.NewServerError(
+	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", fmt.Sprintf("%s.info", dto.ObjectId)); err != nil {
+		return "", types.NewServerError(
 			"Error in deleting file from minio",
 			"VideoServiceImpl.EncodeVideoWithObjectID",
 			err,
 		)
 	}
-	return nil
+	return encodedFilePath, nil
 }

@@ -20,7 +20,7 @@ type Video struct {
 	VerifiedDate *time.Time           `gorm:"column:verified_date;type:timestamp;"`
 	VerifiedById *uint                `gorm:"column:verified_by_id;type:int;index;"`
 	VerifiedBy   *userEntity.User     `gorm:"foreignKey:verified_by_id;"`
-	Duration     *float64             `gorm:"column:duration;type:decimal(10,2);"`
+	Duration     *string              `gorm:"column:duration;type:text;"`
 	Status       VideoStatus          `gorm:"column:status;type:varchar(255);"`
 	URL          string               `gorm:"column:video_url;type:text;"`
 }

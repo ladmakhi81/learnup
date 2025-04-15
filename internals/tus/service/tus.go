@@ -39,15 +39,22 @@ func NewTusServiceImpl(
 func (tus *TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO) {
 	objectId, objectIdExist := dto.Event.Upload.Storage["Key"]
 	courseIdParam, courseIdExist := dto.Event.Upload.MetaData["courseId"]
-	courseId, courseIdErr := strconv.Atoi(courseIdParam.(string))
-	if courseIdErr != nil {
-		tus.logSvc.Error(logger.LogMessage{Message: "Error in converting course id"})
-		return
-	}
-	if objectIdExist && courseIdExist {
+	videoIdParam, videoIdExist := dto.Event.Upload.MetaData["videoId"]
+	if objectIdExist && courseIdExist && videoIdExist {
+		courseId, courseIdErr := strconv.Atoi(courseIdParam.(string))
+		if courseIdErr != nil {
+			tus.logSvc.Error(logger.LogMessage{Message: "Error in converting course id"})
+			return
+		}
+		videoId, videoIdErr := strconv.Atoi(videoIdParam.(string))
+		if videoIdErr != nil {
+			tus.logSvc.Error(logger.LogMessage{Message: "Error in converting video id"})
+			return
+		}
 		workflowDto := dtoreq.VideoCourseWorkflowDto{
 			CourseID: uint(courseId),
 			ObjectID: objectId.(string),
+			VideoID:  uint(videoId),
 		}
 		workflowErr := tus.temporalSvc.ExecuteWorker(
 			ctx,
