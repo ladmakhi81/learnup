@@ -18,7 +18,7 @@ type videosItem struct {
 	Title        string                       `json:"title"`
 	Description  string                       `json:"description"`
 	AccessLevel  videoEntity.VideoAccessLevel `json:"accessLevel"`
-	Duration     *float64                     `json:"duration"`
+	Duration     *string                      `json:"duration"`
 	URL          string                       `json:"url"`
 	IsPublished  bool                         `json:"isPublished"`
 	IsVerified   bool                         `json:"isVerified"`

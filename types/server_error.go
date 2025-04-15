@@ -7,7 +7,7 @@ type ServerError struct {
 }
 
 func (e ServerError) Error() string {
-	return e.Message
+	return e.Message + " - " + e.MainErr.Error()
 }
 
 func NewServerError(message string, location string, mainErr error) *ServerError {

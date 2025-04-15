@@ -3,6 +3,7 @@ package miniov7
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/ladmakhi81/learnup/pkg/storage"
 	"github.com/minio/minio-go/v7"
 	"io"
@@ -30,7 +31,7 @@ func (svc MinioClientSvc) BucketExist(
 	exist, err := svc.minio.BucketExists(ctx, bucketName)
 	if err != nil {
 		return false, storage.NewStorageError(
-			"Error: bucket exist checking error",
+			fmt.Sprintf("Error: bucket exist checking error - %s", err.Error()),
 			"MinioClientSvc.BucketExist",
 		)
 	}

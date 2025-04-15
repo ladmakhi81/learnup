@@ -34,12 +34,15 @@ import (
 	videoHandler "github.com/ladmakhi81/learnup/internals/video/handler"
 	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
+	"github.com/ladmakhi81/learnup/internals/video/workflow"
 	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/env"
 	"github.com/ladmakhi81/learnup/pkg/env/koanf"
 	ffmpegv1 "github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
 	logrusv1 "github.com/ladmakhi81/learnup/pkg/logger/logrus/v1"
 	miniov7 "github.com/ladmakhi81/learnup/pkg/storage/minio/v7"
+	"github.com/ladmakhi81/learnup/pkg/temporal"
+	temporalv1 "github.com/ladmakhi81/learnup/pkg/temporal/v1"
 	jwtv5 "github.com/ladmakhi81/learnup/pkg/token/jwt/v5"
 	i18nv2 "github.com/ladmakhi81/learnup/pkg/translations/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
@@ -68,6 +71,12 @@ func main() {
 	config, configErr := koanfConfigProvider.LoadLearnUp()
 	if configErr != nil {
 		log.Fatalf("load learn up config failed: %v", configErr)
+	}
+
+	// temporal
+	temporalSvc := temporalv1.NewTemporalSvc(config)
+	if err := temporalSvc.Init(); err != nil {
+		log.Fatalf("temporal throw error: %v", err)
 	}
 
 	// minio
@@ -119,7 +128,8 @@ func main() {
 	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
 	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc)
-	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc)
+	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc)
+	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -141,6 +151,19 @@ func main() {
 	tusModule := tus.NewModule(tusHandler)
 	videoModule := video.NewModule(videoAdminHandler)
 	notificationModule := notification.NewModule(notificationAdminHandler, middlewares)
+
+	// workers
+	if err := temporalSvc.AddWorker(
+		temporal.COURSE_VIDEO_QUEUE,
+		videoWorkflowSvc.VideoCourseWorkflow,
+		videoSvc.CalculateDuration,
+		videoSvc.Encode,
+		videoSvc.UpdateURLAndDuration,
+		notificationSvc.Create,
+		videoSvc.CreateCompleteUploadVideoNotification,
+	); err != nil {
+		log.Printf("Error in add worker: %+v", err)
+	}
 
 	// register module
 	userModule.Register(api)

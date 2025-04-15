@@ -83,10 +83,53 @@ services:
       LEARNUP_APP__PORT: ${APP_PORT}
       LEARNUP_APP__TOKEN_SECRET_KEY: ${APP_TOKEN_SECRET_KEY}
       LEARNUP_APP__OPENAI_KEY: ${APP_OPENAI_KEY}
+      # temporal
+      LEARNUP_TEMPORAL__PORT: ${TEMPORAL_PORT}
+      LEARNUP_TEMPORAL__HOST: ${TEMPORAL_HOST}
+      LEARNUP_TEMPORAL__ENDPOINT: ${TEMPORAL_ENDPOINT}
     networks:
       - learnup_network
     volumes:
       - ./log:/app/log
+  #
+  temporal:
+    image: temporalio/auto-setup:1.20.0
+    environment:
+      DB: postgresql
+      DB_PORT: ${MAIN_DB_PORT}
+      POSTGRES_USER: ${MAIN_DB_USERNAME}
+      POSTGRES_PWD: ${MAIN_DB_PASSWORD}
+      POSTGRES_SEEDS: db
+      TEMPORAL_CLI_ADDRESS: ${TEMPORAL_ENDPOINT}
+    ports:
+      - "7233:7233"
+    depends_on:
+      - db
+    networks:
+      - learnup_network
+  #
+  temporal-admin-tools:
+    image: temporalio/admin-tools:1.20.0
+    stdin_open: true
+    tty: true
+    depends_on:
+      - temporal
+    environment:
+      TEMPORAL_CLI_ADDRESS: ${TEMPORAL_ENDPOINT}
+    networks:
+      - learnup_network
+  #
+  temporal-ui:
+    image: temporalio/ui:latest
+    ports:
+      - "9090:9090"
+    environment:
+      TEMPORAL_ADDRESS: ${TEMPORAL_ENDPOINT}
+      TEMPORAL_UI_PORT: 9090
+    depends_on:
+      - temporal
+    networks:
+      - learnup_network
 
 networks:
   learnup_network:

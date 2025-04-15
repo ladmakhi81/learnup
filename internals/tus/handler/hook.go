@@ -29,8 +29,7 @@ func (h TusHookHandler) VideoWebhook(ctx *gin.Context) (*types.ApiResponse, erro
 	}
 	switch dto.Type {
 	case reqdto.TusHookType_PostFinish:
-		go h.tusHookSvc.VideoWebhook(*dto)
-
+		go h.tusHookSvc.VideoWebhook(ctx, *dto)
 	}
 	return types.NewApiResponse(http.StatusOK, gin.H{"message": "hook received"}), nil
 }
