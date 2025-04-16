@@ -15,6 +15,7 @@ type CourseRepo interface {
 	FetchById(id uint) (*entities.Course, error)
 	FetchDetailById(id uint) (*entities.Course, error)
 	FetchByVideoId(id uint) (*entities.Course, error)
+	Update(course *entities.Course) error
 }
 
 type CourseRepoImpl struct {
@@ -112,4 +113,9 @@ func (repo CourseRepoImpl) FetchByVideoId(id uint) (*entities.Course, error) {
 	}
 
 	return course, nil
+}
+
+func (repo CourseRepoImpl) Update(course *entities.Course) error {
+	tx := repo.dbClient.Core.Updates(course)
+	return tx.Error
 }

@@ -20,6 +20,7 @@ type CourseService interface {
 	FindById(id uint) (*entities.Course, error)
 	FindDetailById(id uint) (*entities.Course, error)
 	FindByVideoId(id uint) (*entities.Course, error)
+	VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error
 }
 
 type CourseServiceImpl struct {
@@ -196,4 +197,64 @@ func (svc CourseServiceImpl) FindByVideoId(id uint) (*entities.Course, error) {
 		)
 	}
 	return course, nil
+}
+
+func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error {
+	course, courseErr := svc.FindById(dto.ID)
+	if courseErr != nil {
+		return courseErr
+	}
+	if course == nil {
+		return types.NewNotFoundError(
+			svc.translateSvc.Translate(
+				"course.errors.not_found",
+			),
+		)
+	}
+	if course.Status != entities.CourseStatus_InProgress {
+		return types.NewBadRequestError(
+			svc.translateSvc.Translate("course.errors.unable_to_verify"),
+		)
+	}
+	adminClaim := authContext.(*types.TokenClaim)
+	admin, adminErr := svc.userSvc.FindById(adminClaim.UserID)
+	if adminErr != nil {
+		return adminErr
+	}
+	if admin == nil {
+		return types.NewNotFoundError(
+			svc.translateSvc.Translate("user.errors.admin_not_found"),
+		)
+	}
+	if dto.Fee > course.Price || dto.Fee < 0 || dto.Fee > course.Price-course.MaxDiscountAmount {
+		return types.NewBadRequestError(
+			svc.translateSvc.Translate("course.errors.invalid_fee"),
+		)
+	}
+	if dto.DiscountFeeAmountPercentage > 100 {
+		return types.NewBadRequestError(
+			svc.translateSvc.Translate("course.errors.invalid_max_discount_percentage"),
+		)
+	}
+	now := time.Now()
+	course.Fee = dto.Fee
+	if course.CanHaveDiscount {
+		course.DiscountFeeAmountPercentage = dto.DiscountFeeAmountPercentage
+	}
+	course.Status = entities.CourseStatus_Verified
+	course.StatusChangedAt = &now
+	course.VerifiedByID = &admin.ID
+	course.VerifiedDate = &now
+	course.IsVerifiedByAdmin = true
+	if err := svc.courseRepo.Update(course); err != nil {
+		return types.NewServerError(
+			"Error in verifying the course by admin",
+			"CourseServiceImpl.VerifyCourse",
+			err,
+		)
+	}
+	//TODO: notification system
+	// create notification for teacher that course verified
+	// send email for this notification
+	return nil
 }

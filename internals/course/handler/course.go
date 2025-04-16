@@ -179,3 +179,45 @@ func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 	courseRes := dtores.NewGetCourseByIdRes(course)
 	return types.NewApiResponse(http.StatusOK, courseRes), nil
 }
+
+// VerifyCourse godoc
+//
+//	@Summary	Verify a course
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		course-id	path		int						true	"Course ID"
+//	@Param		request		body		dtoreq.VerifyCourseReq	true	" "
+//	@Success	200			{object}	types.ApiResponse
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	401			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/{course-id}/verify [patch]
+//
+//	@Security	BearerAuth
+func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseIdParam := ctx.Param("course-id")
+	courseId, courseIdErr := strconv.Atoi(courseIdParam)
+	if courseIdErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("course.errors.invalid_course_id"),
+		)
+	}
+	dto := &dtoreq.VerifyCourseReq{
+		ID: uint(courseId),
+	}
+	if err := ctx.Bind(dto); err != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("common.errors.invalid_request_body"),
+		)
+	}
+	if err := h.validationSvc.Validate(dto); err != nil {
+		return nil, err
+	}
+	authContext, _ := ctx.Get("AUTH")
+	if err := h.courseSvc.VerifyCourse(authContext, *dto); err != nil {
+		return nil, err
+	}
+	return types.NewApiResponse(http.StatusOK, nil), nil
+}
