@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"github.com/ladmakhi81/learnup/pkg/env"
+	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"time"
@@ -10,10 +10,10 @@ import (
 
 type Database struct {
 	Core   *gorm.DB
-	config *env.EnvConfig
+	config *dtos.EnvConfig
 }
 
-func NewDatabase(config *env.EnvConfig) *Database {
+func NewDatabase(config *dtos.EnvConfig) *Database {
 	return &Database{
 		config: config,
 	}

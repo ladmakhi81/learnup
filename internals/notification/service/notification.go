@@ -1,11 +1,11 @@
 package service
 
 import (
+	notificationEntity "github.com/ladmakhi81/learnup/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/notification/dto/req"
-	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
 	"github.com/ladmakhi81/learnup/internals/notification/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"time"
 )
@@ -21,13 +21,13 @@ type NotificationService interface {
 type NotificationServiceImpl struct {
 	notificationRepo repo.NotificationRepo
 	userSvc          userService.UserSvc
-	translationSvc   translations.Translator
+	translationSvc   contracts.Translator
 }
 
 func NewNotificationServiceImpl(
 	notificationRepo repo.NotificationRepo,
 	userSvc userService.UserSvc,
-	translationSvc translations.Translator,
+	translationSvc contracts.Translator,
 ) *NotificationServiceImpl {
 	return &NotificationServiceImpl{
 		userSvc:          userSvc,

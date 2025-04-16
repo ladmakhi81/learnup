@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 	"github.com/ladmakhi81/learnup/db"
-	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
+	notificationEntity "github.com/ladmakhi81/learnup/db/entities"
 	"gorm.io/gorm"
 )
 

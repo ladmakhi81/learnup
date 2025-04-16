@@ -6,7 +6,8 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
-	"github.com/ladmakhi81/learnup/pkg/logger"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
+	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/pkg/temporal"
 	"strconv"
 )
@@ -17,15 +18,15 @@ type TusService interface {
 
 type TusServiceImpl struct {
 	videoSvc         videoService.VideoService
-	logSvc           logger.Log
-	temporalSvc      temporal.Temporal
+	logSvc           contracts.Log
+	temporalSvc      contracts.Temporal
 	videoWorkflowSvc workflow.VideoWorkflow
 }
 
 func NewTusServiceImpl(
 	videoSvc videoService.VideoService,
-	logSvc logger.Log,
-	temporalSvc temporal.Temporal,
+	logSvc contracts.Log,
+	temporalSvc contracts.Temporal,
 	videoWorkflowSvc workflow.VideoWorkflow,
 ) *TusServiceImpl {
 	return &TusServiceImpl{
@@ -43,12 +44,12 @@ func (tus *TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebho
 	if objectIdExist && courseIdExist && videoIdExist {
 		courseId, courseIdErr := strconv.Atoi(courseIdParam.(string))
 		if courseIdErr != nil {
-			tus.logSvc.Error(logger.LogMessage{Message: "Error in converting course id"})
+			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting course id"})
 			return
 		}
 		videoId, videoIdErr := strconv.Atoi(videoIdParam.(string))
 		if videoIdErr != nil {
-			tus.logSvc.Error(logger.LogMessage{Message: "Error in converting video id"})
+			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting video id"})
 			return
 		}
 		workflowDto := dtoreq.VideoCourseWorkflowDto{
@@ -64,7 +65,7 @@ func (tus *TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebho
 		)
 
 		if workflowErr != nil {
-			tus.logSvc.Error(logger.LogMessage{
+			tus.logSvc.Error(dtos.LogMessage{
 				Message: "Error happen in workflow of video workflow svc",
 				Metadata: map[string]any{
 					"error": workflowErr,

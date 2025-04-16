@@ -35,17 +35,17 @@ import (
 	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
-	redisv6 "github.com/ladmakhi81/learnup/pkg/cache/redis/v6"
-	"github.com/ladmakhi81/learnup/pkg/env"
-	"github.com/ladmakhi81/learnup/pkg/env/koanf"
-	ffmpegv1 "github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
-	logrusv1 "github.com/ladmakhi81/learnup/pkg/logger/logrus/v1"
-	miniov7 "github.com/ladmakhi81/learnup/pkg/storage/minio/v7"
+	"github.com/ladmakhi81/learnup/pkg/dtos"
+	"github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
+	"github.com/ladmakhi81/learnup/pkg/i18n/v2"
+	"github.com/ladmakhi81/learnup/pkg/jwt/v5"
+	"github.com/ladmakhi81/learnup/pkg/koanf"
+	"github.com/ladmakhi81/learnup/pkg/logrus/v1"
+	"github.com/ladmakhi81/learnup/pkg/minio/v7"
+	"github.com/ladmakhi81/learnup/pkg/redis/v6"
 	"github.com/ladmakhi81/learnup/pkg/temporal"
-	temporalv1 "github.com/ladmakhi81/learnup/pkg/temporal/v1"
-	jwtv5 "github.com/ladmakhi81/learnup/pkg/token/jwt/v5"
-	i18nv2 "github.com/ladmakhi81/learnup/pkg/translations/i18n/v2"
-	"github.com/ladmakhi81/learnup/pkg/validation/validator/v10"
+	"github.com/ladmakhi81/learnup/pkg/temporal/v1"
+	"github.com/ladmakhi81/learnup/pkg/validator/v10"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -180,7 +180,7 @@ func main() {
 	log.Fatalln(server.Run(port))
 }
 
-func SetupMinio(config *env.EnvConfig) (*minio.Client, error) {
+func SetupMinio(config *dtos.EnvConfig) (*minio.Client, error) {
 	endpoint := config.Minio.URL
 	accessKey := config.Minio.AccessKey
 	secretKey := config.Minio.SecretKey
@@ -192,7 +192,7 @@ func SetupMinio(config *env.EnvConfig) (*minio.Client, error) {
 	})
 }
 
-func SetupRedis(config *env.EnvConfig) *redis.Client {
+func SetupRedis(config *dtos.EnvConfig) *redis.Client {
 	host := config.Redis.Host
 	port := config.Redis.Port
 	return redis.NewClient(&redis.Options{

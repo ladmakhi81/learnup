@@ -1,37 +1,37 @@
 package service
 
 import (
+	"github.com/ladmakhi81/learnup/db/entities"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/course/dto/req"
-	"github.com/ladmakhi81/learnup/internals/course/entity"
 	"github.com/ladmakhi81/learnup/internals/course/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"time"
 )
 
 type CourseService interface {
-	Create(authContext any, dto dtoreq.CreateCourseReq) (*entity.Course, error)
-	FindByName(name string) (*entity.Course, error)
+	Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error)
+	FindByName(name string) (*entities.Course, error)
 	IsCourseNameExist(name string) (bool, error)
-	GetCourses(page, pageSize int) ([]*entity.Course, error)
+	GetCourses(page, pageSize int) ([]*entities.Course, error)
 	GetCoursesCount() (int, error)
-	FindById(id uint) (*entity.Course, error)
-	FindDetailById(id uint) (*entity.Course, error)
-	FindByVideoId(id uint) (*entity.Course, error)
+	FindById(id uint) (*entities.Course, error)
+	FindDetailById(id uint) (*entities.Course, error)
+	FindByVideoId(id uint) (*entities.Course, error)
 }
 
 type CourseServiceImpl struct {
 	courseRepo   repo.CourseRepo
 	categorySvc  categoryService.CategoryService
 	userSvc      userService.UserSvc
-	translateSvc translations.Translator
+	translateSvc contracts.Translator
 }
 
 func NewCourseServiceImpl(
 	courseRepo repo.CourseRepo,
-	translateSvc translations.Translator,
+	translateSvc contracts.Translator,
 	userSvc userService.UserSvc,
 	categorySvc categoryService.CategoryService,
 ) *CourseServiceImpl {
@@ -43,7 +43,7 @@ func NewCourseServiceImpl(
 	}
 }
 
-func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq) (*entity.Course, error) {
+func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
 	isCourseNameDuplicated, courseNameDuplicatedErr := svc.IsCourseNameExist(dto.Name)
 	if courseNameDuplicatedErr != nil {
 		return nil, courseNameDuplicatedErr
@@ -74,7 +74,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 	}
 
 	verifiedDate := time.Now()
-	course := &entity.Course{
+	course := &entities.Course{
 		CategoryID:                  &category.ID,
 		Name:                        dto.Name,
 		AbilityToAddComment:         dto.AbilityToAddComment,
@@ -89,7 +89,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 		Level:                       dto.Level,
 		MaxDiscountAmount:           dto.MaxDiscountAmount,
 		Prerequisite:                dto.Prerequisite,
-		Status:                      entity.CourseStatus_Starting,
+		Status:                      entities.CourseStatus_Starting,
 		Tags:                        dto.Tags,
 		TeacherID:                   &teacher.ID,
 		ThumbnailImage:              dto.ThumbnailImage,
@@ -112,7 +112,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 	return course, nil
 }
 
-func (svc CourseServiceImpl) FindByName(name string) (*entity.Course, error) {
+func (svc CourseServiceImpl) FindByName(name string) (*entities.Course, error) {
 	course, courseErr := svc.courseRepo.FetchByName(name)
 	if courseErr != nil {
 		return nil, types.NewServerError(
@@ -138,7 +138,7 @@ func (svc CourseServiceImpl) IsCourseNameExist(name string) (bool, error) {
 	return true, nil
 }
 
-func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entity.Course, error) {
+func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course, error) {
 	courses, coursesErr := svc.courseRepo.FetchPage(page, pageSize)
 	if coursesErr != nil {
 		return nil, types.NewServerError(
@@ -162,7 +162,7 @@ func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
 	return count, nil
 }
 
-func (svc CourseServiceImpl) FindById(id uint) (*entity.Course, error) {
+func (svc CourseServiceImpl) FindById(id uint) (*entities.Course, error) {
 	course, courseErr := svc.courseRepo.FetchById(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(
@@ -174,7 +174,7 @@ func (svc CourseServiceImpl) FindById(id uint) (*entity.Course, error) {
 	return course, nil
 }
 
-func (svc CourseServiceImpl) FindDetailById(id uint) (*entity.Course, error) {
+func (svc CourseServiceImpl) FindDetailById(id uint) (*entities.Course, error) {
 	course, courseErr := svc.courseRepo.FetchDetailById(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(
@@ -186,7 +186,7 @@ func (svc CourseServiceImpl) FindDetailById(id uint) (*entity.Course, error) {
 	return course, nil
 }
 
-func (svc CourseServiceImpl) FindByVideoId(id uint) (*entity.Course, error) {
+func (svc CourseServiceImpl) FindByVideoId(id uint) (*entities.Course, error) {
 	course, courseErr := svc.courseRepo.FetchByVideoId(id)
 	if courseErr != nil {
 		return nil, types.NewServerError(

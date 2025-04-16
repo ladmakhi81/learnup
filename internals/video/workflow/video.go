@@ -1,10 +1,10 @@
 package workflow
 
 import (
+	videoEntity "github.com/ladmakhi81/learnup/db/entities"
 	videoDtoReq "github.com/ladmakhi81/learnup/internals/video/dto/req"
-	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
-	"github.com/ladmakhi81/learnup/pkg/temporal"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"go.temporal.io/sdk/workflow"
 )
 
@@ -14,12 +14,12 @@ type VideoWorkflow interface {
 
 type VideoWorkflowImpl struct {
 	videoSvc    videoService.VideoService
-	temporalSvc temporal.Temporal
+	temporalSvc contracts.Temporal
 }
 
 func NewVideoWorkflowImpl(
 	videoSvc videoService.VideoService,
-	temporal temporal.Temporal,
+	temporal contracts.Temporal,
 ) *VideoWorkflowImpl {
 	return &VideoWorkflowImpl{
 		videoSvc:    videoSvc,

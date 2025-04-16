@@ -5,8 +5,7 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/category/dto/res"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
-	"github.com/ladmakhi81/learnup/pkg/validation"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
@@ -15,14 +14,14 @@ import (
 
 type Handler struct {
 	categorySvc    categoryService.CategoryService
-	translationSvc translations.Translator
-	validationSvc  validation.Validation
+	translationSvc contracts.Translator
+	validationSvc  contracts.Validation
 }
 
 func NewHandler(
 	categorySvc categoryService.CategoryService,
-	translationSvc translations.Translator,
-	validationSvc validation.Validation,
+	translationSvc contracts.Translator,
+	validationSvc contracts.Validation,
 ) *Handler {
 	return &Handler{
 		categorySvc:    categorySvc,

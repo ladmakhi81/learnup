@@ -1,6 +1,8 @@
 package dtoreq
 
-import notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
+import (
+	notificationEntity "github.com/ladmakhi81/learnup/db/entities"
+)
 
 type CreateNotificationReq struct {
 	UserID    uint                                `json:"user_id"`

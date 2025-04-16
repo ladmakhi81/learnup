@@ -4,17 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	notificationEntity "github.com/ladmakhi81/learnup/db/entities"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	notificationReqDto "github.com/ladmakhi81/learnup/internals/notification/dto/req"
-	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
-	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
 	"github.com/ladmakhi81/learnup/internals/video/repo"
-	"github.com/ladmakhi81/learnup/pkg/ffmpeg"
-	"github.com/ladmakhi81/learnup/pkg/logger"
-	"github.com/ladmakhi81/learnup/pkg/storage"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"log"
 	"math"
@@ -25,35 +21,35 @@ import (
 )
 
 type VideoService interface {
-	AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity.Video, error)
-	FindByTitle(title string) (*videoEntity.Video, error)
+	AddVideo(dto *dtoreq.AddVideoToCourse) (*notificationEntity.Video, error)
+	FindByTitle(title string) (*notificationEntity.Video, error)
 	IsVideoTitleExist(title string) (bool, error)
-	FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error)
-	UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*videoEntity.Video, error)
-	FindById(id uint) (*videoEntity.Video, error)
+	FindVideosByCourseID(courseID uint) ([]*notificationEntity.Video, error)
+	UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*notificationEntity.Video, error)
+	FindById(id uint) (*notificationEntity.Video, error)
 	CreateCompleteUploadVideoNotification(videoID uint) error
 	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error)
 	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error)
 }
 
 type VideoServiceImpl struct {
-	minioClient     storage.Storage
-	ffmpegSvc       ffmpeg.Ffmpeg
-	logSvc          logger.Log
+	minioClient     contracts.Storage
+	ffmpegSvc       contracts.Ffmpeg
+	logSvc          contracts.Log
 	courseSvc       courseService.CourseService
 	videoRepo       repo.VideoRepo
 	notificationSvc notificationService.NotificationService
-	translationSvc  translations.Translator
+	translationSvc  contracts.Translator
 }
 
 func NewVideoServiceImpl(
-	minioClient storage.Storage,
-	ffmpegSvc ffmpeg.Ffmpeg,
-	logSvc logger.Log,
+	minioClient contracts.Storage,
+	ffmpegSvc contracts.Ffmpeg,
+	logSvc contracts.Log,
 	courseSvc courseService.CourseService,
 	videoRepo repo.VideoRepo,
 	notificationSvc notificationService.NotificationService,
-	translationSvc translations.Translator,
+	translationSvc contracts.Translator,
 ) *VideoServiceImpl {
 	return &VideoServiceImpl{
 		minioClient:     minioClient,
@@ -66,7 +62,7 @@ func NewVideoServiceImpl(
 	}
 }
 
-func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity.Video, error) {
+func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*notificationEntity.Video, error) {
 	isTitleDuplicated, titleDuplicatedErr := svc.IsVideoTitleExist(dto.Title)
 	if titleDuplicatedErr != nil {
 		return nil, titleDuplicatedErr
@@ -81,14 +77,14 @@ func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity
 	if course == nil {
 		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
 	}
-	video := &videoEntity.Video{
+	video := &notificationEntity.Video{
 		Title:       dto.Title,
 		IsPublished: dto.IsPublished,
 		Description: dto.Description,
 		AccessLevel: dto.AccessLevel,
 		CourseId:    &course.ID,
 		IsVerified:  false,
-		Status:      videoEntity.VideoStatus_Pending,
+		Status:      notificationEntity.VideoStatus_Pending,
 	}
 	if err := svc.videoRepo.Create(video); err != nil {
 		return nil, types.NewServerError(
@@ -100,7 +96,7 @@ func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*videoEntity
 	return video, nil
 }
 
-func (svc VideoServiceImpl) FindByTitle(title string) (*videoEntity.Video, error) {
+func (svc VideoServiceImpl) FindByTitle(title string) (*notificationEntity.Video, error) {
 	video, videoErr := svc.videoRepo.FetchByTitle(title)
 	if videoErr != nil {
 		return nil, types.NewServerError(
@@ -144,7 +140,7 @@ func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) 
 	return nil
 }
 
-func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.Video, error) {
+func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*notificationEntity.Video, error) {
 	course, courseErr := svc.courseSvc.FindById(courseID)
 	if courseErr != nil {
 		return nil, courseErr
@@ -163,7 +159,7 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*videoEntity.
 	return videos, nil
 }
 
-func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*videoEntity.Video, error) {
+func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*notificationEntity.Video, error) {
 	video, videoErr := svc.FindById(dto.ID)
 	if videoErr != nil {
 		return nil, videoErr
@@ -173,7 +169,7 @@ func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDuration
 	}
 	video.URL = dto.URL
 	video.Duration = &dto.Duration
-	video.Status = videoEntity.VideoStatus_Done
+	video.Status = notificationEntity.VideoStatus_Done
 	if err := svc.videoRepo.Update(video); err != nil {
 		return nil, types.NewServerError(
 			"Error in updating the video",
@@ -184,7 +180,7 @@ func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDuration
 	return video, nil
 }
 
-func (svc VideoServiceImpl) FindById(id uint) (*videoEntity.Video, error) {
+func (svc VideoServiceImpl) FindById(id uint) (*notificationEntity.Video, error) {
 	video, videoErr := svc.videoRepo.FetchById(id)
 	if videoErr != nil {
 		return nil, types.NewServerError(

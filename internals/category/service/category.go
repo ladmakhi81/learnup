@@ -1,32 +1,32 @@
 package service
 
 import (
+	"github.com/ladmakhi81/learnup/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
-	"github.com/ladmakhi81/learnup/internals/category/entity"
 	"github.com/ladmakhi81/learnup/internals/category/repo"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type CategoryService interface {
-	Create(req dtoreq.CreateCategoryReq) (*entity.Category, error)
+	Create(req dtoreq.CreateCategoryReq) (*entities.Category, error)
 	DeleteById(id uint) error
-	FindByID(id uint) (*entity.Category, error)
-	FindByName(name string) (*entity.Category, error)
+	FindByID(id uint) (*entities.Category, error)
+	FindByName(name string) (*entities.Category, error)
 	IsCategoryNameExist(name string) (bool, error)
-	GetCategoriesTree() ([]*entity.Category, error)
-	GetCategories(page, pageSize int) ([]*entity.Category, error)
+	GetCategoriesTree() ([]*entities.Category, error)
+	GetCategories(page, pageSize int) ([]*entities.Category, error)
 	GetCategoriesCount() (int, error)
 }
 
 type CategoryServiceImpl struct {
 	repo           repo.CategoryRepo
-	translationSvc translations.Translator
+	translationSvc contracts.Translator
 }
 
 func NewCategoryServiceImpl(
 	repo repo.CategoryRepo,
-	translationSvc translations.Translator,
+	translationSvc contracts.Translator,
 ) *CategoryServiceImpl {
 	return &CategoryServiceImpl{
 		repo:           repo,
@@ -34,7 +34,7 @@ func NewCategoryServiceImpl(
 	}
 }
 
-func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entity.Category, error) {
+func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.Category, error) {
 	isDuplicateName, duplicateNameErr := svc.IsCategoryNameExist(dto.Name)
 	if duplicateNameErr != nil {
 		return nil, duplicateNameErr
@@ -57,7 +57,7 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entity.Cat
 			)
 		}
 	}
-	category := &entity.Category{
+	category := &entities.Category{
 		Name:             dto.Name,
 		ParentCategoryID: dto.ParentID,
 	}
@@ -91,7 +91,7 @@ func (svc CategoryServiceImpl) DeleteById(id uint) error {
 	return nil
 }
 
-func (svc CategoryServiceImpl) FindByID(id uint) (*entity.Category, error) {
+func (svc CategoryServiceImpl) FindByID(id uint) (*entities.Category, error) {
 	category, categoryErr := svc.repo.FetchById(id)
 	if categoryErr != nil {
 		return nil, types.NewServerError("Find Category By Id Throw Error",
@@ -102,7 +102,7 @@ func (svc CategoryServiceImpl) FindByID(id uint) (*entity.Category, error) {
 	return category, nil
 }
 
-func (svc CategoryServiceImpl) FindByName(name string) (*entity.Category, error) {
+func (svc CategoryServiceImpl) FindByName(name string) (*entities.Category, error) {
 	category, categoryErr := svc.repo.FetchByName(name)
 	if categoryErr != nil {
 		return nil, types.NewServerError("Find Category By Name Throw Error",
@@ -124,7 +124,7 @@ func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
 	return true, nil
 }
 
-func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*entity.Category, error) {
+func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]*entities.Category, error) {
 	subCategories, subCategoriesErr := svc.repo.FetchChildren(category.ID)
 	if subCategoriesErr != nil {
 		return nil, subCategoriesErr
@@ -139,7 +139,7 @@ func (svc CategoryServiceImpl) getSubCategories(category *entity.Category) ([]*e
 	return subCategories, nil
 }
 
-func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
+func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entities.Category, error) {
 	rootCategories, rootCategoriesErr := svc.repo.FetchRoot()
 	if rootCategoriesErr != nil {
 		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
@@ -147,7 +147,7 @@ func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
 			rootCategoriesErr,
 		)
 	}
-	treeCategories := make([]*entity.Category, len(rootCategories))
+	treeCategories := make([]*entities.Category, len(rootCategories))
 	for rootCategoryIndex, rootCategory := range rootCategories {
 		subCategory, subCategoryErr := svc.getSubCategories(rootCategory)
 		if subCategoryErr != nil {
@@ -159,7 +159,7 @@ func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entity.Category, error) {
 	return treeCategories, nil
 }
 
-func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entity.Category, error) {
+func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entities.Category, error) {
 	categories, categoriesErr := svc.repo.FetchPage(page, pageSize)
 	if categoriesErr != nil {
 		return nil, types.NewServerError("Get Categories List Throw Error",

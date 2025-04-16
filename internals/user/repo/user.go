@@ -3,14 +3,14 @@ package repo
 import (
 	"errors"
 	"github.com/ladmakhi81/learnup/db"
-	"github.com/ladmakhi81/learnup/internals/user/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"gorm.io/gorm"
 )
 
 type UserRepo interface {
-	CreateBasic(user *entity.User) error
-	FetchByPhone(phone string) (*entity.User, error)
-	FetchById(id uint) (*entity.User, error)
+	CreateBasic(user *entities.User) error
+	FetchByPhone(phone string) (*entities.User, error)
+	FetchById(id uint) (*entities.User, error)
 }
 
 type UserRepoImpl struct {
@@ -23,13 +23,13 @@ func NewUserRepoImpl(db *db.Database) *UserRepoImpl {
 	}
 }
 
-func (svc UserRepoImpl) CreateBasic(user *entity.User) error {
+func (svc UserRepoImpl) CreateBasic(user *entities.User) error {
 	tx := svc.db.Core.Create(user)
 	return tx.Error
 }
 
-func (svc UserRepoImpl) FetchByPhone(phone string) (*entity.User, error) {
-	user := new(entity.User)
+func (svc UserRepoImpl) FetchByPhone(phone string) (*entities.User, error) {
+	user := new(entities.User)
 	tx := svc.db.Core.Where("phone_number = ?", phone).First(user)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
@@ -39,8 +39,8 @@ func (svc UserRepoImpl) FetchByPhone(phone string) (*entity.User, error) {
 	return user, nil
 }
 
-func (svc UserRepoImpl) FetchById(id uint) (*entity.User, error) {
-	user := &entity.User{}
+func (svc UserRepoImpl) FetchById(id uint) (*entities.User, error) {
+	user := &entities.User{}
 	tx := svc.db.Core.Where("id = ?", id).First(user)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
