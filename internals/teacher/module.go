@@ -28,4 +28,5 @@ func (m Module) Register(api *gin.RouterGroup) {
 	teacherApi.Use(m.middleware.CheckAccessToken())
 
 	teacherApi.POST("/course", utils.JsonHandler(m.courseHandler.CreateCourse))
+	teacherApi.GET("/courses", utils.JsonHandler(m.courseHandler.FetchCourses))
 }

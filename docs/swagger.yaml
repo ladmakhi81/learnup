@@ -2,20 +2,20 @@ basePath: /api
 definitions:
   entities.CourseStatus:
     enum:
-    - starting
     - in-progress
+    - verified
+    - starting
     - done
     - pause
     - cancel
-    - verified
     type: string
     x-enum-varnames:
-    - CourseStatus_Starting
     - CourseStatus_InProgress
+    - CourseStatus_Verified
+    - CourseStatus_Starting
     - CourseStatus_Done
     - CourseStatus_Pause
     - CourseStatus_Cancel
-    - CourseStatus_Verified
   entities.VideoAccessLevel:
     enum:
     - private
@@ -513,6 +513,21 @@ definitions:
       updatedAt:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
       firstName:
@@ -581,6 +596,14 @@ definitions:
         type: integer
       url:
         type: string
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
     type: object
   types.ApiError:
     properties:
@@ -1096,6 +1119,57 @@ paths:
       security:
       - BearerAuth: []
       summary: Create a new course by teacher
+      tags:
+      - teacher
+  /teacher/courses:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      row:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes'
+                        type: array
+                    type: object
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+      security:
+      - BearerAuth: []
+      summary: Get teacher's courses
       tags:
       - teacher
   /users/basic:

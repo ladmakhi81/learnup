@@ -825,6 +825,94 @@ const docTemplate = `{
                 }
             }
         },
+        "/teacher/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teacher"
+                ],
+                "summary": "Get teacher's courses",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.PaginationRes"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "row": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes"
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/basic": {
             "post": {
                 "security": [
@@ -961,20 +1049,20 @@ const docTemplate = `{
         "entities.CourseStatus": {
             "type": "string",
             "enum": [
-                "starting",
                 "in-progress",
+                "verified",
+                "starting",
                 "done",
                 "pause",
-                "cancel",
-                "verified"
+                "cancel"
             ],
             "x-enum-varnames": [
-                "CourseStatus_Starting",
                 "CourseStatus_InProgress",
+                "CourseStatus_Verified",
+                "CourseStatus_Starting",
                 "CourseStatus_Done",
                 "CourseStatus_Pause",
-                "CourseStatus_Cancel",
-                "CourseStatus_Verified"
+                "CourseStatus_Cancel"
             ]
         },
         "entities.VideoAccessLevel": {
@@ -1703,6 +1791,29 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq": {
             "type": "object",
             "required": [
@@ -1801,6 +1912,18 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
                 }
             }
         },
