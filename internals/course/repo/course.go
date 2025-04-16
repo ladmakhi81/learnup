@@ -7,11 +7,23 @@ import (
 	"gorm.io/gorm"
 )
 
+type FetchPageOption struct {
+	PageSize   *int
+	Page       *int
+	TeacherId  *uint
+	OrderField *string
+	Preloads   []string
+}
+
+type FetchCountOption struct {
+	TeacherId *uint
+}
+
 type CourseRepo interface {
 	Create(course *entities.Course) error
 	FetchByName(name string) (*entities.Course, error)
-	FetchPage(page, pageSize int) ([]*entities.Course, error)
-	FetchCount() (int, error)
+	FetchPage(opt FetchPageOption) ([]*entities.Course, error)
+	FetchCount(opt FetchCountOption) (int, error)
 	FetchById(id uint) (*entities.Course, error)
 	FetchDetailById(id uint) (*entities.Course, error)
 	FetchByVideoId(id uint) (*entities.Course, error)
@@ -44,25 +56,39 @@ func (repo CourseRepoImpl) FetchByName(name string) (*entities.Course, error) {
 	return course, nil
 }
 
-func (repo CourseRepoImpl) FetchPage(page, pageSize int) ([]*entities.Course, error) {
+func (repo CourseRepoImpl) FetchPage(opt FetchPageOption) ([]*entities.Course, error) {
 	var courses []*entities.Course
-	tx := repo.dbClient.Core.
-		Preload("Teacher").
-		Preload("Category").
-		Preload("VerifiedBy").
-		Offset(page * pageSize).
-		Limit(pageSize).
-		Order("created_at desc").
-		Find(&courses)
+	query := repo.dbClient.Core
+	if opt.Preloads != nil && len(opt.Preloads) > 0 {
+		for _, preload := range opt.Preloads {
+			query = query.Preload(preload)
+		}
+	}
+	if opt.TeacherId != nil {
+		query = query.Where("teacher_id = ?", opt.TeacherId)
+	}
+	if opt.Page != nil && opt.PageSize != nil {
+		query = query.Offset((*opt.Page) * (*opt.PageSize)).Limit(*opt.PageSize)
+	}
+	orderField := "created_at desc"
+	if opt.OrderField != nil {
+		orderField = *opt.OrderField
+	}
+
+	tx := query.Order(orderField).Find(&courses)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return courses, nil
 }
 
-func (repo CourseRepoImpl) FetchCount() (int, error) {
+func (repo CourseRepoImpl) FetchCount(opt FetchCountOption) (int, error) {
 	count := int64(0)
-	tx := repo.dbClient.Core.Model(&entities.Course{}).Count(&count)
+	query := repo.dbClient.Core.Model(&entities.Course{})
+	if opt.TeacherId != nil {
+		query = query.Where("teacher_id = ?", opt.TeacherId)
+	}
+	tx := query.Count(&count)
 	if tx.Error != nil {
 		return 0, tx.Error
 	}
@@ -118,4 +144,27 @@ func (repo CourseRepoImpl) FetchByVideoId(id uint) (*entities.Course, error) {
 func (repo CourseRepoImpl) Update(course *entities.Course) error {
 	tx := repo.dbClient.Core.Updates(course)
 	return tx.Error
+}
+
+func (repo CourseRepoImpl) FetchByTeacherId(teacherId uint, page, pageSize int) ([]*entities.Course, error) {
+	var courses []*entities.Course
+	tx := repo.dbClient.Core.
+		Where("teacher_id = ?", teacherId).
+		Order("created_at desc").
+		Offset(page * pageSize).
+		Limit(pageSize).
+		Find(&courses)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return courses, nil
+}
+
+func (repo CourseRepoImpl) FetchCountByTeacherId(teacherId int64) (int, error) {
+	var count int64
+	tx := repo.dbClient.Core.Model(&entities.Course{}).Where("teacher_id = ?", teacherId).Count(&count)
+	if tx.Error != nil {
+		return 0, tx.Error
+	}
+	return int(count), nil
 }

@@ -2,7 +2,8 @@
   "user": {
     "errors": {
       "phone_duplicate": "شماره تماس قبلا ثبت شده است",
-      "admin_not_found": "ادمین با این شناسه یافت نشد"
+      "admin_not_found": "ادمین با این شناسه یافت نشد",
+      "teacher_not_found": "مدرس یافت نشد"
     }
   },
   "auth": {

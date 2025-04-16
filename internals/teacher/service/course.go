@@ -13,6 +13,8 @@ import (
 
 type TeacherCourseService interface {
 	Create(authContext any, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error)
+	FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, error)
+	FetchCountByTeacherId(authContext any) (int, error)
 }
 
 type TeacherCourseServiceImpl struct {
@@ -98,4 +100,54 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 	//send email for creating course
 	//create notification about creating new course for all admin
 	return course, nil
+}
+
+func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, error) {
+	authClaim := authContext.(*types.TokenClaim)
+	teacher, teacherErr := svc.userSvc.FindById(authClaim.UserID)
+	if teacherErr != nil {
+		return nil, teacherErr
+	}
+	if teacher == nil {
+		return nil, types.NewNotFoundError(
+			svc.translationSvc.Translate("user.errors.teacher_not_found"),
+		)
+	}
+	courses, coursesErr := svc.courseRepo.FetchPage(courseRepository.FetchPageOption{
+		Page:      &page,
+		PageSize:  &pageSize,
+		TeacherId: &teacher.ID,
+	})
+	if coursesErr != nil {
+		return nil, types.NewServerError(
+			"Error in fetching courses related to teacher",
+			"TeacherCourseServiceImpl.FetchByTeacherId",
+			coursesErr,
+		)
+	}
+	return courses, nil
+}
+
+func (svc TeacherCourseServiceImpl) FetchCountByTeacherId(authContext any) (int, error) {
+	authClaim := authContext.(*types.TokenClaim)
+	teacher, teacherErr := svc.userSvc.FindById(authClaim.UserID)
+	if teacherErr != nil {
+		return 0, teacherErr
+	}
+	if teacher == nil {
+		return 0, types.NewNotFoundError(
+			svc.translationSvc.Translate("user.errors.teacher_not_found"),
+		)
+	}
+	count, countErr := svc.courseRepo.FetchCount(courseRepository.FetchCountOption{
+		TeacherId: &teacher.ID,
+	})
+	if countErr != nil {
+		return 0, types.NewServerError(
+			"Error in return count of course by teacher id",
+			"FetchCountByTeacherId",
+			countErr,
+		)
+	}
+	return count, nil
 }

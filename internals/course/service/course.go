@@ -140,7 +140,15 @@ func (svc CourseServiceImpl) IsCourseNameExist(name string) (bool, error) {
 }
 
 func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course, error) {
-	courses, coursesErr := svc.courseRepo.FetchPage(page, pageSize)
+	courses, coursesErr := svc.courseRepo.FetchPage(repo.FetchPageOption{
+		PageSize: &pageSize,
+		Page:     &page,
+		Preloads: []string{
+			"Teacher",
+			"Category",
+			"VerifiedBy",
+		},
+	})
 	if coursesErr != nil {
 		return nil, types.NewServerError(
 			"Find All Pageable Courses Throw Error",
@@ -152,7 +160,7 @@ func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course,
 }
 
 func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
-	count, countErr := svc.courseRepo.FetchCount()
+	count, countErr := svc.courseRepo.FetchCount(repo.FetchCountOption{})
 	if countErr != nil {
 		return 0, types.NewServerError(
 			"Get Count Of Courses Throw Error",
