@@ -1,7 +1,8 @@
 {
   "user": {
     "errors": {
-      "phone_duplicate": "شماره تماس قبلا ثبت شده است"
+      "phone_duplicate": "شماره تماس قبلا ثبت شده است",
+      "admin_not_found": "ادمین با این شناسه یافت نشد"
     }
   },
   "auth": {
@@ -23,7 +24,10 @@
       "not_found_category": "دسته بندی انتخاب شده یافت نشد",
       "not_found_teacher": "مدرس مربوط به دوره یافت نشد",
       "invalid_course_id": "شناسه مربوط به دوره نادرست میباشد",
-      "not_found": "دوره ای یافت نشد"
+      "not_found": "دوره ای یافت نشد",
+      "invalid_fee": "سهم سایت از مبلغ دوره نادرست میباشد",
+      "invalid_max_discount_percentage": "درصد سهم سایت از تخفیف نادرست میباشد",
+      "unable_to_verify": "قابلیت وریفای کردن این دوره وجود ندارد"
     }
   },
   "notification": {

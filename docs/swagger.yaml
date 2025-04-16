@@ -1,5 +1,39 @@
 basePath: /api
 definitions:
+  entities.CourseStatus:
+    enum:
+    - starting
+    - in-progress
+    - done
+    - pause
+    - cancel
+    - verified
+    type: string
+    x-enum-varnames:
+    - CourseStatus_Starting
+    - CourseStatus_InProgress
+    - CourseStatus_Done
+    - CourseStatus_Pause
+    - CourseStatus_Cancel
+    - CourseStatus_Verified
+  entities.VideoAccessLevel:
+    enum:
+    - private
+    - public
+    type: string
+    x-enum-varnames:
+    - VideoAccessLevel_Private
+    - VideoAccessLevel_Public
+  entities.VideoStatus:
+    enum:
+    - pending
+    - fail
+    - done
+    type: string
+    x-enum-varnames:
+    - VideoStatus_Pending
+    - VideoStatus_Fail
+    - VideoStatus_Done
   github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq:
     properties:
       password:
@@ -128,6 +162,18 @@ definitions:
     - teacher_id
     - thumbnailImage
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReq:
+    properties:
+      discountFeeAmountPercentage:
+        minimum: 0
+        type: number
+      fee:
+        minimum: 0
+        type: number
+    required:
+    - discountFeeAmountPercentage
+    - fee
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes:
     properties:
       abilityToAddComment:
@@ -139,7 +185,7 @@ definitions:
       commentAccessMode:
         type: string
       courseStatus:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus'
+        $ref: '#/definitions/entities.CourseStatus'
       description:
         type: string
       discountFeeAmountPercentage:
@@ -220,7 +266,7 @@ definitions:
       price:
         type: number
       status:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus'
+        $ref: '#/definitions/entities.CourseStatus'
       statusChangedAt:
         type: string
       tags:
@@ -293,7 +339,7 @@ definitions:
       price:
         type: number
       status:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus'
+        $ref: '#/definitions/entities.CourseStatus'
       statusChangedAt:
         type: string
       teacher:
@@ -351,13 +397,13 @@ definitions:
   github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem:
     properties:
       accessLevel:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel'
+        $ref: '#/definitions/entities.VideoAccessLevel'
       createdAt:
         type: string
       description:
         type: string
       duration:
-        type: number
+        type: string
       id:
         type: integer
       isPublished:
@@ -365,7 +411,7 @@ definitions:
       isVerified:
         type: boolean
       status:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoStatus'
+        $ref: '#/definitions/entities.VideoStatus'
       title:
         type: string
       updatedAt:
@@ -377,20 +423,6 @@ definitions:
       verifiedDate:
         type: string
     type: object
-  github_com_ladmakhi81_learnup_internals_course_entity.CourseStatus:
-    enum:
-    - starting
-    - in-progress
-    - done
-    - pause
-    - cancel
-    type: string
-    x-enum-varnames:
-    - CourseStatus_Starting
-    - CourseStatus_InProgress
-    - CourseStatus_Done
-    - CourseStatus_Pause
-    - CourseStatus_Cancel
   github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem:
     properties:
       isSeen:
@@ -409,6 +441,77 @@ definitions:
         type: string
       id:
         type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReq:
+    properties:
+      abilityToAddComment:
+        type: boolean
+      canHaveDiscount:
+        type: boolean
+      categoryId:
+        type: integer
+      commentAccessMode:
+        enum:
+        - all
+        - students
+        type: string
+      courseLevel:
+        enum:
+        - beginner
+        - pre-intermediate
+        - intermediate
+        - advance
+        type: string
+      description:
+        minLength: 20
+        type: string
+      image:
+        minLength: 10
+        type: string
+      introductionVideo:
+        minLength: 20
+        type: string
+      maxDiscountAmount:
+        minimum: 0
+        type: number
+      name:
+        maxLength: 255
+        minLength: 3
+        type: string
+      prerequisite:
+        minLength: 20
+        type: string
+      price:
+        minimum: 0
+        type: number
+      tags:
+        items:
+          type: string
+        type: array
+      thumbnailImage:
+        minLength: 10
+        type: string
+    required:
+    - abilityToAddComment
+    - canHaveDiscount
+    - categoryId
+    - courseLevel
+    - description
+    - image
+    - introductionVideo
+    - name
+    - prerequisite
+    - price
+    - thumbnailImage
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseRes:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
@@ -448,7 +551,7 @@ definitions:
     properties:
       accessLevel:
         allOf:
-        - $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel'
+        - $ref: '#/definitions/entities.VideoAccessLevel'
         enum:
         - private
         - public
@@ -479,24 +582,6 @@ definitions:
       url:
         type: string
     type: object
-  github_com_ladmakhi81_learnup_internals_video_entity.VideoAccessLevel:
-    enum:
-    - private
-    - public
-    type: string
-    x-enum-varnames:
-    - VideoAccessLevel_Private
-    - VideoAccessLevel_Public
-  github_com_ladmakhi81_learnup_internals_video_entity.VideoStatus:
-    enum:
-    - pending
-    - fail
-    - done
-    type: string
-    x-enum-varnames:
-    - VideoStatus_Pending
-    - VideoStatus_Fail
-    - VideoStatus_Done
   types.ApiError:
     properties:
       message: {}
@@ -775,6 +860,50 @@ paths:
       summary: Get Course by ID
       tags:
       - courses
+  /courses/{course-id}/verify:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Verify a course
+      tags:
+      - courses
   /courses/{course-id}/videos:
     get:
       parameters:
@@ -925,6 +1054,50 @@ paths:
       summary: Get paginated notifications
       tags:
       - notifications
+  /teacher/course:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Create a new course by teacher
+      tags:
+      - teacher
   /users/basic:
     post:
       consumes:

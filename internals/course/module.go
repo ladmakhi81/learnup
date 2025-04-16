@@ -31,4 +31,5 @@ func (m Module) Register(api *gin.RouterGroup) {
 	coursesApi.GET("/page", utils.JsonHandler(m.courseAdminHandler.GetCourses))
 	coursesApi.GET("/:course-id/videos", utils.JsonHandler(m.courseAdminHandler.GetVideosByCourseID))
 	coursesApi.GET("/:course-id", utils.JsonHandler(m.courseAdminHandler.GetCourseById))
+	coursesApi.PATCH("/:course-id/verify", utils.JsonHandler(m.courseAdminHandler.VerifyCourse))
 }

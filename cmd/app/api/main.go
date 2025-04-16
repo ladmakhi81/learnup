@@ -23,6 +23,9 @@ import (
 	notificationHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	"github.com/ladmakhi81/learnup/internals/teacher"
+	teacherCourseHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
+	teacherCourseService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
 	tusHookHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
@@ -130,6 +133,7 @@ func main() {
 	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc)
 	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
+	teacherCourseSvc := teacherCourseService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -142,6 +146,7 @@ func main() {
 	videoAdminHandler := videoHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
 	notificationAdminHandler := notificationHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
+	teacherCourseHandler := teacherCourseHandler.NewHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)
@@ -151,6 +156,7 @@ func main() {
 	tusModule := tus.NewModule(tusHandler)
 	videoModule := video.NewModule(videoAdminHandler)
 	notificationModule := notification.NewModule(notificationAdminHandler, middlewares)
+	teacherModule := teacher.NewModule(teacherCourseHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -173,6 +179,7 @@ func main() {
 	tusModule.Register(api)
 	videoModule.Register(api)
 	notificationModule.Register(api)
+	teacherModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
