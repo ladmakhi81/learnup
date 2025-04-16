@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	courseEntity "github.com/ladmakhi81/learnup/internals/course/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"time"
 )
 
@@ -22,35 +22,35 @@ type verifiedByItem struct {
 }
 
 type GetCourseByIdRes struct {
-	ID                          uint                                 `json:"id"`
-	CreatedAt                   time.Time                            `json:"createdAt"`
-	UpdatedAt                   time.Time                            `json:"updatedAt"`
-	DeletedAt                   time.Time                            `json:"deletedAt"`
-	Teacher                     *teacherUser                         `json:"teacher"`
-	Category                    *categoryItem                        `json:"category"`
-	Price                       float64                              `json:"price"`
-	ThumbnailImage              string                               `json:"thumbnailImage"`
-	Image                       string                               `json:"image"`
-	Description                 string                               `json:"description"`
-	Prerequisite                string                               `json:"prerequisite"`
-	Level                       courseEntity.CourseLevel             `json:"level"`
-	Status                      courseEntity.CourseStatus            `json:"status"`
-	StatusChangedAt             *time.Time                           `json:"statusChangedAt"`
-	Tags                        []string                             `json:"tags"`
-	AbilityToAddComment         bool                                 `json:"abilityToAddComment"`
-	CommentAccessMode           courseEntity.CourseCommentAccessMode `json:"commentAccessMode"`
-	IsPublished                 bool                                 `json:"isPublished"`
-	IsVerifiedByAdmin           bool                                 `json:"isVerifiedByAdmin"`
-	VerifiedBy                  *verifiedByItem                      `json:"verifiedBy"`
-	VerifiedDate                *time.Time                           `json:"verifiedDate"`
-	Fee                         float64                              `json:"fee"`
-	IntroductionVideo           string                               `json:"introductionVideo"`
-	CanHaveDiscount             bool                                 `json:"canHaveDiscount"`
-	MaxDiscountAmount           float64                              `json:"maxDiscountAmount"`
-	DiscountFeeAmountPercentage float64                              `json:"discountFeeAmountPercentage"`
+	ID                          uint                             `json:"id"`
+	CreatedAt                   time.Time                        `json:"createdAt"`
+	UpdatedAt                   time.Time                        `json:"updatedAt"`
+	DeletedAt                   time.Time                        `json:"deletedAt"`
+	Teacher                     *teacherUser                     `json:"teacher"`
+	Category                    *categoryItem                    `json:"category"`
+	Price                       float64                          `json:"price"`
+	ThumbnailImage              string                           `json:"thumbnailImage"`
+	Image                       string                           `json:"image"`
+	Description                 string                           `json:"description"`
+	Prerequisite                string                           `json:"prerequisite"`
+	Level                       entities.CourseLevel             `json:"level"`
+	Status                      entities.CourseStatus            `json:"status"`
+	StatusChangedAt             *time.Time                       `json:"statusChangedAt"`
+	Tags                        []string                         `json:"tags"`
+	AbilityToAddComment         bool                             `json:"abilityToAddComment"`
+	CommentAccessMode           entities.CourseCommentAccessMode `json:"commentAccessMode"`
+	IsPublished                 bool                             `json:"isPublished"`
+	IsVerifiedByAdmin           bool                             `json:"isVerifiedByAdmin"`
+	VerifiedBy                  *verifiedByItem                  `json:"verifiedBy"`
+	VerifiedDate                *time.Time                       `json:"verifiedDate"`
+	Fee                         float64                          `json:"fee"`
+	IntroductionVideo           string                           `json:"introductionVideo"`
+	CanHaveDiscount             bool                             `json:"canHaveDiscount"`
+	MaxDiscountAmount           float64                          `json:"maxDiscountAmount"`
+	DiscountFeeAmountPercentage float64                          `json:"discountFeeAmountPercentage"`
 }
 
-func NewGetCourseByIdRes(course *courseEntity.Course) GetCourseByIdRes {
+func NewGetCourseByIdRes(course *entities.Course) GetCourseByIdRes {
 	res := GetCourseByIdRes{
 		ID:                course.ID,
 		Status:            course.Status,

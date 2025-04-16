@@ -1,6 +1,8 @@
 package dtores
 
-import "github.com/ladmakhi81/learnup/internals/category/entity"
+import (
+	"github.com/ladmakhi81/learnup/db/entities"
+)
 
 type GetCategoriesTreeItem struct {
 	ID            uint                     `json:"id"`
@@ -13,7 +15,7 @@ type GetCategoriesTreeRes struct {
 	Categories []*GetCategoriesTreeItem `json:"categories"`
 }
 
-func mapCategoryToCategoryTreeItem(categories []*entity.Category) []*GetCategoriesTreeItem {
+func mapCategoryToCategoryTreeItem(categories []*entities.Category) []*GetCategoriesTreeItem {
 	categoriesTreeItems := make([]*GetCategoriesTreeItem, len(categories))
 	for categoryIndex, category := range categories {
 		categoriesTreeItems[categoryIndex] = &GetCategoriesTreeItem{
@@ -26,7 +28,7 @@ func mapCategoryToCategoryTreeItem(categories []*entity.Category) []*GetCategori
 	return categoriesTreeItems
 }
 
-func NewGetCategoriesTreeRes(categories []*entity.Category) GetCategoriesTreeRes {
+func NewGetCategoriesTreeRes(categories []*entities.Category) GetCategoriesTreeRes {
 	categoriesTree := GetCategoriesTreeRes{}
 	categoriesTree.Categories = mapCategoryToCategoryTreeItem(categories)
 	return categoriesTree

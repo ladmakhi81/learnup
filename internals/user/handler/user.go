@@ -5,22 +5,21 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
 	"github.com/ladmakhi81/learnup/internals/user/dto/res"
 	"github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
-	"github.com/ladmakhi81/learnup/pkg/validation"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"net/http"
 )
 
 type Handler struct {
 	userSvc        service.UserSvc
-	validationSvc  validation.Validation
-	translationSvc translations.Translator
+	validationSvc  contracts.Validation
+	translationSvc contracts.Translator
 }
 
 func NewHandler(
 	userSvc service.UserSvc,
-	validationSvc validation.Validation,
-	translationSvc translations.Translator,
+	validationSvc contracts.Validation,
+	translationSvc contracts.Translator,
 ) *Handler {
 	return &Handler{
 		userSvc:        userSvc,

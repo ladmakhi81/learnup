@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ladmakhi81/learnup/internals/notification/dto/res"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
@@ -13,12 +13,12 @@ import (
 
 type Handler struct {
 	notificationSvc notificationService.NotificationService
-	translationSvc  translations.Translator
+	translationSvc  contracts.Translator
 }
 
 func NewHandler(
 	notificationSvc notificationService.NotificationService,
-	translationSvc translations.Translator,
+	translationSvc contracts.Translator,
 ) *Handler {
 	return &Handler{
 		notificationSvc: notificationSvc,

@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"time"
 )
 
@@ -12,19 +12,19 @@ type verifiedByUser struct {
 }
 
 type videosItem struct {
-	ID           uint                         `json:"id"`
-	CreatedAt    time.Time                    `json:"createdAt"`
-	UpdatedAt    time.Time                    `json:"updatedAt"`
-	Title        string                       `json:"title"`
-	Description  string                       `json:"description"`
-	AccessLevel  videoEntity.VideoAccessLevel `json:"accessLevel"`
-	Duration     *string                      `json:"duration"`
-	URL          string                       `json:"url"`
-	IsPublished  bool                         `json:"isPublished"`
-	IsVerified   bool                         `json:"isVerified"`
-	VerifiedDate *time.Time                   `json:"verifiedDate"`
-	VerifiedBy   *verifiedByUser              `json:"verifiedBy"`
-	Status       videoEntity.VideoStatus      `json:"status"`
+	ID           uint                      `json:"id"`
+	CreatedAt    time.Time                 `json:"createdAt"`
+	UpdatedAt    time.Time                 `json:"updatedAt"`
+	Title        string                    `json:"title"`
+	Description  string                    `json:"description"`
+	AccessLevel  entities.VideoAccessLevel `json:"accessLevel"`
+	Duration     *string                   `json:"duration"`
+	URL          string                    `json:"url"`
+	IsPublished  bool                      `json:"isPublished"`
+	IsVerified   bool                      `json:"isVerified"`
+	VerifiedDate *time.Time                `json:"verifiedDate"`
+	VerifiedBy   *verifiedByUser           `json:"verifiedBy"`
+	Status       entities.VideoStatus      `json:"status"`
 }
 
 type GetVideosByCourseIDRes struct {
@@ -32,7 +32,7 @@ type GetVideosByCourseIDRes struct {
 	CourseID uint          `json:"courseId"`
 }
 
-func mapper(videos []*videoEntity.Video) []*videosItem {
+func mapper(videos []*entities.Video) []*videosItem {
 	result := make([]*videosItem, len(videos))
 	for videoIndex, video := range videos {
 		result[videoIndex] = &videosItem{
@@ -60,7 +60,7 @@ func mapper(videos []*videoEntity.Video) []*videosItem {
 	return result
 }
 
-func NewGetVideosByCourseIDRes(videos []*videoEntity.Video, courseID uint) GetVideosByCourseIDRes {
+func NewGetVideosByCourseIDRes(videos []*entities.Video, courseID uint) GetVideosByCourseIDRes {
 	return GetVideosByCourseIDRes{
 		Videos:   mapper(videos),
 		CourseID: courseID,

@@ -5,22 +5,21 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/video/dto/res"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
-	"github.com/ladmakhi81/learnup/pkg/validation"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"net/http"
 )
 
 type Handler struct {
-	validationSvc  validation.Validation
+	validationSvc  contracts.Validation
 	videoSvc       videoService.VideoService
-	translationSvc translations.Translator
+	translationSvc contracts.Translator
 }
 
 func NewHandler(
-	validationSvc validation.Validation,
+	validationSvc contracts.Validation,
 	videoSvc videoService.VideoService,
-	translationSvc translations.Translator,
+	translationSvc contracts.Translator,
 ) *Handler {
 	return &Handler{
 		validationSvc:  validationSvc,

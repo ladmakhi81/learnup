@@ -1,19 +1,15 @@
 package db
 
 import (
-	categoryEntity "github.com/ladmakhi81/learnup/internals/category/entity"
-	courseEntity "github.com/ladmakhi81/learnup/internals/course/entity"
-	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
-	userEntity "github.com/ladmakhi81/learnup/internals/user/entity"
-	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 )
 
 func LoadEntities() map[string]any {
 	return map[string]any{
-		"user":         &userEntity.User{},
-		"category":     &categoryEntity.Category{},
-		"course":       &courseEntity.Course{},
-		"video":        &videoEntity.Video{},
-		"notification": &notificationEntity.Notification{},
+		"user":         &entities.User{},
+		"category":     &entities.Category{},
+		"course":       &entities.Course{},
+		"video":        &entities.Video{},
+		"notification": &entities.Notification{},
 	}
 }

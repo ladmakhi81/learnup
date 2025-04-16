@@ -2,7 +2,7 @@ package temporalv1
 
 import (
 	"context"
-	"github.com/ladmakhi81/learnup/pkg/env"
+	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
@@ -11,10 +11,10 @@ import (
 
 type TemporalSvc struct {
 	client client.Client
-	config *env.EnvConfig
+	config *dtos.EnvConfig
 }
 
-func NewTemporalSvc(config *env.EnvConfig) *TemporalSvc {
+func NewTemporalSvc(config *dtos.EnvConfig) *TemporalSvc {
 	return &TemporalSvc{
 		config: config,
 	}

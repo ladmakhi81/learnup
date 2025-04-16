@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/internals/user/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"time"
 )
 
@@ -14,7 +14,7 @@ type CreateBasicUserRes struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func NewCreateUserResponse(user *entity.User) CreateBasicUserRes {
+func NewCreateUserResponse(user *entities.User) CreateBasicUserRes {
 	return CreateBasicUserRes{
 		ID:        user.ID,
 		FirstName: user.FirstName,

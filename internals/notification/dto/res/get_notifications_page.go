@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	notificationEntity "github.com/ladmakhi81/learnup/internals/notification/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"time"
 )
 
@@ -11,14 +11,14 @@ type userItem struct {
 }
 
 type NotificationPageItem struct {
-	Type     notificationEntity.NotificationType `json:"type"`
-	IsSeen   bool                                `json:"isSeen"`
-	SeenAt   *time.Time                          `json:"seenAt"`
-	User     *userItem                           `json:"user"`
-	Metadata any                                 `json:"metadata"`
+	Type     entities.NotificationType `json:"type"`
+	IsSeen   bool                      `json:"isSeen"`
+	SeenAt   *time.Time                `json:"seenAt"`
+	User     *userItem                 `json:"user"`
+	Metadata any                       `json:"metadata"`
 }
 
-func NewNotificationPageItems(notifications []*notificationEntity.Notification) []*NotificationPageItem {
+func NewNotificationPageItems(notifications []*entities.Notification) []*NotificationPageItem {
 	result := make([]*NotificationPageItem, len(notifications))
 	for index, notification := range notifications {
 		result[index] = &NotificationPageItem{

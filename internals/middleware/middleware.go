@@ -1,16 +1,15 @@
 package middleware
 
 import (
-	"github.com/ladmakhi81/learnup/pkg/cache"
-	"github.com/ladmakhi81/learnup/pkg/token"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 )
 
 type Middleware struct {
-	tokenSvc token.Token
-	redisSvc cache.Cache
+	tokenSvc contracts.Token
+	redisSvc contracts.Cache
 }
 
-func NewMiddleware(tokenSvc token.Token, redisSvc cache.Cache) *Middleware {
+func NewMiddleware(tokenSvc contracts.Token, redisSvc contracts.Cache) *Middleware {
 	return &Middleware{
 		tokenSvc: tokenSvc,
 		redisSvc: redisSvc,

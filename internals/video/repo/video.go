@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 	"github.com/ladmakhi81/learnup/db"
-	videoEntity "github.com/ladmakhi81/learnup/internals/video/entity"
+	videoEntity "github.com/ladmakhi81/learnup/db/entities"
 	"gorm.io/gorm"
 )
 

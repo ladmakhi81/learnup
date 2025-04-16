@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/internals/category/entity"
+	"github.com/ladmakhi81/learnup/db/entities"
 	"time"
 )
 
@@ -14,7 +14,7 @@ type CategoryPageableItem struct {
 	DeletedAt time.Time `json:"deletedAt"`
 }
 
-func MapCategoriesToPageableItems(categories []*entity.Category) []*CategoryPageableItem {
+func MapCategoriesToPageableItems(categories []*entities.Category) []*CategoryPageableItem {
 	pageableItems := make([]*CategoryPageableItem, len(categories))
 	for categoryIndex, category := range categories {
 		pageableItems[categoryIndex] = &CategoryPageableItem{

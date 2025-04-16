@@ -4,9 +4,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/auth/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/auth/dto/req"
 	"github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/cache"
-	"github.com/ladmakhi81/learnup/pkg/token"
-	"github.com/ladmakhi81/learnup/pkg/translations"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,16 +15,16 @@ type AuthService interface {
 
 type AuthServiceImpl struct {
 	userSvc        service.UserSvc
-	cacheSvc       cache.Cache
-	tokenSvc       token.Token
-	translationSvc translations.Translator
+	cacheSvc       contracts.Cache
+	tokenSvc       contracts.Token
+	translationSvc contracts.Translator
 }
 
 func NewAuthServiceImpl(
 	userSvc service.UserSvc,
-	cacheSvc cache.Cache,
-	tokenSvc token.Token,
-	translationSvc translations.Translator,
+	cacheSvc contracts.Cache,
+	tokenSvc contracts.Token,
+	translationSvc contracts.Translator,
 ) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		userSvc:        userSvc,

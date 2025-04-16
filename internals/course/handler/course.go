@@ -6,8 +6,7 @@ import (
 	dtores "github.com/ladmakhi81/learnup/internals/course/dto/res"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
-	"github.com/ladmakhi81/learnup/pkg/translations"
-	"github.com/ladmakhi81/learnup/pkg/validation"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
@@ -16,15 +15,15 @@ import (
 
 type Handler struct {
 	courseSvc     courseService.CourseService
-	validationSvc validation.Validation
-	translateSvc  translations.Translator
+	validationSvc contracts.Validation
+	translateSvc  contracts.Translator
 	videoSvc      videoService.VideoService
 }
 
 func NewHandler(
 	courseSvc courseService.CourseService,
-	validationSvc validation.Validation,
-	translateSvc translations.Translator,
+	validationSvc contracts.Validation,
+	translateSvc contracts.Translator,
 	videosSvc videoService.VideoService,
 ) *Handler {
 	return &Handler{
