@@ -5,6 +5,8 @@ import (
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/course/dto/req"
 	"github.com/ladmakhi81/learnup/internals/course/repo"
+	notificationReqDto "github.com/ladmakhi81/learnup/internals/notification/dto/req"
+	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
@@ -21,13 +23,16 @@ type CourseService interface {
 	FindDetailById(id uint) (*entities.Course, error)
 	FindByVideoId(id uint) (*entities.Course, error)
 	VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error
+	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error
+	CreateCompleteIntroductionVideoNotification(id uint) error
 }
 
 type CourseServiceImpl struct {
-	courseRepo   repo.CourseRepo
-	categorySvc  categoryService.CategoryService
-	userSvc      userService.UserSvc
-	translateSvc contracts.Translator
+	courseRepo      repo.CourseRepo
+	categorySvc     categoryService.CategoryService
+	userSvc         userService.UserSvc
+	translateSvc    contracts.Translator
+	notificationSvc notificationService.NotificationService
 }
 
 func NewCourseServiceImpl(
@@ -35,12 +40,14 @@ func NewCourseServiceImpl(
 	translateSvc contracts.Translator,
 	userSvc userService.UserSvc,
 	categorySvc categoryService.CategoryService,
+	notificationSvc notificationService.NotificationService,
 ) *CourseServiceImpl {
 	return &CourseServiceImpl{
-		courseRepo:   courseRepo,
-		translateSvc: translateSvc,
-		userSvc:      userSvc,
-		categorySvc:  categorySvc,
+		courseRepo:      courseRepo,
+		translateSvc:    translateSvc,
+		userSvc:         userSvc,
+		categorySvc:     categorySvc,
+		notificationSvc: notificationSvc,
 	}
 }
 
@@ -264,5 +271,51 @@ func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCour
 	//TODO: notification system
 	// create notification for teacher that course verified
 	// send email for this notification
+	return nil
+}
+
+func (svc CourseServiceImpl) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error {
+	course, courseErr := svc.FindById(dto.CourseId)
+	if courseErr != nil {
+		return courseErr
+	}
+	if course == nil {
+		return types.NewNotFoundError(
+			svc.translateSvc.Translate("course.errors.not_found"),
+		)
+	}
+	course.IntroductionVideo = dto.URL
+	if err := svc.courseRepo.Update(course); err != nil {
+		return types.NewServerError(
+			"Error in setting introduction video url",
+			"CourseServiceImpl.UpdateIntroductionURL",
+			err,
+		)
+	}
+	return nil
+}
+
+func (svc CourseServiceImpl) CreateCompleteIntroductionVideoNotification(id uint) error {
+	course, courseErr := svc.FindById(id)
+	if courseErr != nil {
+		return courseErr
+	}
+	if course == nil {
+		return types.NewNotFoundError(
+			svc.translateSvc.Translate("course.errors.not_found"),
+		)
+	}
+	notificationDto := notificationReqDto.CreateNotificationReq{
+		UserID:    *course.TeacherID,
+		EventType: entities.NotificationType_CompleteIntroductionCourseVideoUpload,
+		Metadata: map[string]any{
+			"courseId":   course.ID,
+			"courseName": course.Name,
+		},
+	}
+	_, notificationErr := svc.notificationSvc.Create(notificationDto)
+	if notificationErr != nil {
+		return notificationErr
+	}
 	return nil
 }

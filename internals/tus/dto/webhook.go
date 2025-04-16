@@ -9,6 +9,13 @@ const (
 	TusHookType_PostFinish  TusHookType = "post-finish"
 )
 
+type TusActionType string
+
+const (
+	TusActionType_NewCourseVideo       TusActionType = "add-new-course-video"
+	TusActionType_AddIntroductionVideo TusActionType = "add-introduction-video"
+)
+
 type TusWebhookDTO struct {
 	Type  TusHookType `json:"Type"`
 	Event struct {

@@ -24,8 +24,8 @@ import (
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
-	teacherCourseHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
-	teacherCourseService "github.com/ladmakhi81/learnup/internals/teacher/service"
+	teacherHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
+	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
 	tusHookHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
@@ -128,12 +128,13 @@ func main() {
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
-	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
+	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc, notificationSvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc)
-	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc)
+	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc, userSvc)
+	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc, courseSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
-	teacherCourseSvc := teacherCourseService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
+	teacherCourseSvc := teacherService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
+	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(videoSvc, i18nTranslatorSvc, courseSvc, videoRepo)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -146,7 +147,8 @@ func main() {
 	videoAdminHandler := videoHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
 	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
 	notificationAdminHandler := notificationHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
-	teacherCourseHandler := teacherCourseHandler.NewHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
+	teacherCourseHandler := teacherHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
+	teacherVideoHandler := teacherHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
 	userModule := user.NewModule(userAdminHandler, middlewares)
@@ -154,19 +156,29 @@ func main() {
 	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
 	courseModule := course.NewModule(courseAdminHandler, middlewares)
 	tusModule := tus.NewModule(tusHandler)
-	videoModule := video.NewModule(videoAdminHandler)
+	videoModule := video.NewModule(videoAdminHandler, middlewares)
 	notificationModule := notification.NewModule(notificationAdminHandler, middlewares)
-	teacherModule := teacher.NewModule(teacherCourseHandler, middlewares)
+	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
-		temporal.COURSE_VIDEO_QUEUE,
-		videoWorkflowSvc.VideoCourseWorkflow,
+		temporal.ADD_NEW_COURSE_VIDEO_QUEUE,
+		videoWorkflowSvc.AddNewCourseVideoWorkflow,
 		videoSvc.CalculateDuration,
 		videoSvc.Encode,
 		videoSvc.UpdateURLAndDuration,
 		notificationSvc.Create,
 		videoSvc.CreateCompleteUploadVideoNotification,
+	); err != nil {
+		log.Printf("Error in add worker: %+v", err)
+	}
+
+	if err := temporalSvc.AddWorker(
+		temporal.SET_INTRODUCTION_COURSE_QUEUE,
+		videoWorkflowSvc.AddIntroductionVideoWorkflow,
+		videoSvc.Encode,
+		courseSvc.UpdateIntroductionURL,
+		courseSvc.CreateCompleteIntroductionVideoNotification,
 	); err != nil {
 		log.Printf("Error in add worker: %+v", err)
 	}
