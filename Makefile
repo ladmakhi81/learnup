@@ -1,5 +1,5 @@
 dev:
-	@docker compose up --build -d
+	@docker compose up --build -d && docker ps
 stop:
 	@docker compose stop
 update-doc:

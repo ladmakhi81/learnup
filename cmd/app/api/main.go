@@ -128,10 +128,10 @@ func main() {
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
 	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
-	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc)
+	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc, notificationSvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
 	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc)
-	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc)
+	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc, courseSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
 	teacherCourseSvc := teacherCourseService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
 
@@ -160,13 +160,23 @@ func main() {
 
 	// workers
 	if err := temporalSvc.AddWorker(
-		temporal.COURSE_VIDEO_QUEUE,
-		videoWorkflowSvc.VideoCourseWorkflow,
+		temporal.ADD_NEW_COURSE_VIDEO_QUEUE,
+		videoWorkflowSvc.AddNewCourseVideoWorkflow,
 		videoSvc.CalculateDuration,
 		videoSvc.Encode,
 		videoSvc.UpdateURLAndDuration,
 		notificationSvc.Create,
 		videoSvc.CreateCompleteUploadVideoNotification,
+	); err != nil {
+		log.Printf("Error in add worker: %+v", err)
+	}
+
+	if err := temporalSvc.AddWorker(
+		temporal.SET_INTRODUCTION_COURSE_QUEUE,
+		videoWorkflowSvc.AddIntroductionVideoWorkflow,
+		videoSvc.Encode,
+		courseSvc.UpdateIntroductionURL,
+		courseSvc.CreateCompleteIntroductionVideoNotification,
 	); err != nil {
 		log.Printf("Error in add worker: %+v", err)
 	}
