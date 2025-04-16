@@ -7,12 +7,12 @@ import (
 )
 
 type FetchCourseItemRes struct {
-	ID          uint
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt
-	Name        string
-	Description string
+	ID          uint           `json:"id"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	DeletedAt   gorm.DeletedAt `json:"deletedAt"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
 }
 
 func MapCoursesToFetchCourseItemRes(courses []*entities.Course) []*FetchCourseItemRes {

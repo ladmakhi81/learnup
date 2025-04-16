@@ -11,18 +11,18 @@ import (
 	"net/http"
 )
 
-type Handler struct {
+type CourseHandler struct {
 	courseSvc      service.TeacherCourseService
 	validationSvc  contracts.Validation
 	translationSvc contracts.Translator
 }
 
-func NewHandler(
+func NewCourseHandler(
 	courseSvc service.TeacherCourseService,
 	validationSvc contracts.Validation,
 	translationSvc contracts.Translator,
-) *Handler {
-	return &Handler{
+) *CourseHandler {
+	return &CourseHandler{
 		courseSvc:      courseSvc,
 		validationSvc:  validationSvc,
 		translationSvc: translationSvc,
@@ -44,7 +44,7 @@ func NewHandler(
 //	@Router		/teacher/course [post]
 //
 //	@Security	BearerAuth
-func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h CourseHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := &dtoreq.CreateCourseReq{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
@@ -81,7 +81,7 @@ func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Failure	500			{object}	types.ApiResponse
 //	@Router		/teacher/courses [get]
 //	@Security	BearerAuth
-func (h Handler) FetchCourses(ctx *gin.Context) (*types.ApiResponse, error) {
+func (h CourseHandler) FetchCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 	authContext, _ := ctx.Get("AUTH")
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Param("page"), ctx.Param("pageSize"))
 	courses, coursesErr := h.courseSvc.FetchByTeacherId(authContext, page, pageSize)

@@ -2,24 +2,28 @@ package video
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/video/handler"
 	"github.com/ladmakhi81/learnup/utils"
 )
 
 type Module struct {
-	videoAdminHandler *handler.Handler
+	videoHandler *handler.Handler
+	middleware   *middleware.Middleware
 }
 
 func NewModule(
-	videoAdminHandler *handler.Handler,
+	handler *handler.Handler,
+	middleware *middleware.Middleware,
 ) *Module {
 	return &Module{
-		videoAdminHandler: videoAdminHandler,
+		videoHandler: handler,
+		middleware:   middleware,
 	}
 }
 
 func (m Module) Register(api *gin.RouterGroup) {
 	videosApi := api.Group("/videos")
-
-	videosApi.POST("/", utils.JsonHandler(m.videoAdminHandler.AddNewVideoToCourse))
+	videosApi.Use(m.middleware.CheckAccessToken())
+	videosApi.PATCH("/:video-id/verify", utils.JsonHandler(m.videoHandler.VerifyVideo))
 }

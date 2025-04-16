@@ -8,6 +8,7 @@ import (
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	notificationReqDto "github.com/ladmakhi81/learnup/internals/notification/dto/req"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	"github.com/ladmakhi81/learnup/internals/video/repo"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
@@ -18,10 +19,10 @@ import (
 	"path"
 	"path/filepath"
 	"strconv"
+	"time"
 )
 
 type VideoService interface {
-	AddVideo(dto *dtoreq.AddVideoToCourse) (*notificationEntity.Video, error)
 	FindByTitle(title string) (*notificationEntity.Video, error)
 	IsVideoTitleExist(title string) (bool, error)
 	FindVideosByCourseID(courseID uint) ([]*notificationEntity.Video, error)
@@ -30,6 +31,7 @@ type VideoService interface {
 	CreateCompleteUploadVideoNotification(videoID uint) error
 	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error)
 	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error)
+	Verify(authContext any, videoId uint) error
 }
 
 type VideoServiceImpl struct {
@@ -40,6 +42,7 @@ type VideoServiceImpl struct {
 	videoRepo       repo.VideoRepo
 	notificationSvc notificationService.NotificationService
 	translationSvc  contracts.Translator
+	userSvc         userService.UserSvc
 }
 
 func NewVideoServiceImpl(
@@ -50,6 +53,7 @@ func NewVideoServiceImpl(
 	videoRepo repo.VideoRepo,
 	notificationSvc notificationService.NotificationService,
 	translationSvc contracts.Translator,
+	userSvc userService.UserSvc,
 ) *VideoServiceImpl {
 	return &VideoServiceImpl{
 		minioClient:     minioClient,
@@ -59,41 +63,8 @@ func NewVideoServiceImpl(
 		videoRepo:       videoRepo,
 		notificationSvc: notificationSvc,
 		translationSvc:  translationSvc,
+		userSvc:         userSvc,
 	}
-}
-
-func (svc VideoServiceImpl) AddVideo(dto *dtoreq.AddVideoToCourse) (*notificationEntity.Video, error) {
-	isTitleDuplicated, titleDuplicatedErr := svc.IsVideoTitleExist(dto.Title)
-	if titleDuplicatedErr != nil {
-		return nil, titleDuplicatedErr
-	}
-	if isTitleDuplicated {
-		return nil, types.NewConflictError(svc.translationSvc.Translate("video.errors.title_duplicated"))
-	}
-	course, courseErr := svc.courseSvc.FindById(dto.CourseID)
-	if courseErr != nil {
-		return nil, courseErr
-	}
-	if course == nil {
-		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
-	}
-	video := &notificationEntity.Video{
-		Title:       dto.Title,
-		IsPublished: dto.IsPublished,
-		Description: dto.Description,
-		AccessLevel: dto.AccessLevel,
-		CourseId:    &course.ID,
-		IsVerified:  false,
-		Status:      notificationEntity.VideoStatus_Pending,
-	}
-	if err := svc.videoRepo.Create(video); err != nil {
-		return nil, types.NewServerError(
-			"Create course throw error",
-			"VideoServiceImpl.AddVideo",
-			err,
-		)
-	}
-	return video, nil
 }
 
 func (svc VideoServiceImpl) FindByTitle(title string) (*notificationEntity.Video, error) {
@@ -307,4 +278,41 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 		)
 	}
 	return encodedFilePath, nil
+}
+
+func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
+	video, videoErr := svc.FindById(videoId)
+	if videoErr != nil {
+		return videoErr
+	}
+	if video == nil {
+		return types.NewNotFoundError(
+			svc.translationSvc.Translate("video.errors.not_found"),
+		)
+	}
+	if video.IsVerified {
+		return nil
+	}
+	adminClaim := authContext.(*types.TokenClaim)
+	admin, adminErr := svc.userSvc.FindById(adminClaim.UserID)
+	if adminErr != nil {
+		return adminErr
+	}
+	if admin == nil {
+		return types.NewNotFoundError(
+			svc.translationSvc.Translate("user.errors.admin_not_found"),
+		)
+	}
+	now := time.Now()
+	video.IsVerified = true
+	video.VerifiedDate = &now
+	video.VerifiedById = &admin.ID
+	if err := svc.videoRepo.Update(video); err != nil {
+		return types.NewServerError(
+			"Error in verify video",
+			"VideoServiceImpl.Verify",
+			err,
+		)
+	}
+	return nil
 }
