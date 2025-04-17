@@ -8,10 +8,11 @@ import (
 )
 
 type Module struct {
-	courseHandler  *handler.CourseHandler
-	middleware     *middleware.Middleware
-	videoHandler   *handler.VideoHandler
-	commentHandler *handler.CommentHandler
+	courseHandler   *handler.CourseHandler
+	middleware      *middleware.Middleware
+	videoHandler    *handler.VideoHandler
+	commentHandler  *handler.CommentHandler
+	questionHandler *handler.QuestionHandler
 }
 
 func NewModule(
@@ -19,12 +20,14 @@ func NewModule(
 	videoHandler *handler.VideoHandler,
 	middleware *middleware.Middleware,
 	commentHandler *handler.CommentHandler,
+	questionHandler *handler.QuestionHandler,
 ) *Module {
 	return &Module{
-		courseHandler:  courseHandler,
-		middleware:     middleware,
-		videoHandler:   videoHandler,
-		commentHandler: commentHandler,
+		courseHandler:   courseHandler,
+		middleware:      middleware,
+		videoHandler:    videoHandler,
+		commentHandler:  commentHandler,
+		questionHandler: questionHandler,
 	}
 }
 
@@ -37,4 +40,5 @@ func (m Module) Register(api *gin.RouterGroup) {
 	teacherApi.GET("/courses", utils.JsonHandler(m.courseHandler.FetchCourses))
 	teacherApi.POST("/video", utils.JsonHandler(m.videoHandler.AddVideoToCourse))
 	teacherApi.GET("/comments/:course-id", utils.JsonHandler(m.commentHandler.GetPageableCommentByCourseId))
+	teacherApi.GET("/questions", utils.JsonHandler(m.questionHandler.GetQuestions))
 }

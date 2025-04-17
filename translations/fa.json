@@ -1,4 +1,11 @@
 {
+  "question": {
+    "errors": {
+      "not_found": "پرسشی با این شناسه یافت نشد",
+      "closed": "وضعیت پرسش درحالت بسته شده قرار دارد",
+      "invalid_id": "فرمت شناسه پرسش نادرست میباشد"
+    }
+  },
   "user": {
     "errors": {
       "phone_duplicate": "شماره تماس قبلا ثبت شده است",
@@ -62,7 +69,8 @@
       "min_validation": "{{.Name}} باید حداقل {{.Len}} کاراکتر داشته باشد",
       "numeric_validation": "{{.Name}} باید عدد باشد",
       "len_validation": "{{.Name}} باید {{.Len}} کاراکتر داشته باشد",
-      "unknown_validation": "{{.Name}} با تگ {{.Tag}} نادرست میباشد"
+      "unknown_validation": "{{.Name}} با تگ {{.Tag}} نادرست میباشد",
+      "forbidden_access": "دسترسی محدود"
     }
   }
 }
