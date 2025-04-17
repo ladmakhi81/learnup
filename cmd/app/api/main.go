@@ -22,6 +22,8 @@ import (
 	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
 	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	likeRepository "github.com/ladmakhi81/learnup/internals/like/repo"
+	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/notification"
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
@@ -121,6 +123,7 @@ func main() {
 	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
 	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
 	commentRepo := commentRepository.NewCommentRepoImpl(dbClient)
+	likeRepo := likeRepository.NewLikeRepoImpl(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -142,6 +145,7 @@ func main() {
 	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(videoSvc, i18nTranslatorSvc, courseSvc, videoRepo)
 	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
 	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
+	likeSvc := likeService.NewLikeServiceImpl(likeRepo, userSvc, i18nTranslatorSvc, courseSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -150,7 +154,7 @@ func main() {
 	userHandler := userApiHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
+	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc)
 	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
 	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
 	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)

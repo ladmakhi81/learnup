@@ -8,8 +8,8 @@ import (
 )
 
 type Module struct {
-	middleware         *middleware.Middleware
-	courseAdminHandler *handler.Handler
+	middleware    *middleware.Middleware
+	courseHandler *handler.Handler
 }
 
 func NewModule(
@@ -17,8 +17,8 @@ func NewModule(
 	middleware *middleware.Middleware,
 ) *Module {
 	return &Module{
-		middleware:         middleware,
-		courseAdminHandler: courseAdminHandler,
+		middleware:    middleware,
+		courseHandler: courseAdminHandler,
 	}
 }
 
@@ -27,9 +27,13 @@ func (m Module) Register(api *gin.RouterGroup) {
 
 	coursesApi.Use(m.middleware.CheckAccessToken())
 
-	coursesApi.POST("/", utils.JsonHandler(m.courseAdminHandler.CreateCourse))
-	coursesApi.GET("/page", utils.JsonHandler(m.courseAdminHandler.GetCourses))
-	coursesApi.GET("/:course-id/videos", utils.JsonHandler(m.courseAdminHandler.GetVideosByCourseID))
-	coursesApi.GET("/:course-id", utils.JsonHandler(m.courseAdminHandler.GetCourseById))
-	coursesApi.PATCH("/:course-id/verify", utils.JsonHandler(m.courseAdminHandler.VerifyCourse))
+	coursesApi.POST("/", utils.JsonHandler(m.courseHandler.CreateCourse))
+	coursesApi.GET("/page", utils.JsonHandler(m.courseHandler.GetCourses))
+	coursesApi.GET("/:course-id/videos", utils.JsonHandler(m.courseHandler.GetVideosByCourseID))
+	coursesApi.GET("/:course-id", utils.JsonHandler(m.courseHandler.GetCourseById))
+	coursesApi.PATCH("/:course-id/verify", utils.JsonHandler(m.courseHandler.VerifyCourse))
+	coursesApi.POST("/:course-id/like", utils.JsonHandler(m.courseHandler.Like))
+	coursesApi.GET("/:course-id/likes", utils.JsonHandler(m.courseHandler.FetchLikes))
+	coursesApi.POST("/:course-id/comment", utils.JsonHandler(m.courseHandler.CreateComment))
+	coursesApi.DELETE("/comments/:comment-id", utils.JsonHandler(m.courseHandler.DeleteComment))
 }

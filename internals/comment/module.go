@@ -26,8 +26,6 @@ func (m *Module) Register(api *gin.RouterGroup) {
 	commentsApi := api.Group("/comments")
 
 	commentsApi.Use(m.middleware.CheckAccessToken())
-
-	commentsApi.POST("/", utils.JsonHandler(m.handler.CreateComment))
-	commentsApi.DELETE("/:comment-id", utils.JsonHandler(m.handler.DeleteComment))
+	
 	commentsApi.GET("/page", utils.JsonHandler(m.handler.GetCommentsPageable))
 }

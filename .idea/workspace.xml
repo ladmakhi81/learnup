@@ -11,7 +11,12 @@
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/comment/dto/req/create_comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/dto/req/create_comment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/comment/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/handler/comment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/comment/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/module.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,7 +59,7 @@
     "RunOnceActivity.go.formatter.settings.were.checked": "true",
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "feat/comments",
+    "git-widget-placeholder": "main",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
     "last_opened_file_path": "/home/ladmakhi",

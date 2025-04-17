@@ -94,21 +94,10 @@ definitions:
       content:
         minLength: 3
         type: string
-      courseId:
-        minimum: 1
-        type: integer
       parentId:
         type: integer
     required:
     - content
-    - courseId
-    type: object
-  github_com_ladmakhi81_learnup_internals_comment_dto_res.CreateCommentRes:
-    properties:
-      content:
-        type: string
-      id:
-        type: integer
     type: object
   github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItem:
     properties:
@@ -232,6 +221,13 @@ definitions:
     - discountFeeAmountPercentage
     - fee
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentRes:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes:
     properties:
       abilityToAddComment:
@@ -349,6 +345,13 @@ definitions:
           $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems'
         type: array
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem:
+    properties:
+      type:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.userItem'
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes:
     properties:
       courseId:
@@ -436,6 +439,13 @@ definitions:
       id:
         type: integer
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.userItem:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByItem:
     properties:
       fullName:
@@ -480,6 +490,17 @@ definitions:
         $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser'
       verifiedDate:
         type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq:
+    properties:
+      type:
+        enum:
+        - none
+        - like
+        - dislike
+        type: string
+    required:
+    - type
     type: object
   github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem:
     properties:
@@ -906,84 +927,6 @@ paths:
       summary: Get categories as a tree structure
       tags:
       - categories
-  /comments:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: ' '
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/types.ApiResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.CreateCommentRes'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/types.ApiError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/types.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.ApiError'
-      security:
-      - BearerAuth: []
-      summary: Create a new comment
-      tags:
-      - comments
-  /comments/{comment-id}:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: Comment ID
-        in: path
-        name: comment-id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/types.ApiResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/types.ApiError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/types.ApiError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/types.ApiError'
-      security:
-      - BearerAuth: []
-      summary: Delete a comment
-      tags:
-      - comments
   /comments/page:
     get:
       consumes:
@@ -1101,6 +1044,155 @@ paths:
       summary: Get Course by ID
       tags:
       - courses
+  /courses/{course-id}/comment:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Create a new comment
+      tags:
+      - courses
+  /courses/{course-id}/like:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: like
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Like a course
+      tags:
+      - courses
+  /courses/{course-id}/likes:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated likes by course ID
+      tags:
+      - courses
   /courses/{course-id}/verify:
     patch:
       consumes:
@@ -1173,6 +1265,45 @@ paths:
       security:
       - BearerAuth: []
       summary: Get Videos by Course ID
+      tags:
+      - courses
+  /courses/comments/{comment-id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment-id
+        required: true
+        type: integer
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
       tags:
       - courses
   /courses/page:

@@ -1,0 +1,2 @@
+Timestamp: 1744872083, URL: /api/courses/2/like, Location: LikeServiceImpl.Create, Message: Error in finding like by user id and course id - invalid value, should be pointer to struct or slice, TraceID: 198494c0-652b-4e45-b8e2-f4e1387a087a
+Timestamp: 1744872107, URL: /api/courses/2/like, Location: LikeServiceImpl.Create, Message: Error in finding like by user id and course id - invalid value, should be pointer to struct or slice, TraceID: 098098bd-0ef9-4230-ad38-631595b47957
