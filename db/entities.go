@@ -12,5 +12,6 @@ func LoadEntities() map[string]any {
 		"video":        &entities.Video{},
 		"notification": &entities.Notification{},
 		"comment":      &entities.Comment{},
+		"like":         &entities.Like{},
 	}
 }

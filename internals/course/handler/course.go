@@ -2,9 +2,13 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	dtoreq "github.com/ladmakhi81/learnup/internals/course/dto/req"
+	dtoreq "github.com/ladmakhi81/learnup/internals/comment/dto/req"
+	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
+	courseDtoReq "github.com/ladmakhi81/learnup/internals/course/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/course/dto/res"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	likeDtoReq "github.com/ladmakhi81/learnup/internals/like/dto/req"
+	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
@@ -18,6 +22,8 @@ type Handler struct {
 	validationSvc contracts.Validation
 	translateSvc  contracts.Translator
 	videoSvc      videoService.VideoService
+	likeSvc       likeService.LikeService
+	commentSvc    commentService.CommentService
 }
 
 func NewHandler(
@@ -25,12 +31,16 @@ func NewHandler(
 	validationSvc contracts.Validation,
 	translateSvc contracts.Translator,
 	videosSvc videoService.VideoService,
+	likeSvc likeService.LikeService,
+	commentSvc commentService.CommentService,
 ) *Handler {
 	return &Handler{
 		courseSvc:     courseSvc,
 		validationSvc: validationSvc,
 		translateSvc:  translateSvc,
 		videoSvc:      videosSvc,
+		likeSvc:       likeSvc,
+		commentSvc:    commentSvc,
 	}
 }
 
@@ -40,7 +50,7 @@ func NewHandler(
 //	@Tags		courses
 //	@Accept		json
 //	@Produce	json
-//	@Param		requestBody	body		dtoreq.CreateCourseReq	true	" "
+//	@Param		requestBody	body		courseDtoReq.CreateCourseReq	true	" "
 //	@Success	201			{object}	types.ApiResponse{data=dtores.CreateCourseRes}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
@@ -49,7 +59,7 @@ func NewHandler(
 //	@Router		/courses [post]
 //	@Security	BearerAuth
 func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &dtoreq.CreateCourseReq{}
+	dto := &courseDtoReq.CreateCourseReq{}
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("common.errors.invalid_request_body"),
@@ -186,8 +196,8 @@ func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Tags		courses
 //	@Accept		json
 //	@Produce	json
-//	@Param		course-id	path		int						true	"Course ID"
-//	@Param		request		body		dtoreq.VerifyCourseReq	true	" "
+//	@Param		course-id	path		int								true	"Course ID"
+//	@Param		request		body		courseDtoReq.VerifyCourseReq	true	" "
 //	@Success	200			{object}	types.ApiResponse
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
@@ -204,7 +214,7 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 			h.translateSvc.Translate("course.errors.invalid_course_id"),
 		)
 	}
-	dto := &dtoreq.VerifyCourseReq{
+	dto := &courseDtoReq.VerifyCourseReq{
 		ID: uint(courseId),
 	}
 	if err := ctx.Bind(dto); err != nil {
@@ -217,6 +227,159 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	}
 	authContext, _ := ctx.Get("AUTH")
 	if err := h.courseSvc.VerifyCourse(authContext, *dto); err != nil {
+		return nil, err
+	}
+	return types.NewApiResponse(http.StatusOK, nil), nil
+}
+
+// Like godoc
+//
+//	@Summary	Like a course
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		course-id	path		int							true	"Course ID"
+//	@Param		like		body		likeDtoReq.CreateLikeReq	true	" "
+//	@Success	201			{object}	types.ApiResponse
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	401			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/{course-id}/like [post]
+//
+//	@Security	BearerAuth
+func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseIDParam := ctx.Param("course-id")
+	courseID, courseIDErr := strconv.Atoi(courseIDParam)
+	if courseIDErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("course.errors.invalid_course_id"),
+		)
+	}
+	authContext, _ := ctx.Get("AUTH")
+	dto := &likeDtoReq.CreateLikeReq{}
+	if err := ctx.Bind(dto); err != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("common.errors.invalid_request_body"),
+		)
+	}
+	if err := h.validationSvc.Validate(dto); err != nil {
+		return nil, err
+	}
+	dto.CourseID = uint(courseID)
+	_, likeErr := h.likeSvc.Create(authContext, *dto)
+	if likeErr != nil {
+		return nil, likeErr
+	}
+	return types.NewApiResponse(http.StatusCreated, nil), nil
+}
+
+// FetchLikes godoc
+//
+//	@Summary	Get paginated likes by course ID
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		course-id	path		int	true	"Course ID"
+//	@Param		page		query		int	false	"Page number"	default(0)
+//	@Param		pageSize	query		int	false	"Page size"		default(10)
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]dtores.GetLikesPageableItem}}
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/{course-id}/likes [get]
+//	@Security	BearerAuth
+func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseIDParam := ctx.Param("course-id")
+	courseID, courseIDErr := strconv.Atoi(courseIDParam)
+	if courseIDErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("course.errors.invalid_course_id"),
+		)
+	}
+	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
+	likes, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, uint(courseID))
+	if likesErr != nil {
+		return nil, likesErr
+	}
+	likeCount, likeCountErr := h.likeSvc.FetchCountByCourseID(uint(courseID))
+	if likeCountErr != nil {
+		return nil, likeCountErr
+	}
+	likesRes := types.NewPaginationRes(
+		dtores.MappedGetLikesPageableItem(likes),
+		page,
+		utils.CalculatePaginationTotalPage(likeCount),
+		likeCount,
+	)
+	return types.NewApiResponse(http.StatusOK, likesRes), nil
+}
+
+// CreateComment godoc
+//
+//	@Summary	Create a new comment
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		course-id	path		int						true	"Course ID"
+//	@Param		request		body		dtoreq.CreateCommentReq	true	" "
+//	@Success	201			{object}	types.ApiResponse{data=dtores.CreateCommentRes}
+//	@Failure	400			{object}	types.ApiError
+//	@Failure	401			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/{course-id}/comment [post]
+//	@Security	BearerAuth
+func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseIDParam := ctx.Param("course-id")
+	courseID, courseIDErr := strconv.Atoi(courseIDParam)
+	if courseIDErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("course.errors.invalid_course_id"),
+		)
+	}
+	dto := &dtoreq.CreateCommentReq{}
+	if err := ctx.Bind(dto); err != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("common.errors.invalid_request_body"),
+		)
+	}
+	if err := h.validationSvc.Validate(dto); err != nil {
+		return nil, err
+	}
+	dto.CourseId = uint(courseID)
+	authContext, _ := ctx.Get("AUTH")
+	comment, commentErr := h.commentSvc.Create(authContext, *dto)
+	if commentErr != nil {
+		return nil, commentErr
+	}
+	commentRes := dtores.NewCreateCommentRes(comment)
+	return types.NewApiResponse(http.StatusCreated, commentRes), nil
+}
+
+// DeleteComment godoc
+//
+//	@Summary	Delete a comment
+//	@Tags		courses
+//	@Accept		json
+//	@Produce	json
+//	@Param		comment-id	path		int	true	"Comment ID"
+//	@Param		course-id	path		int	true	"Course ID"
+//	@Success	200			{object}	types.ApiResponse
+//	@Failure	401			{object}	types.ApiError
+//	@Failure	404			{object}	types.ApiError
+//	@Failure	500			{object}	types.ApiError
+//	@Router		/courses/comments/{comment-id} [delete]
+//	@Security	BearerAuth
+func (h Handler) DeleteComment(ctx *gin.Context) (*types.ApiResponse, error) {
+	commentIdParam := ctx.Param("comment-id")
+	commentId, commentIdErr := strconv.Atoi(commentIdParam)
+	if commentIdErr != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("comment.errors.invalid_id"),
+		)
+	}
+	if err := h.commentSvc.Delete(uint(commentId)); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil
