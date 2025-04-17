@@ -89,6 +89,64 @@ definitions:
           $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem'
         type: array
     type: object
+  github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq:
+    properties:
+      content:
+        minLength: 3
+        type: string
+      courseId:
+        minimum: 1
+        type: integer
+      parentId:
+        type: integer
+    required:
+    - content
+    - courseId
+    type: object
+  github_com_ladmakhi81_learnup_internals_comment_dto_res.CreateCommentRes:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItem:
+    properties:
+      content:
+        type: string
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.getCourseItem'
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      isReport:
+        type: boolean
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.getUserItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_comment_dto_res.getCourseItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_comment_dto_res.getUserItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReq:
     properties:
       abilityToAddComment:
@@ -569,6 +627,39 @@ definitions:
       updatedAt:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemRes:
+    properties:
+      content:
+        type: string
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentCourseItem'
+      createdAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentUserItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentCourseItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentUserItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
     properties:
       firstName:
@@ -815,6 +906,127 @@ paths:
       summary: Get categories as a tree structure
       tags:
       - categories
+  /comments:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.CreateCommentRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Create a new comment
+      tags:
+      - comments
+  /comments/{comment-id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Comment ID
+        in: path
+        name: comment-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Delete a comment
+      tags:
+      - comments
+  /comments/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      row:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItem'
+                        type: array
+                    type: object
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated list of comments
+      tags:
+      - comments
   /courses:
     post:
       consumes:
@@ -1083,6 +1295,66 @@ paths:
       summary: Get paginated notifications
       tags:
       - notifications
+  /teacher/comments/{course-id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemRes'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated comments by course ID
+      tags:
+      - teacher
   /teacher/course:
     post:
       consumes:
