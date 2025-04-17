@@ -44,6 +44,15 @@
       "invalid_id": "شناسه ویدیو نادرست میباشد"
     }
   },
+  "comment": {
+    "errors": {
+      "sender_not_found": "کاربری با شماسه فرستنده یافت نشد",
+      "course_not_found": "دوره ای با این شناسه برای ثبت نظر یافت نشد",
+      "parent_comment_not_found": "نظری یافت نشد",
+      "not_found": "نظری با این شناسه یافت نشد",
+      "invalid_id": "شناسه نظر فرمت نادرستی دارد"
+    }
+  },
   "common": {
     "errors": {
       "invalid_request_body": "بدنه درخواست نادرست میباشد",

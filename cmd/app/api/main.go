@@ -8,33 +8,37 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/db"
 	"github.com/ladmakhi81/learnup/internals/auth"
-	authHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
+	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/internals/category"
-	categoryHandler "github.com/ladmakhi81/learnup/internals/category/handler"
+	categoryApiHandler "github.com/ladmakhi81/learnup/internals/category/handler"
 	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
+	"github.com/ladmakhi81/learnup/internals/comment"
+	commentApiHandler "github.com/ladmakhi81/learnup/internals/comment/handler"
+	commentRepository "github.com/ladmakhi81/learnup/internals/comment/repo"
+	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	"github.com/ladmakhi81/learnup/internals/course"
-	courseHandler "github.com/ladmakhi81/learnup/internals/course/handler"
+	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
 	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/notification"
-	notificationHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
+	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
-	teacherHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
+	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
-	tusHookHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
+	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
-	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
+	userApiHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/internals/video"
-	videoHandler "github.com/ladmakhi81/learnup/internals/video/handler"
+	videoApiHandler "github.com/ladmakhi81/learnup/internals/video/handler"
 	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
@@ -116,6 +120,7 @@ func main() {
 	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
 	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
 	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
+	commentRepo := commentRepository.NewCommentRepoImpl(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -135,30 +140,35 @@ func main() {
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
 	teacherCourseSvc := teacherService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
 	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(videoSvc, i18nTranslatorSvc, courseSvc, videoRepo)
+	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
+	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
 
 	// handlers
-	userAdminHandler := userHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
-	userAuthHandler := authHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
-	categoryAdminHandler := categoryHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseAdminHandler := courseHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
-	videoAdminHandler := videoHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
-	tusHandler := tusHookHandler.NewTusHookHandler(tusHookSvc)
-	notificationAdminHandler := notificationHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
-	teacherCourseHandler := teacherHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
-	teacherVideoHandler := teacherHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
+	userHandler := userApiHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
+	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
+	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
+	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc)
+	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
+	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
+	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
+	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
+	teacherVideoHandler := teacherApiHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
+	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc)
+	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
-	userModule := user.NewModule(userAdminHandler, middlewares)
-	authModule := auth.NewModule(userAuthHandler)
-	categoryModule := category.NewModule(categoryAdminHandler, middlewares)
-	courseModule := course.NewModule(courseAdminHandler, middlewares)
+	userModule := user.NewModule(userHandler, middlewares)
+	authModule := auth.NewModule(authHandler)
+	categoryModule := category.NewModule(categoryHandler, middlewares)
+	courseModule := course.NewModule(courseHandler, middlewares)
 	tusModule := tus.NewModule(tusHandler)
-	videoModule := video.NewModule(videoAdminHandler, middlewares)
-	notificationModule := notification.NewModule(notificationAdminHandler, middlewares)
-	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares)
+	videoModule := video.NewModule(videoHandler, middlewares)
+	notificationModule := notification.NewModule(notificationHandler, middlewares)
+	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler)
+	commentModule := comment.NewModule(commentHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -192,6 +202,7 @@ func main() {
 	videoModule.Register(api)
 	notificationModule.Register(api)
 	teacherModule.Register(api)
+	commentModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
