@@ -1,2 +1,3 @@
 Timestamp: 1744872083, URL: /api/courses/2/like, Location: LikeServiceImpl.Create, Message: Error in finding like by user id and course id - invalid value, should be pointer to struct or slice, TraceID: 198494c0-652b-4e45-b8e2-f4e1387a087a
 Timestamp: 1744872107, URL: /api/courses/2/like, Location: LikeServiceImpl.Create, Message: Error in finding like by user id and course id - invalid value, should be pointer to struct or slice, TraceID: 098098bd-0ef9-4230-ad38-631595b47957
+Timestamp: 1745041943, URL: /api/carts/, Location: CartServiceImpl.Create, Message: Error in creating cart items - ERROR: insert or update on table "_carts" violates foreign key constraint "fk__carts_course" (SQLSTATE 23503), TraceID: 21a5e03c-7ddf-4571-9a7d-8dc67fe0560a

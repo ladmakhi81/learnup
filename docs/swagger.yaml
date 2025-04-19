@@ -50,6 +50,45 @@ definitions:
       accessToken:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReq:
+    properties:
+      courseId:
+        minimum: 1
+        type: integer
+    required:
+    - courseId
+    type: object
+  github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartRes:
+    properties:
+      courseId:
+        type: integer
+      createdAt:
+        type: string
+      id:
+        type: integer
+      userId:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItem:
+    properties:
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.courseCartItem'
+      createdAt:
+        type: string
+      id:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_cart_dto_res.courseCartItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_category_dto_req.CreateCategoryReq:
     properties:
       name:
@@ -955,6 +994,112 @@ paths:
       summary: Login a user and return an access token
       tags:
       - auth
+  /carts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItem'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get all cart items for the authenticated user
+      tags:
+      - carts
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Add a new cart item
+      tags:
+      - carts
+  /carts/{cart-id}:
+    delete:
+      parameters:
+      - description: Cart ID
+        in: path
+        name: cart-id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Delete a cart item by ID
+      tags:
+      - carts
   /categories/:
     post:
       consumes:
