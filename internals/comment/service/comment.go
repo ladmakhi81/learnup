@@ -97,7 +97,7 @@ func (svc CommentServiceImpl) FindById(id uint) (*entities.Comment, error) {
 	if commentErr != nil {
 		return nil, types.NewServerError(
 			"Error in finding comment by id",
-			"CommentServiceImpl.FindById",
+			"CommentServiceImpl.FetchById",
 			commentErr,
 		)
 	}

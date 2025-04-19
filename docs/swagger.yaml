@@ -281,6 +281,17 @@ definitions:
       verifiedDate:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionRes:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      priority:
+        type: string
+    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes:
     properties:
       abilityToAddComment:
@@ -351,6 +362,27 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.userItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemRes:
+    properties:
+      content:
+        type: string
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.questionCourseItem'
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      priority:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.questionUserItem'
+      video:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.questionVideoItem'
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes:
     properties:
@@ -430,6 +462,31 @@ definitions:
       id:
         type: integer
       phone:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.questionCourseItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.questionUserItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.questionVideoItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      title:
         type: string
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.teacherUser:
@@ -520,6 +577,66 @@ definitions:
         type: string
       id:
         type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq:
+    properties:
+      content:
+        type: string
+    required:
+    - content
+    type: object
+  github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReq:
+    properties:
+      content:
+        minLength: 4
+        type: string
+      priority:
+        enum:
+        - high
+        - low
+        type: string
+      videoId:
+        type: integer
+    required:
+    - content
+    - priority
+    type: object
+  github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerRes:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      questionId:
+        type: integer
+      senderId:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswersRes:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      sender:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.senderItem'
+      updatedAt:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_question_dto_res.senderItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_teacher_dto_req.AddVideoToCourseReq:
     properties:
@@ -663,6 +780,27 @@ definitions:
       user:
         $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentUserItem'
     type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemRes:
+    properties:
+      content:
+        type: string
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionCourseItem'
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      priority:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionUserItem'
+      video:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionVideoItem'
+    type: object
   github_com_ladmakhi81_learnup_internals_teacher_dto_res.getCommentCourseItem:
     properties:
       description:
@@ -679,6 +817,31 @@ definitions:
       id:
         type: integer
       phone:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionCourseItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionUserItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_teacher_dto_res.questionVideoItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      title:
         type: string
     type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
@@ -1193,6 +1356,111 @@ paths:
       summary: Get paginated likes by course ID
       tags:
       - courses
+  /courses/{course-id}/question:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: question
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Create a new question for a course
+      tags:
+      - courses
+  /courses/{course-id}/questions:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: course-id
+        required: true
+        type: integer
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Number of items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemRes'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve paginated questions for a specific course
+      tags:
+      - courses
   /courses/{course-id}/verify:
     patch:
       consumes:
@@ -1426,6 +1694,100 @@ paths:
       summary: Get paginated notifications
       tags:
       - notifications
+  /questions/{question-id}/answer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: question-id
+        required: true
+        type: integer
+      - description: ' '
+        in: body
+        name: answer
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerRes'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+      security:
+      - BearerAuth: []
+      summary: Submit an answer to a question
+      tags:
+      - questions
+  /questions/{question-id}/answers:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: question-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswersRes'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve answers for a specific question
+      tags:
+      - questions
   /teacher/comments/{course-id}:
     get:
       consumes:
@@ -1579,6 +1941,65 @@ paths:
       security:
       - BearerAuth: []
       summary: Get teacher's courses
+      tags:
+      - teacher
+  /teacher/questions:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: query
+        name: course-id
+        type: integer
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      row:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemRes'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get questions by course ID for teacher
       tags:
       - teacher
   /teacher/video:

@@ -39,3 +39,10 @@ func NewNotFoundError(message string) *ClientError {
 		Message:    message,
 	}
 }
+
+func NewForbiddenAccessError(message string) *ClientError {
+	return &ClientError{
+		StatusCode: http.StatusForbidden,
+		Message:    message,
+	}
+}

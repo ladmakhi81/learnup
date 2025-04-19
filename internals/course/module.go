@@ -36,4 +36,6 @@ func (m Module) Register(api *gin.RouterGroup) {
 	coursesApi.GET("/:course-id/likes", utils.JsonHandler(m.courseHandler.FetchLikes))
 	coursesApi.POST("/:course-id/comment", utils.JsonHandler(m.courseHandler.CreateComment))
 	coursesApi.DELETE("/comments/:comment-id", utils.JsonHandler(m.courseHandler.DeleteComment))
+	coursesApi.POST("/:course-id/question", utils.JsonHandler(m.courseHandler.CreateQuestion))
+	coursesApi.GET("/:course-id/questions", utils.JsonHandler(m.courseHandler.GetQuestions))
 }

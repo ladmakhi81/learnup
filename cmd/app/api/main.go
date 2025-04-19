@@ -29,6 +29,10 @@ import (
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	"github.com/ladmakhi81/learnup/internals/question"
+	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
+	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
+	questionService "github.com/ladmakhi81/learnup/internals/question/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
 	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
@@ -124,6 +128,8 @@ func main() {
 	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
 	commentRepo := commentRepository.NewCommentRepoImpl(dbClient)
 	likeRepo := likeRepository.NewLikeRepoImpl(dbClient)
+	questionRepo := questionRepository.NewQuestionRepoImpl(dbClient)
+	questionAnswerRepo := questionRepository.NewQuestionAnswerRepoImpl(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -146,6 +152,9 @@ func main() {
 	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
 	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
 	likeSvc := likeService.NewLikeServiceImpl(likeRepo, userSvc, i18nTranslatorSvc, courseSvc)
+	questionSvc := questionService.NewQuestionServiceImpl(questionRepo, userSvc, courseSvc, i18nTranslatorSvc, videoSvc)
+	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(questionAnswerRepo, questionSvc, i18nTranslatorSvc, userSvc)
+	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(questionSvc, i18nTranslatorSvc, userSvc, courseSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -154,14 +163,16 @@ func main() {
 	userHandler := userApiHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc)
+	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc, questionSvc)
 	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
 	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
 	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
 	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
 	teacherVideoHandler := teacherApiHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
 	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc)
+	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc)
 	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
+	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
 	userModule := user.NewModule(userHandler, middlewares)
@@ -171,8 +182,9 @@ func main() {
 	tusModule := tus.NewModule(tusHandler)
 	videoModule := video.NewModule(videoHandler, middlewares)
 	notificationModule := notification.NewModule(notificationHandler, middlewares)
-	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler)
+	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler)
 	commentModule := comment.NewModule(commentHandler, middlewares)
+	questionModule := question.NewModule(questionHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -207,6 +219,7 @@ func main() {
 	notificationModule.Register(api)
 	teacherModule.Register(api)
 	commentModule.Register(api)
+	questionModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
