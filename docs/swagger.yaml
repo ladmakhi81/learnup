@@ -16,6 +16,16 @@ definitions:
     - CourseStatus_Done
     - CourseStatus_Pause
     - CourseStatus_Cancel
+  entities.OrderStatus:
+    enum:
+    - pending
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - OrderStatus_Pending
+    - OrderStatus_Success
+    - OrderStatus_Failed
   entities.VideoAccessLevel:
     enum:
     - private
@@ -616,6 +626,103 @@ definitions:
         type: string
       id:
         type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReq:
+    properties:
+      carts:
+        items:
+          type: integer
+        type: array
+    required:
+    - carts
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailRes:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      discountPrice:
+        type: number
+      finalPrice:
+        type: number
+      id:
+        type: integer
+      items:
+        items:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.orderItem'
+        type: array
+      status:
+        $ref: '#/definitions/entities.OrderStatus'
+      statusChangedAt:
+        type: string
+      totalPrice:
+        type: number
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.userOrderDetailItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItem:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      discountPrice:
+        type: number
+      finalPrice:
+        type: number
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/entities.OrderStatus'
+      statusChangedAt:
+        type: string
+      totalPrice:
+        type: number
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.userOrderItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.orderCourseItem:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.orderItem:
+    properties:
+      amount:
+        type: number
+      course:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.orderCourseItem'
+      id:
+        type: integer
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.userOrderDetailItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.userOrderItem:
+    properties:
+      fullName:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq:
     properties:
@@ -1839,6 +1946,129 @@ paths:
       summary: Get paginated notifications
       tags:
       - notifications
+  /orders:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        items:
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItem'
+                        type: array
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve paginated orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/types.ApiResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{order-id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ' '
+        in: path
+        name: order-id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Retrieve order details by ID
+      tags:
+      - orders
   /questions/{question-id}/answer:
     post:
       consumes:

@@ -7,10 +7,15 @@
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/entities/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities/order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/entities/order_item.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities/order_item.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/cart/repo/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/repo/cart.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/cart/service/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/service/cart.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
     </list>
@@ -57,7 +62,7 @@
     "git-widget-placeholder": "feat/cart__order",
     "go.import.settings.migrated": "true",
     "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/home/ladmakhi",
+    "last_opened_file_path": "/home/ladmakhi/Desktop/projects/golang-zibal-sample",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",

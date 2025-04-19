@@ -106,7 +106,10 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 	}
 	if dto.Price == nil {
 		course.Price = 0
+	} else {
+		course.Price = *dto.Price
 	}
+
 	if dto.Fee == nil {
 		course.Fee = 0
 	}

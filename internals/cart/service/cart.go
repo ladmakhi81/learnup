@@ -17,6 +17,7 @@ type CartService interface {
 	DeleteAllByUserID(userID uint) error
 	FetchAllByUserID(userID uint) ([]*entities.Cart, error)
 	FetchByUserAndCourse(userID uint, courseID uint) (*entities.Cart, error)
+	FetchByCartIDs(ids []uint) ([]*entities.Cart, error)
 }
 
 type CartServiceImpl struct {
@@ -164,4 +165,16 @@ func (svc CartServiceImpl) FetchByUserAndCourse(userID uint, courseID uint) (*en
 	}
 
 	return cart, nil
+}
+
+func (svc CartServiceImpl) FetchByCartIDs(ids []uint) ([]*entities.Cart, error) {
+	carts, cartsErr := svc.cartRepo.FetchByCartIDs(ids)
+	if cartsErr != nil {
+		return nil, types.NewServerError(
+			"Error in fetching carts by ids",
+			"CartServiceImpl.FetchByCartIDS",
+			cartsErr,
+		)
+	}
+	return carts, nil
 }

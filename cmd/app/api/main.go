@@ -33,6 +33,10 @@ import (
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	"github.com/ladmakhi81/learnup/internals/order"
+	orderApiHandler "github.com/ladmakhi81/learnup/internals/order/handler"
+	orderRepository "github.com/ladmakhi81/learnup/internals/order/repo"
+	orderService "github.com/ladmakhi81/learnup/internals/order/service"
 	"github.com/ladmakhi81/learnup/internals/question"
 	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
 	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
@@ -135,6 +139,8 @@ func main() {
 	questionRepo := questionRepository.NewQuestionRepoImpl(dbClient)
 	questionAnswerRepo := questionRepository.NewQuestionAnswerRepoImpl(dbClient)
 	cartRepo := cartRepository.NewCartRepo(dbClient)
+	orderRepo := orderRepository.NewOrderRepo(dbClient)
+	orderItemRepo := orderRepository.NewOrderItemRepo(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -161,6 +167,7 @@ func main() {
 	questionSvc := questionService.NewQuestionServiceImpl(questionRepo, userSvc, courseSvc, i18nTranslatorSvc, videoSvc)
 	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(questionAnswerRepo, questionSvc, i18nTranslatorSvc, userSvc)
 	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(questionSvc, i18nTranslatorSvc, userSvc, courseSvc)
+	orderSvc := orderService.NewOrderService(orderRepo, orderItemRepo, userSvc, cartSvc, i18nTranslatorSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -180,6 +187,7 @@ func main() {
 	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
 	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc)
 	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc)
+	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc)
 
 	// modules
 	userModule := user.NewModule(userHandler, middlewares)
@@ -193,6 +201,7 @@ func main() {
 	commentModule := comment.NewModule(commentHandler, middlewares)
 	questionModule := question.NewModule(questionHandler, middlewares)
 	cartModule := cart.NewModule(cartHandler, middlewares)
+	orderModule := order.NewModule(orderHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -229,6 +238,7 @@ func main() {
 	commentModule.Register(api)
 	questionModule.Register(api)
 	cartModule.Register(api)
+	orderModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 

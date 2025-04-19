@@ -14,6 +14,7 @@ type CartRepo interface {
 	FetchByUserAndCourse(userID uint, courseID uint) (*entities.Cart, error)
 	DeleteByID(id uint) error
 	DeleteAllByUserID(userID uint) error
+	FetchByCartIDs(ids []uint) ([]*entities.Cart, error)
 }
 
 type CartRepoImpl struct {
@@ -78,4 +79,16 @@ func (repo CartRepoImpl) FetchByUserAndCourse(userID uint, courseID uint) (*enti
 		return nil, tx.Error
 	}
 	return cart, nil
+}
+
+func (repo CartRepoImpl) FetchByCartIDs(ids []uint) ([]*entities.Cart, error) {
+	var carts []*entities.Cart
+	tx := repo.dbClient.Core.
+		Where("id IN (?)", ids).
+		Preload("Course").
+		Find(&carts)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return carts, nil
 }
