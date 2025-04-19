@@ -100,6 +100,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) error {
 			err,
 		)
 	}
+	//TODO: create payment
 	return nil
 }
 
