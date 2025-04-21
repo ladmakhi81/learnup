@@ -5,56 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
-      <change afterPath="$PROJECT_DIR$/db/entities/payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/entities/payment_gateway.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/entities/payment_status.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/entities/transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/entities/transaction_action.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/db/entities/transaction_type.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/order/dto/res/create_order.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/dto/req/create_payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/dto/req/verify_payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/dto/res/get_pageable_payments.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/handler/payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/module.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/repo/payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/payment/service/payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/dto/req/create_transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/dto/res/get_transactions_page.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/handler/transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/module.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/repo/transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internals/transaction/service/transaction.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pkg/stripe/v82/svc.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/db/entities.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docs/swagger.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/handler/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/comment/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/handler/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/handler/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/handler/notification.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/handler/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/handler/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/service/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/service/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/tus/service/tus.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/service/tus.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/error" beforeDir="false" afterPath="$PROJECT_DIR$/log/error" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/dtos/env.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/dtos/env.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/dtos/payment_gateway.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/dtos/payment_gateway.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/resty/v2/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/resty/v2/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/zarinpal/v1/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/zarinpal/v1/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/zibal/v1/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/zibal/v1/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/zibal/v1/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/zibal/v1/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/translations/fa.json" beforeDir="false" afterPath="$PROJECT_DIR$/translations/fa.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/pagination.go" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pagination.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,32 +39,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/cart__order&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/ladmakhi/Desktop/projects/golang-stripe-sample&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "refeactor/update__repository__layer",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/home/ladmakhi/Desktop/projects/golang-stripe-sample",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/db/repositories" />
       <recent name="$PROJECT_DIR$/internals/payment/dto/res" />
       <recent name="$PROJECT_DIR$/pkg/zarinpal/v1" />
       <recent name="$PROJECT_DIR$/db/entities" />
       <recent name="$PROJECT_DIR$/pkg" />
-      <recent name="$PROJECT_DIR$/pkg/services" />
     </key>
   </component>
   <component name="SharedIndexes">
