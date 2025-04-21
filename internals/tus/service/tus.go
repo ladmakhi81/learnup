@@ -80,7 +80,7 @@ func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.
 
 		if workflowErr != nil {
 			tus.logSvc.Error(dtos.LogMessage{
-				Message: "Error happen in workflow of video workflow svc",
+				Message: "Error happen in workflow of video workflow service",
 				Metadata: map[string]any{
 					"error": workflowErr,
 					"key":   objectId,
@@ -113,7 +113,7 @@ func (tus TusServiceImpl) AddIntroductionVideoWebhook(ctx context.Context, dto r
 		)
 		if workflowErr != nil {
 			tus.logSvc.Error(dtos.LogMessage{
-				Message: "Error happen in workflow of video workflow svc",
+				Message: "Error happen in workflow of video workflow service",
 				Metadata: map[string]any{
 					"error": workflowErr,
 					"key":   objectId,

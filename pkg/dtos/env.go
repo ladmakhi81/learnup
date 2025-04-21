@@ -39,6 +39,21 @@ type AppEnvConfig struct {
 	OPENAI_KEY     string `koanf:"openai_key"`
 }
 
+type ZarinpalEnvConfig struct {
+	Merchant    string `koanf:"merchant"`
+	CallbackURL string `koanf:"callback_url"`
+}
+
+type ZibalEnvConfig struct {
+	Merchant    string `koanf:"merchant"`
+	CallbackURL string `koanf:"callback_url"`
+}
+
+type StripeEnvConfig struct {
+	Key         string `koanf:"key"`
+	CallbackURL string `koanf:"callback_url"`
+}
+
 type EnvConfig struct {
 	Minio    MinioEnvConfig    `koanf:"minio"`
 	Redis    RedisEnvConfig    `koanf:"redis"`
@@ -46,4 +61,7 @@ type EnvConfig struct {
 	Smtp     SmtpEnvConfig     `koanf:"smtp"`
 	App      AppEnvConfig      `koanf:"app"`
 	Temporal TemporalEnvConfig `koanf:"temporal"`
+	Zarinpal ZarinpalEnvConfig `koanf:"zarinpal"`
+	Zibal    ZibalEnvConfig    `koanf:"zibal"`
+	Stripe   StripeEnvConfig   `koanf:"stripe"`
 }

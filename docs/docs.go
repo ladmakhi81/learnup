@@ -1604,7 +1604,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/types.ApiResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1675,6 +1687,85 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/page": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "Get paginated payments",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.PaginationRes"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/types.ApiError"
                         }
@@ -2281,6 +2372,85 @@ const docTemplate = `{
                 }
             }
         },
+        "/transactions/page": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get paginated transactions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "Items per page",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/definitions/types.PaginationRes"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "rows": {
+                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
         "/users/basic": {
             "post": {
                 "security": [
@@ -2441,6 +2611,45 @@ const docTemplate = `{
                 "OrderStatus_Pending",
                 "OrderStatus_Success",
                 "OrderStatus_Failed"
+            ]
+        },
+        "entities.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "PaymentStatus_Pending",
+                "PaymentStatus_Success",
+                "PaymentStatus_Failure"
+            ]
+        },
+        "entities.TransactionTag": {
+            "type": "string",
+            "enum": [
+                "sell",
+                "charge_wallet",
+                "deposit_wallet",
+                "salary_payment"
+            ],
+            "x-enum-varnames": [
+                "TransactionTag_Sell",
+                "TransactionTag_ChargeWallet",
+                "TransactionTag_DepositWallet",
+                "TransactionTag_SalaryPayment"
+            ]
+        },
+        "entities.TransactionType": {
+            "type": "string",
+            "enum": [
+                "withdraw",
+                "deposit"
+            ],
+            "x-enum-varnames": [
+                "TransactionType_Withdraw",
+                "TransactionType_Deposit"
             ]
         },
         "entities.VideoAccessLevel": {
@@ -3345,7 +3554,8 @@ const docTemplate = `{
         "github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReq": {
             "type": "object",
             "required": [
-                "carts"
+                "carts",
+                "gateway"
             ],
             "properties": {
                 "carts": {
@@ -3353,6 +3563,22 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "gateway": {
+                    "type": "string",
+                    "enum": [
+                        "zibal",
+                        "zarinpal",
+                        "stripe"
+                    ]
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes": {
+            "type": "object",
+            "properties": {
+                "payLink": {
+                    "type": "string"
                 }
             }
         },
@@ -3488,6 +3714,32 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "gateway": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/entities.PaymentStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
@@ -3880,6 +4132,35 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "tag": {
+                    "$ref": "#/definitions/entities.TransactionTag"
+                },
+                "type": {
+                    "$ref": "#/definitions/entities.TransactionType"
+                },
+                "user": {
                     "type": "string"
                 }
             }

@@ -1,6 +1,9 @@
 package dtoreq
 
+import "github.com/ladmakhi81/learnup/db/entities"
+
 type CreateOrderReq struct {
-	UserID uint   `json:"-"`
-	Carts  []uint `json:"carts" validate:"required,dive,gte=1"`
+	UserID  uint                    `json:"-"`
+	Carts   []uint                  `json:"carts" validate:"required,dive,gte=1"`
+	Gateway entities.PaymentGateway `json:"gateway" validate:"required,oneof=zibal zarinpal stripe"`
 }

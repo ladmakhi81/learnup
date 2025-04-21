@@ -12,20 +12,23 @@ import (
 
 type ZibalClient struct {
 	httpClient contracts.HttpClient
+	config     *dtos.EnvConfig
 }
 
 func NewZibalClient(
 	httpClient contracts.HttpClient,
+	config *dtos.EnvConfig,
 ) *ZibalClient {
 	return &ZibalClient{
 		httpClient: httpClient,
+		config:     config,
 	}
 }
 
 func (svc ZibalClient) CreateRequest(dto dtos.CreatePaymentGatewayDto) (*dtos.CreatePaymentGatewayResDto, error) {
 	body := CreateRequestDTO{
-		Merchant:    "zibal",
-		CallbackURL: dto.CallbackURL,
+		Merchant:    svc.config.Zibal.Merchant,
+		CallbackURL: svc.config.Zibal.CallbackURL,
 		Amount:      dto.Amount,
 	}
 	httpResp, httpRespErr := svc.httpClient.Post(dtos.PostRequestDTO{
@@ -53,9 +56,8 @@ func (svc ZibalClient) VerifyTransaction(dto dtos.VerifyTransactionDto) (*dtos.V
 	if parsedIDErr != nil {
 		return nil, parsedIDErr
 	}
-
 	body := VerifyRequestDTO{
-		Merchant: "zibal",
+		Merchant: svc.config.Zibal.Merchant,
 		TrackID:  parsedID,
 	}
 	httpResp, httpRespErr := svc.httpClient.Post(dtos.PostRequestDTO{

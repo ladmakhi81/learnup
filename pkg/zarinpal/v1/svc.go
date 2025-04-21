@@ -12,22 +12,25 @@ import (
 
 type ZarinpalClient struct {
 	httpClient contracts.HttpClient
+	config     *dtos.EnvConfig
 }
 
 func NewZarinpalClient(
 	httpClient contracts.HttpClient,
+	config *dtos.EnvConfig,
 ) *ZarinpalClient {
 	return &ZarinpalClient{
 		httpClient: httpClient,
+		config:     config,
 	}
 }
 
 func (svc ZarinpalClient) CreateRequest(dto dtos.CreatePaymentGatewayDto) (*dtos.CreatePaymentGatewayResDto, error) {
 	body := CreateRequestDTO{
 		Amount:      dto.Amount,
-		CallbackURL: dto.CallbackURL,
+		CallbackURL: svc.config.Zarinpal.CallbackURL,
 		Description: "...",
-		MerchantID:  "",
+		MerchantID:  svc.config.Zarinpal.Merchant,
 	}
 	httpResp, httpRespErr := svc.httpClient.Post(dtos.PostRequestDTO{
 		URL:  "https://sandbox.zarinpal.com/pg/v4/payment/request.json",
@@ -53,7 +56,7 @@ func (svc ZarinpalClient) VerifyTransaction(dto dtos.VerifyTransactionDto) (*dto
 	body := VerifyRequestDTO{
 		Amount:     dto.Amount,
 		Authority:  dto.ID,
-		MerchantID: "",
+		MerchantID: svc.config.Zarinpal.Merchant,
 	}
 	httpResp, httpRespErr := svc.httpClient.Post(dtos.PostRequestDTO{
 		URL:  "https://sandbox.zarinpal.com/pg/v4/payment/verify.json",

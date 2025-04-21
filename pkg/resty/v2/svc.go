@@ -18,7 +18,7 @@ func NewRestyHttpSvc() *RestyHttpSvc {
 func (svc RestyHttpSvc) Post(dto dtos.PostRequestDTO) (*dtos.HttpResponse, error) {
 	resp, respErr := svc.httpClient.R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(dto).
+		SetBody(dto.Body).
 		Post(dto.URL)
 	if respErr != nil {
 		return nil, dtos.NewHttpError(

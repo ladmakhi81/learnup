@@ -72,7 +72,7 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 	questionsRes := types.NewPaginationRes(
 		dtores.MapGetQuestionItemRes(questions),
 		page,
-		utils.CalculatePaginationTotalPage(questionsCount),
+		utils.CalculatePaginationTotalPage(questionsCount, pageSize),
 		questionsCount,
 	)
 	return types.NewApiResponse(http.StatusOK, questionsRes), nil

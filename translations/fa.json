@@ -1,4 +1,11 @@
 {
+  "payment": {
+    "errors": {
+      "gateway_not_found": "درگاه پرداختی یافت نشد",
+      "merchant_not_found": "شناسه درگاه پرداخت نادرست میباشد",
+      "not_found": "پرداخت یافت نشد"
+    }
+  },
   "order": {
     "errors": {
       "invalid_id": "شناسه سفارش نادرست میباشد"

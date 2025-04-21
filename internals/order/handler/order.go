@@ -30,12 +30,13 @@ func NewHandler(
 }
 
 // CreateOrder godoc
+//
 //	@Summary	Create a new order
 //	@Tags		orders
 //	@Accept		json
 //	@Produce	json
 //	@Param		order	body		orderDtoReq.CreateOrderReq	true	" "
-//	@Success	201		{object}	types.ApiResponse
+//	@Success	201		{object}	types.ApiResponse{data=orderDtoRes.CreateOrderRes}
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	401		{object}	types.ApiError
 //	@Failure	500		{object}	types.ApiError
@@ -55,14 +56,16 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 	authClaim := authContext.(*types.TokenClaim)
 	userID := authClaim.UserID
 	dto.UserID = userID
-	err := h.orderSvc.Create(*dto)
+	payLink, err := h.orderSvc.Create(*dto)
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	res := orderDtoRes.CreateOrderRes{PayLink: payLink}
+	return types.NewApiResponse(http.StatusCreated, res), nil
 }
 
 // GetOrdersPage godoc
+//
 //	@Summary	Retrieve paginated orders
 //	@Tags		orders
 //	@Accept		json
@@ -88,13 +91,14 @@ func (h Handler) GetOrdersPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	res := types.NewPaginationRes(
 		orderDtoRes.MapPaginatedOrderItems(orders),
 		page,
-		utils.CalculatePaginationTotalPage(orderCount),
+		utils.CalculatePaginationTotalPage(orderCount, pageSize),
 		orderCount,
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }
 
 // GetOrderByID godoc
+//
 //	@Summary	Retrieve order details by ID
 //	@Tags		orders
 //	@Accept		json

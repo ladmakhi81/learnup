@@ -26,6 +26,36 @@ definitions:
     - OrderStatus_Pending
     - OrderStatus_Success
     - OrderStatus_Failed
+  entities.PaymentStatus:
+    enum:
+    - pending
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - PaymentStatus_Pending
+    - PaymentStatus_Success
+    - PaymentStatus_Failure
+  entities.TransactionTag:
+    enum:
+    - sell
+    - charge_wallet
+    - deposit_wallet
+    - salary_payment
+    type: string
+    x-enum-varnames:
+    - TransactionTag_Sell
+    - TransactionTag_ChargeWallet
+    - TransactionTag_DepositWallet
+    - TransactionTag_SalaryPayment
+  entities.TransactionType:
+    enum:
+    - withdraw
+    - deposit
+    type: string
+    x-enum-varnames:
+    - TransactionType_Withdraw
+    - TransactionType_Deposit
   entities.VideoAccessLevel:
     enum:
     - private
@@ -633,8 +663,20 @@ definitions:
         items:
           type: integer
         type: array
+      gateway:
+        enum:
+        - zibal
+        - zarinpal
+        - stripe
+        type: string
     required:
     - carts
+    - gateway
+    type: object
+  github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes:
+    properties:
+      payLink:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailRes:
     properties:
@@ -723,6 +765,23 @@ definitions:
         type: integer
       phone:
         type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      gateway:
+        type: string
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/entities.PaymentStatus'
+      updatedAt:
+        type: string
+      userId:
+        type: integer
     type: object
   github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq:
     properties:
@@ -988,6 +1047,25 @@ definitions:
       id:
         type: integer
       title:
+        type: string
+    type: object
+  github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      currency:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+      tag:
+        $ref: '#/definitions/entities.TransactionTag'
+      type:
+        $ref: '#/definitions/entities.TransactionType'
+      user:
         type: string
     type: object
   github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq:
@@ -2013,7 +2091,12 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/types.ApiResponse'
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes'
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -2069,6 +2152,51 @@ paths:
       summary: Retrieve order details by ID
       tags:
       - orders
+  /payments/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem'
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated payments
+      tags:
+      - payments
   /questions/{question-id}/answer:
     post:
       consumes:
@@ -2421,6 +2549,51 @@ paths:
       summary: Add a new video to a course by teacher
       tags:
       - teacher
+  /transactions/page:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 0
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: Items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/types.ApiResponse'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/types.PaginationRes'
+                  - properties:
+                      rows:
+                        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem'
+                    type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ApiError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ApiError'
+      security:
+      - BearerAuth: []
+      summary: Get paginated transactions
+      tags:
+      - transactions
   /users/basic:
     post:
       consumes:

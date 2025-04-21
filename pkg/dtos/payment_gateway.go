@@ -1,8 +1,7 @@
 package dtos
 
 type CreatePaymentGatewayDto struct {
-	CallbackURL string
-	Amount      float64
+	Amount float64
 }
 
 type CreatePaymentGatewayResDto struct {

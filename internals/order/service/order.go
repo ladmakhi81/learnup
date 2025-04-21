@@ -5,13 +5,15 @@ import (
 	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
 	orderDtoReq "github.com/ladmakhi81/learnup/internals/order/dto/req"
 	orderRepository "github.com/ladmakhi81/learnup/internals/order/repo"
+	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
+	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type OrderService interface {
-	Create(dto orderDtoReq.CreateOrderReq) error
+	Create(dto orderDtoReq.CreateOrderReq) (string, error)
 	FetchPaginated(page, pageSize int) ([]*entities.Order, error)
 	FetchCount() (int, error)
 	FetchDetailById(id uint) (*entities.Order, error)
@@ -23,6 +25,7 @@ type OrderServiceImpl struct {
 	userSvc        userService.UserSvc
 	cartSvc        cartService.CartService
 	translationSvc contracts.Translator
+	paymentSvc     paymentService.PaymentService
 }
 
 func NewOrderService(
@@ -31,6 +34,7 @@ func NewOrderService(
 	userSvc userService.UserSvc,
 	cartSvc cartService.CartService,
 	translationSvc contracts.Translator,
+	paymentSvc paymentService.PaymentService,
 ) *OrderServiceImpl {
 	return &OrderServiceImpl{
 		orderRepo:      orderRepo,
@@ -38,25 +42,26 @@ func NewOrderService(
 		cartSvc:        cartSvc,
 		translationSvc: translationSvc,
 		orderItemRepo:  orderItemRepo,
+		paymentSvc:     paymentSvc,
 	}
 }
 
-func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) error {
+func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
 	user, userErr := svc.userSvc.FindById(dto.UserID)
 	if userErr != nil {
-		return userErr
+		return "", userErr
 	}
 	if user == nil {
-		return types.NewNotFoundError(
+		return "", types.NewNotFoundError(
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
 	carts, cartsErr := svc.cartSvc.FetchByCartIDs(dto.Carts)
 	if cartsErr != nil {
-		return cartsErr
+		return "", cartsErr
 	}
 	if len(carts) != len(dto.Carts) || len(carts) == 0 {
-		return types.NewNotFoundError(
+		return "", types.NewNotFoundError(
 			svc.translationSvc.Translate("cart.errors.list_not_match"),
 		)
 	}
@@ -68,7 +73,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) error {
 		Status:        entities.OrderStatus_Pending,
 	}
 	if err := svc.orderRepo.Create(order); err != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in creating order",
 			"OrderServiceImpl.Create",
 			err,
@@ -86,22 +91,34 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) error {
 		totalAmount += cart.Course.Price
 	}
 	if err := svc.orderItemRepo.CreateBatch(orderItems); err != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in batch insert order items",
 			"OrderItemRepo.CreateBatch",
 			err,
 		)
 	}
 	order.TotalPrice = totalAmount
+	order.FinalPrice = totalAmount
 	if err := svc.orderRepo.Update(order); err != nil {
-		return types.NewServerError(
+		return "", types.NewServerError(
 			"Error in updating order",
 			"OrderServiceImpl.Create",
 			err,
 		)
 	}
-	//TODO: create payment
-	return nil
+	payment, paymentErr := svc.paymentSvc.Create(paymentDtoReq.CreatePaymentReq{
+		Gateway: dto.Gateway,
+		UserID:  user.ID,
+		OrderID: order.ID,
+		Amount:  totalAmount,
+	})
+	if paymentErr != nil {
+		return "", paymentErr
+	}
+	if err := svc.cartSvc.DeleteAllByUserID(user.ID); err != nil {
+		return "", err
+	}
+	return payment.PayLink, nil
 }
 
 func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Order, error) {

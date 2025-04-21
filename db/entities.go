@@ -18,5 +18,7 @@ func LoadEntities() map[string]any {
 		"cart":            &entities.Cart{},
 		"order":           &entities.Order{},
 		"order_items":     &entities.OrderItem{},
+		"payment":         &entities.Payment{},
+		"transaction":     &entities.Transaction{},
 	}
 }
