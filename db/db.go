@@ -38,12 +38,11 @@ func (db *Database) Connect() error {
 	sqlDb.SetConnMaxLifetime(time.Minute * 30)
 
 	entities := make([]any, 0)
-	for entityName, entity := range LoadEntities() {
-		fmt.Printf("Adding entity %s : %+v\n", entityName, entity)
+	for _, entity := range LoadEntities() {
 		entities = append(entities, entity)
 	}
 
-	if err := coreDb.AutoMigrate(entities...); err != nil {
+	if err := coreDb.Debug().AutoMigrate(entities...); err != nil {
 		return err
 	}
 	db.Core = coreDb

@@ -74,7 +74,7 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 	commentsRes := types.NewPaginationRes(
 		dtores.MappedGetCommentPageableItemsRes(comments),
 		page,
-		utils.CalculatePaginationTotalPage(commentCount),
+		utils.CalculatePaginationTotalPage(commentCount, pageSize),
 		commentCount,
 	)
 	return types.NewApiResponse(http.StatusOK, commentsRes), nil

@@ -95,7 +95,7 @@ func (h CourseHandler) FetchCourses(ctx *gin.Context) (*types.ApiResponse, error
 	coursesRes := types.NewPaginationRes(
 		dtores.MapCoursesToFetchCourseItemRes(courses),
 		page,
-		utils.CalculatePaginationTotalPage(coursesCount),
+		utils.CalculatePaginationTotalPage(coursesCount, pageSize),
 		coursesCount,
 	)
 	return types.NewApiResponse(http.StatusOK, coursesRes), nil

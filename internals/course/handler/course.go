@@ -137,7 +137,7 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 	paginationRes := types.NewPaginationRes(
 		mappedCourses,
 		page,
-		utils.CalculatePaginationTotalPage(coursesCount),
+		utils.CalculatePaginationTotalPage(coursesCount, pageSize),
 		coursesCount,
 	)
 	return types.NewApiResponse(http.StatusOK, paginationRes), nil
@@ -314,7 +314,7 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 	likesRes := types.NewPaginationRes(
 		questionDtoRes.MappedGetLikesPageableItem(likes),
 		page,
-		utils.CalculatePaginationTotalPage(likeCount),
+		utils.CalculatePaginationTotalPage(likeCount, pageSize),
 		likeCount,
 	)
 	return types.NewApiResponse(http.StatusOK, likesRes), nil
@@ -470,7 +470,7 @@ func (h Handler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, error) {
 	questionRes := types.NewPaginationRes(
 		questionDtoRes.MapGetQuestionItemRes(questions),
 		page,
-		utils.CalculatePaginationTotalPage(questionCount),
+		utils.CalculatePaginationTotalPage(questionCount, pageSize),
 		questionCount,
 	)
 	return types.NewApiResponse(http.StatusOK, questionRes), nil

@@ -56,7 +56,7 @@ func (h Handler) GetCommentsPageable(ctx *gin.Context) (*types.ApiResponse, erro
 	commentsRes := types.NewPaginationRes(
 		dtores.NewGetCommentsPageableItem(comments),
 		page,
-		utils.CalculatePaginationTotalPage(commentsCount),
+		utils.CalculatePaginationTotalPage(commentsCount, pageSize),
 		commentsCount,
 	)
 	return types.NewApiResponse(http.StatusOK, commentsRes), nil

@@ -117,7 +117,7 @@ func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 	pageableCategoryRes := types.NewPaginationRes(
 		pageableCategoryItems,
 		page,
-		utils.CalculatePaginationTotalPage(categoriesCount),
+		utils.CalculatePaginationTotalPage(categoriesCount, pageSize),
 		categoriesCount,
 	)
 

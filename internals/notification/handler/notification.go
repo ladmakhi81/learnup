@@ -80,7 +80,7 @@ func (h Handler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, err
 		mappedNotifications,
 		page,
 		notificationsCount,
-		utils.CalculatePaginationTotalPage(notificationsCount),
+		utils.CalculatePaginationTotalPage(notificationsCount, pageSize),
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

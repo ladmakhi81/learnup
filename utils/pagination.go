@@ -20,6 +20,6 @@ func ExtractPaginationMetadata(pageParam, pageSizeParam string) (int, int) {
 	return page, pageSize
 }
 
-func CalculatePaginationTotalPage(totalCount int) int {
-	return int(math.Ceil(float64(totalCount) / float64(DEFAULT_PAGE_SIZE)))
+func CalculatePaginationTotalPage(totalCount int, pageSize int) int {
+	return int(math.Ceil(float64(totalCount) / float64(pageSize)))
 }

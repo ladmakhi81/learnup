@@ -10,6 +10,10 @@ import (
 	"github.com/ladmakhi81/learnup/internals/auth"
 	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
+	"github.com/ladmakhi81/learnup/internals/cart"
+	cartApiHandler "github.com/ladmakhi81/learnup/internals/cart/handler"
+	cartRepository "github.com/ladmakhi81/learnup/internals/cart/repo"
+	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
 	"github.com/ladmakhi81/learnup/internals/category"
 	categoryApiHandler "github.com/ladmakhi81/learnup/internals/category/handler"
 	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
@@ -29,6 +33,14 @@ import (
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
+	"github.com/ladmakhi81/learnup/internals/order"
+	orderApiHandler "github.com/ladmakhi81/learnup/internals/order/handler"
+	orderRepository "github.com/ladmakhi81/learnup/internals/order/repo"
+	orderService "github.com/ladmakhi81/learnup/internals/order/service"
+	"github.com/ladmakhi81/learnup/internals/payment"
+	paymentApiHandler "github.com/ladmakhi81/learnup/internals/payment/handler"
+	paymentRepository "github.com/ladmakhi81/learnup/internals/payment/repo"
+	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
 	"github.com/ladmakhi81/learnup/internals/question"
 	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
 	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
@@ -36,6 +48,10 @@ import (
 	"github.com/ladmakhi81/learnup/internals/teacher"
 	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
+	"github.com/ladmakhi81/learnup/internals/transaction"
+	transactionApiHandler "github.com/ladmakhi81/learnup/internals/transaction/handler"
+	transactionRepository "github.com/ladmakhi81/learnup/internals/transaction/repo"
+	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
 	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
@@ -56,9 +72,13 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/logrus/v1"
 	"github.com/ladmakhi81/learnup/pkg/minio/v7"
 	"github.com/ladmakhi81/learnup/pkg/redis/v6"
+	restyv2 "github.com/ladmakhi81/learnup/pkg/resty/v2"
+	stripev82 "github.com/ladmakhi81/learnup/pkg/stripe/v82"
 	"github.com/ladmakhi81/learnup/pkg/temporal"
 	"github.com/ladmakhi81/learnup/pkg/temporal/v1"
 	"github.com/ladmakhi81/learnup/pkg/validator/v10"
+	zarinpalv1 "github.com/ladmakhi81/learnup/pkg/zarinpal/v1"
+	zibalv1 "github.com/ladmakhi81/learnup/pkg/zibal/v1"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -130,6 +150,11 @@ func main() {
 	likeRepo := likeRepository.NewLikeRepoImpl(dbClient)
 	questionRepo := questionRepository.NewQuestionRepoImpl(dbClient)
 	questionAnswerRepo := questionRepository.NewQuestionAnswerRepoImpl(dbClient)
+	cartRepo := cartRepository.NewCartRepo(dbClient)
+	orderRepo := orderRepository.NewOrderRepo(dbClient)
+	orderItemRepo := orderRepository.NewOrderItemRepo(dbClient)
+	paymentRepo := paymentRepository.NewPaymentRepo(dbClient)
+	transactionRepo := transactionRepository.NewTransactionRepo(dbClient)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -152,9 +177,20 @@ func main() {
 	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
 	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
 	likeSvc := likeService.NewLikeServiceImpl(likeRepo, userSvc, i18nTranslatorSvc, courseSvc)
+	cartSvc := cartService.NewCartService(cartRepo, i18nTranslatorSvc, userSvc, courseSvc)
 	questionSvc := questionService.NewQuestionServiceImpl(questionRepo, userSvc, courseSvc, i18nTranslatorSvc, videoSvc)
 	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(questionAnswerRepo, questionSvc, i18nTranslatorSvc, userSvc)
 	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(questionSvc, i18nTranslatorSvc, userSvc, courseSvc)
+	restyHttpClient := restyv2.NewRestyHttpSvc()
+	zarinpalSvc := zarinpalv1.NewZarinpalClient(restyHttpClient, config)
+	zibalSvc := zibalv1.NewZibalClient(restyHttpClient, config)
+	stripeSvc, stripeSvcErr := stripev82.NewStripeClient(config)
+	if stripeSvcErr != nil {
+		panic("stripe client error occured")
+	}
+	transactionSvc := transactionService.NewTransactionService(transactionRepo)
+	paymentSvc := paymentService.NewPaymentService(zarinpalSvc, zibalSvc, stripeSvc, paymentRepo, config, i18nTranslatorSvc, transactionSvc)
+	orderSvc := orderService.NewOrderService(orderRepo, orderItemRepo, userSvc, cartSvc, i18nTranslatorSvc, paymentSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -173,6 +209,10 @@ func main() {
 	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc)
 	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
 	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc)
+	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc)
+	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc)
+	paymentHandler := paymentApiHandler.NewHandler(paymentSvc)
+	transactionHandler := transactionApiHandler.NewHandler(transactionSvc)
 
 	// modules
 	userModule := user.NewModule(userHandler, middlewares)
@@ -185,6 +225,10 @@ func main() {
 	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler)
 	commentModule := comment.NewModule(commentHandler, middlewares)
 	questionModule := question.NewModule(questionHandler, middlewares)
+	cartModule := cart.NewModule(cartHandler, middlewares)
+	orderModule := order.NewModule(orderHandler, middlewares)
+	paymentModule := payment.NewModule(paymentHandler, middlewares)
+	transactionModule := transaction.NewModule(transactionHandler, middlewares)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -220,6 +264,10 @@ func main() {
 	teacherModule.Register(api)
 	commentModule.Register(api)
 	questionModule.Register(api)
+	cartModule.Register(api)
+	orderModule.Register(api)
+	paymentModule.Register(api)
+	transactionModule.Register(api)
 
 	log.Printf("the server running on %s \n", port)
 
