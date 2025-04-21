@@ -84,19 +84,15 @@ func (h CourseHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error
 func (h CourseHandler) FetchCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 	authContext, _ := ctx.Get("AUTH")
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Param("page"), ctx.Param("pageSize"))
-	courses, coursesErr := h.courseSvc.FetchByTeacherId(authContext, page, pageSize)
+	courses, count, coursesErr := h.courseSvc.FetchByTeacherId(authContext, page, pageSize)
 	if coursesErr != nil {
 		return nil, coursesErr
-	}
-	coursesCount, coursesCountErr := h.courseSvc.FetchCountByTeacherId(authContext)
-	if coursesCountErr != nil {
-		return nil, coursesCountErr
 	}
 	coursesRes := types.NewPaginationRes(
 		dtores.MapCoursesToFetchCourseItemRes(courses),
 		page,
-		utils.CalculatePaginationTotalPage(coursesCount, pageSize),
-		coursesCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, coursesRes), nil
 }

@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
 type GetCategoriesTreeItem struct {

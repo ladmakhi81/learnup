@@ -1,65 +1,65 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	"github.com/ladmakhi81/learnup/internals/db"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	dtoreq "github.com/ladmakhi81/learnup/internals/like/dto/req"
-	"github.com/ladmakhi81/learnup/internals/like/repo"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type LikeService interface {
 	Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error)
-	FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, error)
-	FetchCountByCourseID(courseId uint) (int, error)
+	FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, int, error)
 }
 
 type LikeServiceImpl struct {
-	likeRepo       repo.LikeRepo
-	userSvc        userService.UserSvc
+	repo           *db.Repositories
 	translationSvc contracts.Translator
-	courseService  courseService.CourseService
 }
 
 func NewLikeServiceImpl(
-	likeRepo repo.LikeRepo,
-	userSvc userService.UserSvc,
+	repo *db.Repositories,
 	translationSvc contracts.Translator,
-	courseService courseService.CourseService,
 ) *LikeServiceImpl {
 	return &LikeServiceImpl{
-		likeRepo:       likeRepo,
-		userSvc:        userSvc,
+		repo:           repo,
 		translationSvc: translationSvc,
-		courseService:  courseService,
 	}
 }
 
 func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.userSvc.FindById(authClaim.UserID)
+	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID)
 	if userErr != nil {
-		return nil, userErr
+		return nil, types.NewServerError(
+			"Error in fetching logged in user",
+			"LikeServiceImpl.Create",
+			userErr,
+		)
 	}
 	if user == nil {
 		return nil, types.NewNotFoundError(
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := svc.courseService.FindById(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
 	if courseErr != nil {
-		return nil, courseErr
+		return nil, types.NewServerError(
+			"Error in fetching course detail",
+			"LikeServiceImpl.Create",
+			courseErr,
+		)
 	}
 	if course == nil {
 		return nil, types.NewNotFoundError(
 			svc.translationSvc.Translate("course.errors.not_found"),
 		)
 	}
-	likedBefore, likedBeforeErr := svc.likeRepo.FindOne(repo.FindOneLikeOptions{
-		UserID:   &user.ID,
-		CourseID: &course.ID,
+	likedBefore, likedBeforeErr := svc.repo.LikeRepo.GetOne(map[string]any{
+		"user_id":   user.ID,
+		"course_id": course.ID,
 	})
 	if likedBeforeErr != nil {
 		return nil, types.NewServerError(
@@ -70,7 +70,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 	}
 	if likedBefore != nil {
 		likedBefore.Type = dto.Type
-		updateErr := svc.likeRepo.Update(likedBefore)
+		updateErr := svc.repo.LikeRepo.Update(likedBefore)
 		if updateErr != nil {
 			return nil, types.NewServerError(
 				"Error in updating like type",
@@ -85,7 +85,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 		CourseID: course.ID,
 		Type:     dto.Type,
 	}
-	if err := svc.likeRepo.Create(like); err != nil {
+	if err := svc.repo.LikeRepo.Create(like); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating like entity for course",
 			"LikeServiceImpl.Create",
@@ -95,35 +95,21 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 	return like, nil
 }
 
-func (svc LikeServiceImpl) FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, error) {
-	likes, likesErr := svc.likeRepo.Fetch(
-		repo.FetchLikeOptions{
-			PageSize: &pageSize,
-			Page:     &page,
-			CourseID: &courseId,
-			Preloads: []string{"User"},
+func (svc LikeServiceImpl) FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, int, error) {
+	likes, count, likesErr := svc.repo.LikeRepo.GetPaginated(repositories.GetPaginatedOptions{
+		Offset: &page,
+		Limit:  &pageSize,
+		Conditions: map[string]any{
+			"course_id": courseId,
 		},
-	)
+		Relations: []string{"User"},
+	})
 	if likesErr != nil {
-		return nil, types.NewServerError(
+		return nil, 0, types.NewServerError(
 			"Error in fetching likes",
 			"LikeServiceImpl.Fetch",
 			likesErr,
 		)
 	}
-	return likes, nil
-}
-
-func (svc LikeServiceImpl) FetchCountByCourseID(courseId uint) (int, error) {
-	count, countErr := svc.likeRepo.FetchCount(
-		repo.FetchCountLikeOptions{CourseID: &courseId},
-	)
-	if countErr != nil {
-		return 0, types.NewServerError(
-			"Error in fetching count of likes",
-			"LikeServiceImpl.FetchCount",
-			countErr,
-		)
-	}
-	return count, nil
+	return likes, count, nil
 }

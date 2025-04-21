@@ -67,20 +67,16 @@ func (h Handler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, err
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	notifications, notificationsErr := h.notificationSvc.FetchPageable(page, pageSize)
+	notifications, count, notificationsErr := h.notificationSvc.FetchPageable(page, pageSize)
 	if notificationsErr != nil {
 		return nil, notificationsErr
-	}
-	notificationsCount, notificationsCountErr := h.notificationSvc.FetchCount()
-	if notificationsCountErr != nil {
-		return nil, notificationsCountErr
 	}
 	mappedNotifications := dtores.NewNotificationPageItems(notifications)
 	res := types.NewPaginationRes(
 		mappedNotifications,
 		page,
-		notificationsCount,
-		utils.CalculatePaginationTotalPage(notificationsCount, pageSize),
+		count,
+		utils.CalculatePaginationTotalPage(count, pageSize),
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

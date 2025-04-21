@@ -1,12 +1,14 @@
 package dtoreq
 
-import "github.com/ladmakhi81/learnup/db/entities"
+import (
+	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+)
 
 type CreateTransactionReq struct {
 	Amount   float64
 	User     string
 	Phone    string
-	Type     entities.TransactionType
-	Tag      entities.TransactionTag
+	Type     entities2.TransactionType
+	Tag      entities2.TransactionTag
 	Currency string
 }

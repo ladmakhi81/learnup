@@ -1,6 +1,8 @@
 package dtores
 
-import "github.com/ladmakhi81/learnup/db/entities"
+import (
+	"github.com/ladmakhi81/learnup/internals/db/entities"
+)
 
 type AddVideoToCourseRes struct {
 	ID          uint                      `json:"id"`

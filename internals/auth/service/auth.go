@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/ladmakhi81/learnup/internals/auth/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/auth/dto/req"
-	"github.com/ladmakhi81/learnup/internals/user/service"
+	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"golang.org/x/crypto/bcrypt"
@@ -14,30 +14,36 @@ type AuthService interface {
 }
 
 type AuthServiceImpl struct {
-	userSvc        service.UserSvc
 	cacheSvc       contracts.Cache
 	tokenSvc       contracts.Token
 	translationSvc contracts.Translator
+	repo           *db.Repositories
 }
 
 func NewAuthServiceImpl(
-	userSvc service.UserSvc,
 	cacheSvc contracts.Cache,
 	tokenSvc contracts.Token,
 	translationSvc contracts.Translator,
+	repo *db.Repositories,
 ) *AuthServiceImpl {
 	return &AuthServiceImpl{
-		userSvc:        userSvc,
 		cacheSvc:       cacheSvc,
 		tokenSvc:       tokenSvc,
 		translationSvc: translationSvc,
+		repo:           repo,
 	}
 }
 
 func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
-	user, userErr := svc.userSvc.FindByPhone(dto.Phone)
+	user, userErr := svc.repo.UserRepo.GetOne(map[string]any{
+		"phone_number": dto.Phone,
+	})
 	if userErr != nil {
-		return "", userErr
+		return "", types.NewServerError(
+			"Error in fetching user by phone number",
+			"AuthServiceImpl.Login",
+			userErr,
+		)
 	}
 	if user == nil {
 		return "", types.NewNotFoundError(

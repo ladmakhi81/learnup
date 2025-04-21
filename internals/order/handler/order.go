@@ -80,19 +80,15 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/orders [get]
 func (h Handler) GetOrdersPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	orders, ordersErr := h.orderSvc.FetchPaginated(page, pageSize)
+	orders, count, ordersErr := h.orderSvc.FetchPaginated(page, pageSize)
 	if ordersErr != nil {
 		return nil, ordersErr
-	}
-	orderCount, orderCountErr := h.orderSvc.FetchCount()
-	if orderCountErr != nil {
-		return nil, orderCountErr
 	}
 	res := types.NewPaginationRes(
 		orderDtoRes.MapPaginatedOrderItems(orders),
 		page,
-		utils.CalculatePaginationTotalPage(orderCount, pageSize),
-		orderCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

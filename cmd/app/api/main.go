@@ -6,62 +6,50 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/go-redis/redis"
-	"github.com/ladmakhi81/learnup/db"
 	"github.com/ladmakhi81/learnup/internals/auth"
 	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/internals/cart"
 	cartApiHandler "github.com/ladmakhi81/learnup/internals/cart/handler"
-	cartRepository "github.com/ladmakhi81/learnup/internals/cart/repo"
 	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
 	"github.com/ladmakhi81/learnup/internals/category"
 	categoryApiHandler "github.com/ladmakhi81/learnup/internals/category/handler"
-	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	"github.com/ladmakhi81/learnup/internals/comment"
 	commentApiHandler "github.com/ladmakhi81/learnup/internals/comment/handler"
-	commentRepository "github.com/ladmakhi81/learnup/internals/comment/repo"
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	"github.com/ladmakhi81/learnup/internals/course"
 	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
-	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	likeRepository "github.com/ladmakhi81/learnup/internals/like/repo"
+	"github.com/ladmakhi81/learnup/internals/db"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/notification"
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
-	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/order"
 	orderApiHandler "github.com/ladmakhi81/learnup/internals/order/handler"
-	orderRepository "github.com/ladmakhi81/learnup/internals/order/repo"
 	orderService "github.com/ladmakhi81/learnup/internals/order/service"
 	"github.com/ladmakhi81/learnup/internals/payment"
 	paymentApiHandler "github.com/ladmakhi81/learnup/internals/payment/handler"
-	paymentRepository "github.com/ladmakhi81/learnup/internals/payment/repo"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
 	"github.com/ladmakhi81/learnup/internals/question"
 	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
-	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
 	questionService "github.com/ladmakhi81/learnup/internals/question/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
 	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/transaction"
 	transactionApiHandler "github.com/ladmakhi81/learnup/internals/transaction/handler"
-	transactionRepository "github.com/ladmakhi81/learnup/internals/transaction/repo"
 	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
 	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userApiHandler "github.com/ladmakhi81/learnup/internals/user/handler"
-	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/internals/video"
 	videoApiHandler "github.com/ladmakhi81/learnup/internals/video/handler"
-	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
@@ -140,21 +128,7 @@ func main() {
 	// swagger documentation
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// repos
-	categoryRepo := categoryRepository.NewCategoryRepoImpl(dbClient)
-	userRepo := userRepository.NewUserRepoImpl(dbClient)
-	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
-	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
-	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
-	commentRepo := commentRepository.NewCommentRepoImpl(dbClient)
-	likeRepo := likeRepository.NewLikeRepoImpl(dbClient)
-	questionRepo := questionRepository.NewQuestionRepoImpl(dbClient)
-	questionAnswerRepo := questionRepository.NewQuestionAnswerRepoImpl(dbClient)
-	cartRepo := cartRepository.NewCartRepo(dbClient)
-	orderRepo := orderRepository.NewOrderRepo(dbClient)
-	orderItemRepo := orderRepository.NewOrderItemRepo(dbClient)
-	paymentRepo := paymentRepository.NewPaymentRepo(dbClient)
-	transactionRepo := transactionRepository.NewTransactionRepo(dbClient)
+	repositories := db.NewRepositories(dbClient.Core)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
@@ -162,25 +136,25 @@ func main() {
 	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
 	redisSvc := redisv6.NewRedisClientSvc(redisClient)
 	tokenSvc := jwtv5.NewJwtSvc(config)
-	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
-	notificationSvc := notificationService.NewNotificationServiceImpl(notificationRepo, userSvc, i18nTranslatorSvc)
+	userSvc := userService.NewUserSvcImpl(repositories, i18nTranslatorSvc)
+	notificationSvc := notificationService.NewNotificationServiceImpl(repositories, i18nTranslatorSvc)
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
-	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
-	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
-	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc, notificationSvc)
+	authSvc := authService.NewAuthServiceImpl(redisSvc, tokenSvc, i18nTranslatorSvc, repositories)
+	categorySvc := categoryService.NewCategoryServiceImpl(repositories, i18nTranslatorSvc)
+	courseSvc := courseService.NewCourseServiceImpl(repositories, i18nTranslatorSvc)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc, userSvc)
+	videoSvc := videoService.NewVideoServiceImpl(repositories, minioSvc, ffmpegSvc, logrusSvc, i18nTranslatorSvc)
 	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc, courseSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
-	teacherCourseSvc := teacherService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
-	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(videoSvc, i18nTranslatorSvc, courseSvc, videoRepo)
-	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
-	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
-	likeSvc := likeService.NewLikeServiceImpl(likeRepo, userSvc, i18nTranslatorSvc, courseSvc)
-	cartSvc := cartService.NewCartService(cartRepo, i18nTranslatorSvc, userSvc, courseSvc)
-	questionSvc := questionService.NewQuestionServiceImpl(questionRepo, userSvc, courseSvc, i18nTranslatorSvc, videoSvc)
-	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(questionAnswerRepo, questionSvc, i18nTranslatorSvc, userSvc)
-	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(questionSvc, i18nTranslatorSvc, userSvc, courseSvc)
+	teacherCourseSvc := teacherService.NewTeacherCourseServiceImpl(repositories, i18nTranslatorSvc)
+	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(repositories, i18nTranslatorSvc)
+	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(repositories, i18nTranslatorSvc)
+	commentSvc := commentService.NewCommentServiceImpl(repositories, i18nTranslatorSvc)
+	likeSvc := likeService.NewLikeServiceImpl(repositories, i18nTranslatorSvc)
+	cartSvc := cartService.NewCartService(repositories, i18nTranslatorSvc)
+	questionSvc := questionService.NewQuestionServiceImpl(repositories, i18nTranslatorSvc)
+	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(repositories, i18nTranslatorSvc)
+	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(repositories, i18nTranslatorSvc)
 	restyHttpClient := restyv2.NewRestyHttpSvc()
 	zarinpalSvc := zarinpalv1.NewZarinpalClient(restyHttpClient, config)
 	zibalSvc := zibalv1.NewZibalClient(restyHttpClient, config)
@@ -188,9 +162,9 @@ func main() {
 	if stripeSvcErr != nil {
 		panic("stripe client error occured")
 	}
-	transactionSvc := transactionService.NewTransactionService(transactionRepo)
-	paymentSvc := paymentService.NewPaymentService(zarinpalSvc, zibalSvc, stripeSvc, paymentRepo, config, i18nTranslatorSvc, transactionSvc)
-	orderSvc := orderService.NewOrderService(orderRepo, orderItemRepo, userSvc, cartSvc, i18nTranslatorSvc, paymentSvc)
+	transactionSvc := transactionService.NewTransactionService(repositories)
+	paymentSvc := paymentService.NewPaymentService(repositories, zarinpalSvc, zibalSvc, stripeSvc, config, i18nTranslatorSvc)
+	orderSvc := orderService.NewOrderService(repositories, i18nTranslatorSvc, paymentSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
@@ -237,7 +211,6 @@ func main() {
 		videoSvc.CalculateDuration,
 		videoSvc.Encode,
 		videoSvc.UpdateURLAndDuration,
-		notificationSvc.Create,
 		videoSvc.CreateCompleteUploadVideoNotification,
 	); err != nil {
 		log.Printf("Error in add worker: %+v", err)

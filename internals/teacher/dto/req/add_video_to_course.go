@@ -1,6 +1,8 @@
 package dtoreq
 
-import "github.com/ladmakhi81/learnup/db/entities"
+import (
+	"github.com/ladmakhi81/learnup/internals/db/entities"
+)
 
 type AddVideoToCourseReq struct {
 	CourseID    uint                      `json:"courseId" validate:"required,gte=1,numeric"`

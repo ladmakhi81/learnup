@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
-	"github.com/ladmakhi81/learnup/internals/user/repo"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"golang.org/x/crypto/bcrypt"
@@ -11,30 +11,33 @@ import (
 
 type UserSvc interface {
 	CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error)
-	IsPhoneDuplicated(phone string) (bool, error)
-	FindByPhone(phone string) (*entities.User, error)
-	FindById(id uint) (*entities.User, error)
 }
 
 type UserSvcImpl struct {
-	userRepo       repo.UserRepo
+	repo           *db.Repositories
 	translationSvc contracts.Translator
 }
 
 func NewUserSvcImpl(
-	userRepo repo.UserRepo,
+	repo *db.Repositories,
 	translationSvc contracts.Translator,
 ) *UserSvcImpl {
 	return &UserSvcImpl{
-		userRepo:       userRepo,
+		repo:           repo,
 		translationSvc: translationSvc,
 	}
 }
 
 func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error) {
-	isPhoneExistBefore, isPhoneExistBeforeErr := svc.IsPhoneDuplicated(dto.Phone)
+	isPhoneExistBefore, isPhoneExistBeforeErr := svc.repo.UserRepo.Exist(map[string]any{
+		"phone_number": dto.Phone,
+	})
 	if isPhoneExistBeforeErr != nil {
-		return nil, isPhoneExistBeforeErr
+		return nil, types.NewServerError(
+			"Error in checking phone number exist",
+			"UserSvcImpl.CreateBasic",
+			isPhoneExistBeforeErr,
+		)
 	}
 	if isPhoneExistBefore {
 		return nil, types.NewConflictError(
@@ -55,46 +58,11 @@ func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.Use
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
 	}
-	if err := svc.userRepo.CreateBasic(user); err != nil {
+	if err := svc.repo.UserRepo.Create(user); err != nil {
 		return nil, types.NewServerError(
 			"Create Basic User Throw Error",
 			"UserSvcImpl.CreateBasic",
 			err,
-		)
-	}
-	return user, nil
-}
-
-func (svc UserSvcImpl) IsPhoneDuplicated(phone string) (bool, error) {
-	user, userErr := svc.FindByPhone(phone)
-	if userErr != nil {
-		return false, userErr
-	}
-	if user == nil {
-		return false, nil
-	}
-	return true, nil
-}
-
-func (svc UserSvcImpl) FindByPhone(phone string) (*entities.User, error) {
-	user, userErr := svc.userRepo.FetchByPhone(phone)
-	if userErr != nil {
-		return nil, types.NewServerError(
-			"Find User By Phone Throw Error",
-			"UserSvcImpl.FetchByPhone",
-			userErr,
-		)
-	}
-	return user, nil
-}
-
-func (svc UserSvcImpl) FindById(id uint) (*entities.User, error) {
-	user, userErr := svc.userRepo.FetchById(id)
-	if userErr != nil {
-		return nil, types.NewServerError(
-			"Find User By Id Throw Error",
-			"UserServiceImpl.FetchById",
-			userErr,
 		)
 	}
 	return user, nil

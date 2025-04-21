@@ -1,10 +1,9 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	questionService "github.com/ladmakhi81/learnup/internals/question/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	"github.com/ladmakhi81/learnup/internals/db"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 )
@@ -17,72 +16,69 @@ type GetQuestionOptions struct {
 }
 
 type TeacherQuestionService interface {
-	GetQuestions(options GetQuestionOptions) ([]*entities.Question, error)
-	GetQuestionCount(courseId *uint) (int, error)
+	GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error)
 }
 
 type TeacherQuestionServiceImpl struct {
-	questionSvc    questionService.QuestionService
+	repo           *db.Repositories
 	translationSvc contracts.Translator
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
 }
 
 func NewTeacherQuestionServiceImpl(
-	questionSvc questionService.QuestionService,
+	repo *db.Repositories,
 	translationSvc contracts.Translator,
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
 ) *TeacherQuestionServiceImpl {
 	return &TeacherQuestionServiceImpl{
-		questionSvc:    questionSvc,
 		translationSvc: translationSvc,
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
+		repo:           repo,
 	}
 }
 
-func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) ([]*entities.Question, error) {
-	teacher, teacherErr := svc.userSvc.FindById(options.TeacherID)
+func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error) {
+	teacher, teacherErr := svc.repo.UserRepo.GetByID(options.TeacherID)
 	if teacherErr != nil {
-		return nil, teacherErr
+		return nil, 0, types.NewServerError(
+			"Error in fetching teacher by id",
+			"TeacherQuestionServiceImpl.GetQuestions",
+			teacherErr,
+		)
 	}
 	if teacher == nil {
-		return nil, types.NewNotFoundError(
+		return nil, 0, types.NewNotFoundError(
 			svc.translationSvc.Translate("user.errors.teacher_not_found"),
 		)
 	}
 	if options.CourseID != nil {
-		course, courseErr := svc.courseSvc.FindById(*options.CourseID)
+		course, courseErr := svc.repo.CourseRepo.GetByID(*options.CourseID)
 		if courseErr != nil {
-			return nil, courseErr
+			return nil, 0, types.NewServerError(
+				"Error in fetching course by id",
+				"TeacherQuestionServiceImpl.GetQuestions",
+				courseErr,
+			)
 		}
 		if course == nil {
-			return nil, types.NewNotFoundError(
+			return nil, 0, types.NewNotFoundError(
 				svc.translationSvc.Translate("course.errors.not_found"),
 			)
 		}
 		if *course.TeacherID != teacher.ID {
-			return nil, types.NewForbiddenAccessError(
+			return nil, 0, types.NewForbiddenAccessError(
 				svc.translationSvc.Translate("common.errors.forbidden_access"),
 			)
 		}
 	}
-	questions, questionsErr := svc.questionSvc.GetPageable(
-		options.CourseID,
-		options.Page,
-		options.PageSize,
+	questions, count, questionsErr := svc.repo.QuestionRepo.GetPaginated(
+		repositories.GetPaginatedOptions{
+			Offset: &options.Page,
+			Limit:  &options.PageSize,
+			Conditions: map[string]any{
+				"course_id": options.CourseID,
+			},
+		},
 	)
 	if questionsErr != nil {
-		return nil, questionsErr
+		return nil, 0, questionsErr
 	}
-	return questions, nil
-}
-
-func (svc TeacherQuestionServiceImpl) GetQuestionCount(courseId *uint) (int, error) {
-	count, countErr := svc.questionSvc.GetCount(courseId)
-	if countErr != nil {
-		return 0, countErr
-	}
-	return count, nil
+	return questions, count, nil
 }

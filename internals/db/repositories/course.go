@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"errors"
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"gorm.io/gorm"
 )
 

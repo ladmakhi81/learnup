@@ -45,13 +45,9 @@ func (h Handler) GetCommentsPageable(ctx *gin.Context) (*types.ApiResponse, erro
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	comments, commentsErr := h.commentSvc.Fetch(page, pageSize)
+	comments, commentsCount, commentsErr := h.commentSvc.Fetch(page, pageSize)
 	if commentsErr != nil {
 		return nil, commentsErr
-	}
-	commentsCount, commentsCountErr := h.commentSvc.FetchCount()
-	if commentsCountErr != nil {
-		return nil, commentsCountErr
 	}
 	commentsRes := types.NewPaginationRes(
 		dtores.NewGetCommentsPageableItem(comments),

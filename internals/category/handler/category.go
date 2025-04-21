@@ -105,13 +105,9 @@ func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	categories, categoriesErr := h.categorySvc.GetCategories(page, pageSize)
+	categories, categoriesCount, categoriesErr := h.categorySvc.GetCategories(page, pageSize)
 	if categoriesErr != nil {
 		return nil, categoriesErr
-	}
-	categoriesCount, categoriesCountErr := h.categorySvc.GetCategoriesCount()
-	if categoriesCountErr != nil {
-		return nil, categoriesCountErr
 	}
 	pageableCategoryItems := dtores.MapCategoriesToPageableItems(categories)
 	pageableCategoryRes := types.NewPaginationRes(

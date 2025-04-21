@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 	"gorm.io/gorm"
 	"time"
 )
@@ -24,18 +24,18 @@ type questionVideoItem struct {
 }
 
 type GetQuestionItemRes struct {
-	ID        uint                      `json:"id"`
-	CreatedAt time.Time                 `json:"createdAt"`
-	UpdatedAt time.Time                 `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt            `json:"deletedAt"`
-	Content   string                    `json:"content"`
-	Priority  entities.QuestionPriority `json:"priority"`
-	User      *questionUserItem         `json:"user"`
-	Course    *questionCourseItem       `json:"course"`
-	Video     *questionVideoItem        `json:"video"`
+	ID        uint                       `json:"id"`
+	CreatedAt time.Time                  `json:"createdAt"`
+	UpdatedAt time.Time                  `json:"updatedAt"`
+	DeletedAt gorm.DeletedAt             `json:"deletedAt"`
+	Content   string                     `json:"content"`
+	Priority  entities2.QuestionPriority `json:"priority"`
+	User      *questionUserItem          `json:"user"`
+	Course    *questionCourseItem        `json:"course"`
+	Video     *questionVideoItem         `json:"video"`
 }
 
-func MapGetQuestionItemRes(questions []*entities.Question) []*GetQuestionItemRes {
+func MapGetQuestionItemRes(questions []*entities2.Question) []*GetQuestionItemRes {
 	res := make([]*GetQuestionItemRes, len(questions))
 	for index, question := range questions {
 		res[index] = &GetQuestionItemRes{

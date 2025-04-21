@@ -56,7 +56,7 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 	authContext, _ := ctx.Get("AUTH")
 	teacherClaim := authContext.(*types.TokenClaim)
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	questions, questionsErr := h.teacherQuestionSvc.GetQuestions(teacherService.GetQuestionOptions{
+	questions, count, questionsErr := h.teacherQuestionSvc.GetQuestions(teacherService.GetQuestionOptions{
 		PageSize:  pageSize,
 		Page:      page,
 		CourseID:  courseID,
@@ -65,15 +65,11 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 	if questionsErr != nil {
 		return nil, questionsErr
 	}
-	questionsCount, questionsCountErr := h.teacherQuestionSvc.GetQuestionCount(courseID)
-	if questionsCountErr != nil {
-		return nil, questionsCountErr
-	}
 	questionsRes := types.NewPaginationRes(
 		dtores.MapGetQuestionItemRes(questions),
 		page,
-		utils.CalculatePaginationTotalPage(questionsCount, pageSize),
-		questionsCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, questionsRes), nil
 }

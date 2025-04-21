@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 	"gorm.io/gorm"
 	"time"
 )
@@ -26,20 +26,20 @@ type orderItem struct {
 }
 
 type GetOrderDetailRes struct {
-	ID              uint                 `json:"id"`
-	CreatedAt       time.Time            `json:"createdAt"`
-	UpdatedAt       time.Time            `json:"updatedAt"`
-	DeletedAt       gorm.DeletedAt       `json:"deletedAt"`
-	User            userOrderDetailItem  `json:"user"`
-	FinalPrice      float64              `json:"finalPrice"`
-	DiscountPrice   float64              `json:"discountPrice"`
-	TotalPrice      float64              `json:"totalPrice"`
-	Status          entities.OrderStatus `json:"status"`
-	StatusChangedAt *time.Time           `json:"statusChangedAt"`
-	Items           []orderItem          `json:"items"`
+	ID              uint                  `json:"id"`
+	CreatedAt       time.Time             `json:"createdAt"`
+	UpdatedAt       time.Time             `json:"updatedAt"`
+	DeletedAt       gorm.DeletedAt        `json:"deletedAt"`
+	User            userOrderDetailItem   `json:"user"`
+	FinalPrice      float64               `json:"finalPrice"`
+	DiscountPrice   float64               `json:"discountPrice"`
+	TotalPrice      float64               `json:"totalPrice"`
+	Status          entities2.OrderStatus `json:"status"`
+	StatusChangedAt *time.Time            `json:"statusChangedAt"`
+	Items           []orderItem           `json:"items"`
 }
 
-func NewGetOrderDetailRes(order *entities.Order) *GetOrderDetailRes {
+func NewGetOrderDetailRes(order *entities2.Order) *GetOrderDetailRes {
 	items := make([]orderItem, len(order.Items))
 
 	for i, item := range order.Items {

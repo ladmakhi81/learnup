@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 	"time"
 )
 
@@ -24,29 +24,29 @@ type courseCategory struct {
 }
 
 type courseItems struct {
-	ID                uint                  `json:"id"`
-	Name              string                `json:"name"`
-	Teacher           *courseTeacher        `json:"teacher"`
-	Category          *courseCategory       `json:"category"`
-	Price             float64               `json:"price"`
-	ThumbnailImage    string                `json:"thumbnail"`
-	IntroductionVideo string                `json:"introductionVideo"`
-	Status            entities.CourseStatus `json:"status"`
-	IsPublished       bool                  `json:"isPublished"`
-	IsVerifiedByAdmin bool                  `json:"isVerified"`
-	VerifiedDate      *time.Time            `json:"verifiedDate"`
-	VerifiedBy        *courseUserVerifier   `json:"verifiedBy"`
-	CreatedAt         time.Time             `json:"createdAt"`
-	UpdatedAt         time.Time             `json:"updatedAt"`
-	DeletedAt         time.Time             `json:"deletedAt"`
-	StatusChangedAt   *time.Time            `json:"statusChangedAt"`
+	ID                uint                   `json:"id"`
+	Name              string                 `json:"name"`
+	Teacher           *courseTeacher         `json:"teacher"`
+	Category          *courseCategory        `json:"category"`
+	Price             float64                `json:"price"`
+	ThumbnailImage    string                 `json:"thumbnail"`
+	IntroductionVideo string                 `json:"introductionVideo"`
+	Status            entities2.CourseStatus `json:"status"`
+	IsPublished       bool                   `json:"isPublished"`
+	IsVerifiedByAdmin bool                   `json:"isVerified"`
+	VerifiedDate      *time.Time             `json:"verifiedDate"`
+	VerifiedBy        *courseUserVerifier    `json:"verifiedBy"`
+	CreatedAt         time.Time              `json:"createdAt"`
+	UpdatedAt         time.Time              `json:"updatedAt"`
+	DeletedAt         time.Time              `json:"deletedAt"`
+	StatusChangedAt   *time.Time             `json:"statusChangedAt"`
 }
 
 type GetCoursesRes struct {
 	Courses []*courseItems `json:"courses"`
 }
 
-func mapCoursesToCoursesPageableItems(courses []*entities.Course) []*courseItems {
+func mapCoursesToCoursesPageableItems(courses []*entities2.Course) []*courseItems {
 	mappedCourses := make([]*courseItems, len(courses))
 	for courseIndex, course := range courses {
 		mappedCourses[courseIndex] = &courseItems{
@@ -83,7 +83,7 @@ func mapCoursesToCoursesPageableItems(courses []*entities.Course) []*courseItems
 	return mappedCourses
 }
 
-func NewGetCoursesRes(courses []*entities.Course) GetCoursesRes {
+func NewGetCoursesRes(courses []*entities2.Course) GetCoursesRes {
 	res := GetCoursesRes{}
 	res.Courses = mapCoursesToCoursesPageableItems(courses)
 	return res

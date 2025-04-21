@@ -2,7 +2,7 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentDtoRes "github.com/ladmakhi81/learnup/internals/payment/dto/res"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
@@ -71,19 +71,15 @@ func (h Handler) VerifyStripe(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Security	BearerAuth
 func (h Handler) GetPayments(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	payments, paymentsErr := h.paymentSvc.FetchPageable(page, pageSize)
+	payments, count, paymentsErr := h.paymentSvc.FetchPageable(page, pageSize)
 	if paymentsErr != nil {
 		return nil, paymentsErr
-	}
-	paymentCount, paymentCountErr := h.paymentSvc.FetchCount()
-	if paymentCountErr != nil {
-		return nil, paymentCountErr
 	}
 	res := types.NewPaginationRes(
 		paymentDtoRes.MapGetPageablePaymentItems(payments),
 		page,
-		utils.CalculatePaginationTotalPage(paymentCount, pageSize),
-		paymentCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

@@ -1,7 +1,7 @@
 package dtoreq
 
 import (
-	notificationEntity "github.com/ladmakhi81/learnup/db/entities"
+	notificationEntity "github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
 type CreateNotificationReq struct {

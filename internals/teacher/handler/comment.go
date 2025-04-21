@@ -55,7 +55,7 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 		ctx.Query("pageSize"),
 	)
 	authContext, _ := ctx.Get("AUTH")
-	comments, commentsErr := h.teacherCommentSvc.GetPageableCommentByCourseId(
+	comments, count, commentsErr := h.teacherCommentSvc.GetPageableCommentByCourseId(
 		authContext,
 		uint(courseId),
 		page,
@@ -64,18 +64,11 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 	if commentsErr != nil {
 		return nil, commentsErr
 	}
-	commentCount, commentCountErr := h.teacherCommentSvc.GetCommentCountByCourseId(
-		authContext,
-		uint(courseId),
-	)
-	if commentCountErr != nil {
-		return nil, commentCountErr
-	}
 	commentsRes := types.NewPaginationRes(
 		dtores.MappedGetCommentPageableItemsRes(comments),
 		page,
-		utils.CalculatePaginationTotalPage(commentCount, pageSize),
-		commentCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, commentsRes), nil
 }

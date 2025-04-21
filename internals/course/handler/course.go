@@ -125,20 +125,16 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	courses, coursesErr := h.courseSvc.GetCourses(page, pageSize)
+	courses, count, coursesErr := h.courseSvc.GetCourses(page, pageSize)
 	if coursesErr != nil {
 		return nil, coursesErr
-	}
-	coursesCount, coursesCountErr := h.courseSvc.GetCoursesCount()
-	if coursesCountErr != nil {
-		return nil, coursesCountErr
 	}
 	mappedCourses := questionDtoRes.NewGetCoursesRes(courses)
 	paginationRes := types.NewPaginationRes(
 		mappedCourses,
 		page,
-		utils.CalculatePaginationTotalPage(coursesCount, pageSize),
-		coursesCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, paginationRes), nil
 }
@@ -303,19 +299,15 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 		)
 	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	likes, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, uint(courseID))
+	likes, count, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, uint(courseID))
 	if likesErr != nil {
 		return nil, likesErr
-	}
-	likeCount, likeCountErr := h.likeSvc.FetchCountByCourseID(uint(courseID))
-	if likeCountErr != nil {
-		return nil, likeCountErr
 	}
 	likesRes := types.NewPaginationRes(
 		questionDtoRes.MappedGetLikesPageableItem(likes),
 		page,
-		utils.CalculatePaginationTotalPage(likeCount, pageSize),
-		likeCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, likesRes), nil
 }
@@ -459,19 +451,15 @@ func (h Handler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, error) {
 	}
 	courseID := uint(parsedCourseId)
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	questions, questionsErr := h.questionSvc.GetPageable(&courseID, page, pageSize)
+	questions, count, questionsErr := h.questionSvc.GetPageable(&courseID, page, pageSize)
 	if questionsErr != nil {
 		return nil, questionsErr
-	}
-	questionCount, questionCountErr := h.questionSvc.GetCount(&courseID)
-	if questionCountErr != nil {
-		return nil, questionCountErr
 	}
 	questionRes := types.NewPaginationRes(
 		questionDtoRes.MapGetQuestionItemRes(questions),
 		page,
-		utils.CalculatePaginationTotalPage(questionCount, pageSize),
-		questionCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, questionRes), nil
 }

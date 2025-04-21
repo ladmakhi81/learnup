@@ -1,6 +1,8 @@
 package dtores
 
-import "github.com/ladmakhi81/learnup/db/entities"
+import (
+	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+)
 
 type userItem struct {
 	ID       uint   `json:"id"`
@@ -8,11 +10,11 @@ type userItem struct {
 }
 
 type GetLikesPageableItem struct {
-	User *userItem         `json:"user"`
-	Type entities.LikeType `json:"type"`
+	User *userItem          `json:"user"`
+	Type entities2.LikeType `json:"type"`
 }
 
-func MappedGetLikesPageableItem(likes []*entities.Like) []*GetLikesPageableItem {
+func MappedGetLikesPageableItem(likes []*entities2.Like) []*GetLikesPageableItem {
 	res := make([]*GetLikesPageableItem, len(likes))
 	for i, like := range likes {
 		res[i] = &GetLikesPageableItem{

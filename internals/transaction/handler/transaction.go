@@ -36,13 +36,9 @@ func NewHandler(
 //	@Security	BearerAuth
 func (h Handler) GetTransactionsPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	transactions, transactionErr := h.transactionSvc.FetchPageable(page, pageSize)
+	transactions, count, transactionErr := h.transactionSvc.FetchPageable(page, pageSize)
 	if transactionErr != nil {
 		return nil, transactionErr
-	}
-	count, countErr := h.transactionSvc.FetchCount()
-	if countErr != nil {
-		return nil, countErr
 	}
 	res := types.NewPaginationRes(
 		transactionDtoRes.MapGetTransactionPageableItems(transactions),

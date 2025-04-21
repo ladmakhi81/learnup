@@ -1,60 +1,55 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	"github.com/ladmakhi81/learnup/internals/db"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	dtoreq "github.com/ladmakhi81/learnup/internals/question/dto/req"
-	"github.com/ladmakhi81/learnup/internals/question/repo"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type QuestionService interface {
 	Create(dto dtoreq.CreateQuestionReq) (*entities.Question, error)
-	GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, error)
-	GetCount(courseId *uint) (int, error)
-	FindById(id uint) (*entities.Question, error)
+	GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, int, error)
 }
 
 type QuestionServiceImpl struct {
-	questionRepo   repo.QuestionRepo
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
+	repo           *db.Repositories
 	translationSvc contracts.Translator
-	videoSvc       videoService.VideoService
 }
 
 func NewQuestionServiceImpl(
-	questionRepo repo.QuestionRepo,
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
+	repo *db.Repositories,
 	translationSvc contracts.Translator,
-	videoSvc videoService.VideoService,
 ) *QuestionServiceImpl {
 	return &QuestionServiceImpl{
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
+		repo:           repo,
 		translationSvc: translationSvc,
-		videoSvc:       videoSvc,
-		questionRepo:   questionRepo,
 	}
 }
 
 func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Question, error) {
-	sender, senderErr := svc.userSvc.FindById(dto.UserID)
+	sender, senderErr := svc.repo.UserRepo.GetByID(dto.UserID)
 	if senderErr != nil {
-		return nil, senderErr
+		return nil, types.NewServerError(
+			"Error in fetching sender data",
+			"QuestionServiceImpl.Create",
+			senderErr,
+		)
 	}
 	if sender == nil {
 		return nil, types.NewNotFoundError(
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := svc.courseSvc.FindById(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
 	if courseErr != nil {
-		return nil, courseErr
+		return nil, types.NewServerError(
+			"Error in fetching course by id",
+			"QuestionServiceImpl.Create",
+			courseErr,
+		)
 	}
 	if course == nil {
 		return nil, types.NewNotFoundError(
@@ -68,9 +63,13 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 		Priority: dto.Priority,
 	}
 	if dto.VideoID != nil {
-		video, videoErr := svc.videoSvc.FindById(*dto.VideoID)
+		video, videoErr := svc.repo.VideoRepo.GetByID(*dto.VideoID)
 		if videoErr != nil {
-			return nil, videoErr
+			return nil, types.NewServerError(
+				"Error in fetching video",
+				"QuestionServiceImpl.Create",
+				videoErr,
+			)
 		}
 		if video == nil {
 			return nil, types.NewNotFoundError(
@@ -79,7 +78,7 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 		}
 		question.VideoID = &video.ID
 	}
-	if err := svc.questionRepo.Create(question); err != nil {
+	if err := svc.repo.QuestionRepo.Create(question); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating question",
 			"QuestionServiceImpl.Create",
@@ -91,42 +90,26 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 	return question, nil
 }
 
-func (svc QuestionServiceImpl) GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, error) {
-	questions, questionsErr := svc.questionRepo.Fetch(repo.FetchQuestionOptions{
-		PageSize: &pageSize,
-		Page:     &page,
-		CourseID: courseId,
-	})
-	if questionsErr != nil {
-		return nil, types.NewServerError(
+func (svc QuestionServiceImpl) GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, int, error) {
+	questions, count, questionErr := svc.repo.QuestionRepo.GetPaginated(
+		repositories.GetPaginatedOptions{
+			Limit:  &pageSize,
+			Offset: &page,
+			Conditions: map[string]any{
+				"course_id": courseId,
+			},
+			Relations: []string{
+				"User",
+				"Course",
+				"Video",
+			},
+		})
+	if questionErr != nil {
+		return nil, 0, types.NewServerError(
 			"Error in fetching related questions",
 			"QuestionServiceImpl.GetPageable",
-			questionsErr,
+			questionErr,
 		)
 	}
-	return questions, nil
-}
-
-func (svc QuestionServiceImpl) GetCount(courseId *uint) (int, error) {
-	count, countErr := svc.questionRepo.FetchCount(repo.FetchCountQuestionOptions{
-		CourseID: courseId,
-	})
-	if countErr != nil {
-		return 0, types.NewServerError(
-			"Error in fetching count of question",
-			"QuestionServiceImpl.GetCount",
-			countErr,
-		)
-	}
-	return count, nil
-}
-
-func (svc QuestionServiceImpl) FindById(id uint) (*entities.Question, error) {
-	question, questionErr := svc.questionRepo.FindOne(
-		repo.FetchOneQuestionOptions{ID: &id},
-	)
-	if questionErr != nil {
-		return nil, questionErr
-	}
-	return question, nil
+	return questions, count, nil
 }
