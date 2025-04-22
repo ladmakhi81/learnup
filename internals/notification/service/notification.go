@@ -30,7 +30,7 @@ func NewNotificationServiceImpl(
 }
 
 func (svc NotificationServiceImpl) SeenById(id uint) error {
-	notification, notificationErr := svc.repo.NotificationRepo.GetByID(id)
+	notification, notificationErr := svc.repo.NotificationRepo.GetByID(id, nil)
 	if notificationErr != nil {
 		return types.NewServerError(
 			"Error in fetching single notification with id",

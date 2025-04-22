@@ -31,7 +31,7 @@ func NewLikeServiceImpl(
 
 func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID)
+	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching logged in user",
@@ -44,7 +44,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course detail",
@@ -60,7 +60,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 	likedBefore, likedBeforeErr := svc.repo.LikeRepo.GetOne(map[string]any{
 		"user_id":   user.ID,
 		"course_id": course.ID,
-	})
+	}, nil)
 	if likedBeforeErr != nil {
 		return nil, types.NewServerError(
 			"Error in finding like by user id and course id",

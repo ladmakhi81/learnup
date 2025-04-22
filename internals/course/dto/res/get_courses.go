@@ -49,6 +49,14 @@ type GetCoursesRes struct {
 func mapCoursesToCoursesPageableItems(courses []*entities2.Course) []*courseItems {
 	mappedCourses := make([]*courseItems, len(courses))
 	for courseIndex, course := range courses {
+		var verifiedBy *courseUserVerifier
+		if course.VerifiedBy != nil {
+			verifiedBy = &courseUserVerifier{
+				ID:       course.VerifiedBy.ID,
+				FullName: course.VerifiedBy.FullName(),
+				Phone:    course.VerifiedBy.Phone,
+			}
+		}
 		mappedCourses[courseIndex] = &courseItems{
 			ID:   course.ID,
 			Name: course.Name,
@@ -73,11 +81,7 @@ func mapCoursesToCoursesPageableItems(courses []*entities2.Course) []*courseItem
 			StatusChangedAt:   course.StatusChangedAt,
 			CreatedAt:         course.CreatedAt,
 			UpdatedAt:         course.UpdatedAt,
-			VerifiedBy: &courseUserVerifier{
-				ID:       course.VerifiedBy.ID,
-				FullName: course.VerifiedBy.FullName(),
-				Phone:    course.VerifiedBy.Phone,
-			},
+			VerifiedBy:        verifiedBy,
 		}
 	}
 	return mappedCourses

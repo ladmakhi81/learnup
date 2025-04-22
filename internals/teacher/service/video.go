@@ -41,7 +41,7 @@ func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*en
 	if isTitleDuplicated {
 		return nil, types.NewConflictError(svc.translationSvc.Translate("video.errors.title_duplicated"))
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",

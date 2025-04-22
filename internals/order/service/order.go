@@ -36,7 +36,7 @@ func NewOrderService(
 }
 
 func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
-	user, userErr := svc.repo.UserRepo.GetByID(dto.UserID)
+	user, userErr := svc.repo.UserRepo.GetByID(dto.UserID, nil)
 	if userErr != nil {
 		return "", types.NewServerError(
 			"Error in fetching user by id",
@@ -53,6 +53,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 		Conditions: map[string]any{
 			"id": dto.Carts,
 		},
+		Relations: []string{"Course"},
 	})
 	if cartsErr != nil {
 		return "", types.NewServerError(
@@ -145,11 +146,7 @@ func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Orde
 }
 
 func (svc OrderServiceImpl) FetchDetailById(id uint) (*entities.Order, error) {
-	//TODO: add relation to fetch detail
-	//Preload("User").
-	//Preload("Items").
-	//Preload("Items.Course").
-	order, orderErr := svc.repo.OrderRepo.GetByID(id)
+	order, orderErr := svc.repo.OrderRepo.GetByID(id, []string{"User", "Items", "Items.Course"})
 	if orderErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching detail by id",

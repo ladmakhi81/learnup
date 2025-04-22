@@ -45,7 +45,7 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 			svc.translationSvc.Translate("course.errors.name_duplicate"),
 		)
 	}
-	category, categoryErr := svc.repo.CategoryRepo.GetByID(dto.CategoryID)
+	category, categoryErr := svc.repo.CategoryRepo.GetByID(dto.CategoryID, nil)
 	if categoryErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching category by id",
@@ -59,7 +59,7 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 		)
 	}
 	teacherAuth := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(teacherAuth.UserID)
+	teacher, teacherErr := svc.repo.UserRepo.GetByID(teacherAuth.UserID, nil)
 	if teacherErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching teacher by id",
@@ -106,7 +106,7 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 
 func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, int, error) {
 	authClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(authClaim.UserID)
+	teacher, teacherErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
 	if teacherErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching teacher by id",

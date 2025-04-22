@@ -37,7 +37,7 @@ func NewAuthServiceImpl(
 func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
 	user, userErr := svc.repo.UserRepo.GetOne(map[string]any{
 		"phone_number": dto.Phone,
-	})
+	}, nil)
 	if userErr != nil {
 		return "", types.NewServerError(
 			"Error in fetching user by phone number",

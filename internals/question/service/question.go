@@ -30,7 +30,7 @@ func NewQuestionServiceImpl(
 }
 
 func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Question, error) {
-	sender, senderErr := svc.repo.UserRepo.GetByID(dto.UserID)
+	sender, senderErr := svc.repo.UserRepo.GetByID(dto.UserID, nil)
 	if senderErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching sender data",
@@ -43,7 +43,7 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
@@ -63,7 +63,7 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 		Priority: dto.Priority,
 	}
 	if dto.VideoID != nil {
-		video, videoErr := svc.repo.VideoRepo.GetByID(*dto.VideoID)
+		video, videoErr := svc.repo.VideoRepo.GetByID(*dto.VideoID, nil)
 		if videoErr != nil {
 			return nil, types.NewServerError(
 				"Error in fetching video",

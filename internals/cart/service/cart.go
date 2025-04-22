@@ -47,7 +47,7 @@ func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart,
 			svc.translationSvc.Translate("cart.errors.exist_before"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
@@ -75,7 +75,7 @@ func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart,
 }
 
 func (svc CartServiceImpl) DeleteByID(userID, id uint) error {
-	cart, cartErr := svc.repo.CartRepo.GetByID(id)
+	cart, cartErr := svc.repo.CartRepo.GetByID(id, nil)
 	if cartErr != nil {
 		return cartErr
 	}
@@ -101,7 +101,7 @@ func (svc CartServiceImpl) DeleteByID(userID, id uint) error {
 }
 
 func (svc CartServiceImpl) FetchAllByUserID(userID uint) ([]*entities.Cart, error) {
-	user, userErr := svc.repo.UserRepo.GetByID(userID)
+	user, userErr := svc.repo.UserRepo.GetByID(userID, nil)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching carts by user id",
@@ -118,6 +118,7 @@ func (svc CartServiceImpl) FetchAllByUserID(userID uint) ([]*entities.Cart, erro
 		Conditions: map[string]any{
 			"user_id": userID,
 		},
+		Relations: []string{"Course"},
 	})
 	if cartsErr != nil {
 		return nil, types.NewServerError(

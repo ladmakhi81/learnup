@@ -35,7 +35,7 @@ func NewTeacherQuestionServiceImpl(
 }
 
 func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error) {
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(options.TeacherID)
+	teacher, teacherErr := svc.repo.UserRepo.GetByID(options.TeacherID, nil)
 	if teacherErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching teacher by id",
@@ -49,7 +49,7 @@ func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) (
 		)
 	}
 	if options.CourseID != nil {
-		course, courseErr := svc.repo.CourseRepo.GetByID(*options.CourseID)
+		course, courseErr := svc.repo.CourseRepo.GetByID(*options.CourseID, nil)
 		if courseErr != nil {
 			return nil, 0, types.NewServerError(
 				"Error in fetching course by id",
@@ -68,13 +68,16 @@ func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) (
 			)
 		}
 	}
+	questionCondition := make(map[string]any)
+	if options.CourseID != nil {
+		questionCondition["course_id"] = *options.CourseID
+	}
 	questions, count, questionsErr := svc.repo.QuestionRepo.GetPaginated(
 		repositories.GetPaginatedOptions{
-			Offset: &options.Page,
-			Limit:  &options.PageSize,
-			Conditions: map[string]any{
-				"course_id": options.CourseID,
-			},
+			Offset:     &options.Page,
+			Limit:      &options.PageSize,
+			Conditions: questionCondition,
+			Relations:  []string{"User", "Course", "Video"},
 		},
 	)
 	if questionsErr != nil {

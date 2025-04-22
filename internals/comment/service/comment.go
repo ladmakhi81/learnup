@@ -32,7 +32,7 @@ func NewCommentServiceImpl(
 
 func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID)
+	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user logged in information",
@@ -47,7 +47,7 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 			),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseId)
+	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseId, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course",
@@ -63,7 +63,7 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		)
 	}
 	if dto.ParentId != nil {
-		parent, parentErr := svc.repo.CommentRepo.GetByID(*dto.ParentId)
+		parent, parentErr := svc.repo.CommentRepo.GetByID(*dto.ParentId, nil)
 		if parentErr != nil {
 			return nil, types.NewServerError(
 				"Error in fetching comment by parent id",
@@ -96,7 +96,7 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 }
 
 func (svc CommentServiceImpl) Delete(id uint) error {
-	comment, commentErr := svc.repo.CommentRepo.GetByID(id)
+	comment, commentErr := svc.repo.CommentRepo.GetByID(id, nil)
 	if commentErr != nil {
 		return types.NewServerError(
 			"Error in fetching comment by id",

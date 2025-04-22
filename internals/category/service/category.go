@@ -48,7 +48,7 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.C
 		)
 	}
 	if dto.ParentID != nil {
-		parentCategory, parentCategoryErr := svc.repo.CategoryRepo.GetByID(*dto.ParentID)
+		parentCategory, parentCategoryErr := svc.repo.CategoryRepo.GetByID(*dto.ParentID, nil)
 		if parentCategoryErr != nil {
 			return nil, types.NewServerError(
 				"Error in fetching parent category by id",
@@ -79,7 +79,7 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.C
 }
 
 func (svc CategoryServiceImpl) DeleteById(id uint) error {
-	category, categoryErr := svc.repo.CategoryRepo.GetByID(id)
+	category, categoryErr := svc.repo.CategoryRepo.GetByID(id, nil)
 	if categoryErr != nil {
 		return types.NewServerError(
 			"Error in fetching category by id",
@@ -124,7 +124,7 @@ func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]
 func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entities.Category, error) {
 	rootCategories, rootCategoriesErr := svc.repo.CategoryRepo.GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
-			"parent_id": nil,
+			"parent_category_id": nil,
 		},
 	})
 	if rootCategoriesErr != nil {

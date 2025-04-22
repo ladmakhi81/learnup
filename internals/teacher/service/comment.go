@@ -29,7 +29,7 @@ func NewTeacherCommentServiceImpl(
 
 func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
 	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(teacherClaim.UserID)
+	teacher, teacherErr := svc.repo.UserRepo.GetByID(teacherClaim.UserID, nil)
 	if teacherErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in finding teacher by id",
@@ -42,7 +42,7 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			svc.translationSvc.Translate("user.errors.teacher_not_found"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(courseId)
+	course, courseErr := svc.repo.CourseRepo.GetByID(courseId, nil)
 	if courseErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching course detail",

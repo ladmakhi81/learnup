@@ -24,8 +24,8 @@ type Repository[T any] interface {
 	BatchInsert(entities []*T) error
 	Delete(entity *T) error
 	BatchDelete(entities []*T) error
-	GetByID(id uint) (*T, error)
-	GetOne(condition map[string]any) (*T, error)
+	GetByID(id uint, relations []string) (*T, error)
+	GetOne(condition map[string]any, relations []string) (*T, error)
 	GetAll(options GetAllOptions) ([]*T, error)
 	GetPaginated(options GetPaginatedOptions) ([]*T, int, error)
 	Exist(condition map[string]any) (bool, error)
@@ -34,10 +34,6 @@ type Repository[T any] interface {
 
 type RepositoryImpl[T any] struct {
 	db *gorm.DB
-}
-
-func NewRepository[T any](db *gorm.DB) *RepositoryImpl[T] {
-	return &RepositoryImpl[T]{db: db}
 }
 
 func (repo RepositoryImpl[T]) Create(entity *T) error {
@@ -56,9 +52,15 @@ func (repo RepositoryImpl[T]) BatchDelete(entities []*T) error {
 	return repo.db.Delete(&entities).Error
 }
 
-func (repo RepositoryImpl[T]) GetOne(condition map[string]any) (*T, error) {
+func (repo RepositoryImpl[T]) GetOne(condition map[string]any, relations []string) (*T, error) {
 	var entity *T
-	tx := repo.db.Where(condition).First(&entity)
+	query := repo.db.Where(condition)
+	if len(relations) > 0 {
+		for _, relation := range relations {
+			query = query.Preload(relation)
+		}
+	}
+	tx := query.First(&entity)
 	if tx.Error != nil {
 		if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -135,8 +137,8 @@ func (repo RepositoryImpl[T]) Exist(condition map[string]any) (bool, error) {
 	return count > 0, nil
 }
 
-func (repo RepositoryImpl[T]) GetByID(id uint) (*T, error) {
-	return repo.GetOne(map[string]any{"id": id})
+func (repo RepositoryImpl[T]) GetByID(id uint, relations []string) (*T, error) {
+	return repo.GetOne(map[string]any{"id": id}, relations)
 }
 
 func (repo RepositoryImpl[T]) Update(entity *T) error {

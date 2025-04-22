@@ -21,5 +21,5 @@ type CreateCourseReq struct {
 	IntroductionVideo           string                            `json:"introductionVideo" validate:"required,min=20"`
 	CanHaveDiscount             bool                              `json:"canHaveDiscount" validate:"required"`
 	MaxDiscountAmount           float64                           `json:"maxDiscountAmount,omitempty" validate:"numeric,gte=0"`
-	DiscountFeeAmountPercentage float64                           `json:"discountFeeAmountPercentage,omitempty" validate:"numeric,min=1,max=100"`
+	DiscountFeeAmountPercentage float64                           `json:"discountFeeAmountPercentage,omitempty" validate:"numeric,min=0,max=100"`
 }

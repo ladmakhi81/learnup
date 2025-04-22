@@ -8,6 +8,7 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/types"
+	"time"
 )
 
 type PaymentService interface {
@@ -95,7 +96,7 @@ func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 	}
 	payment, paymentErr := svc.repo.PaymentRepo.GetOne(map[string]any{
 		"authority": dto.Authority,
-	})
+	}, []string{"User", "Order"})
 	if paymentErr != nil {
 		return types.NewServerError(
 			"Error in fetching payment by authority",
@@ -138,12 +139,24 @@ func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 		payment.TransactionID = &transaction.ID
 		payment.Status = entities.PaymentStatus_Success
 		payment.RefID = resp.RefCode
+		payment.Order.Status = entities.OrderStatus_Success
+
 	} else {
 		payment.Status = entities.PaymentStatus_Failure
+		payment.Order.Status = entities.OrderStatus_Failed
 	}
 	if err := svc.repo.PaymentRepo.Update(payment); err != nil {
 		return types.NewServerError(
 			"Error in updating the payment",
+			"PaymentServiceImpl.Verify",
+			err,
+		)
+	}
+	now := time.Now()
+	payment.Order.StatusChangedAt = &now
+	if err := svc.repo.OrderRepo.Update(payment.Order); err != nil {
+		return types.NewServerError(
+			"Error in updating status of order",
 			"PaymentServiceImpl.Verify",
 			err,
 		)

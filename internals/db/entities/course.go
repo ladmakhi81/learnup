@@ -43,3 +43,19 @@ func (Course) TableName() string {
 func (course Course) CalculateTeacherIncome() float64 {
 	return course.Price - course.Fee
 }
+
+func (course *Course) SetPrice(price *float64) {
+	if price == nil {
+		course.Price = 0
+	} else {
+		course.Price = *price
+	}
+}
+
+func (course *Course) SetFee(fee *float64) {
+	if fee == nil {
+		course.Fee = 0
+	} else {
+		course.Fee = *fee
+	}
+}

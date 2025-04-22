@@ -30,7 +30,7 @@ func NewQuestionAnswerServiceImpl(
 }
 
 func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
-	sender, senderErr := svc.repo.UserRepo.GetByID(dto.SenderID)
+	sender, senderErr := svc.repo.UserRepo.GetByID(dto.SenderID, nil)
 	if senderErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user",
@@ -43,7 +43,7 @@ func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	question, questionErr := svc.repo.QuestionRepo.GetByID(dto.QuestionID)
+	question, questionErr := svc.repo.QuestionRepo.GetByID(dto.QuestionID, nil)
 	if questionErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching question by id",
@@ -77,7 +77,7 @@ func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq
 }
 
 func (svc QuestionAnswerServiceImpl) GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error) {
-	question, questionErr := svc.repo.QuestionRepo.GetByID(questionID)
+	question, questionErr := svc.repo.QuestionRepo.GetByID(questionID, nil)
 	if questionErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching question by id",
