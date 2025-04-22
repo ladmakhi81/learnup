@@ -13,23 +13,27 @@ type TeacherCommentService interface {
 }
 
 type TeacherCommentServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewTeacherCommentServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *TeacherCommentServiceImpl {
 	return &TeacherCommentServiceImpl{
 		translationSvc: translationSvc,
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 	}
 }
 
 func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
 	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(teacherClaim.UserID, nil)
+	teacher, teacherErr := tx.UserRepo().GetByID(teacherClaim.UserID, nil)
 	if teacherErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in finding teacher by id",
@@ -42,7 +46,7 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			svc.translationSvc.Translate("user.errors.teacher_not_found"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(courseId, nil)
+	course, courseErr := tx.CourseRepo().GetByID(courseId, nil)
 	if courseErr != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching course detail",
@@ -55,7 +59,7 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			svc.translationSvc.Translate("course.errors.not_found"),
 		)
 	}
-	comments, count, commentsErr := svc.repo.CommentRepo.GetPaginated(repositories.GetPaginatedOptions{
+	comments, count, commentsErr := tx.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Limit:     &pageSize,
 		Offset:    &page,
 		Relations: []string{"User", "Course"},
@@ -70,6 +74,9 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			"TeacherCommentServiceImpl.GetPageableCommentByCourseId",
 			commentsErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, txErr
 	}
 	return comments, count, nil
 }

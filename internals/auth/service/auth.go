@@ -17,25 +17,29 @@ type AuthServiceImpl struct {
 	cacheSvc       contracts.Cache
 	tokenSvc       contracts.Token
 	translationSvc contracts.Translator
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 }
 
 func NewAuthServiceImpl(
 	cacheSvc contracts.Cache,
 	tokenSvc contracts.Token,
 	translationSvc contracts.Translator,
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 ) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		cacheSvc:       cacheSvc,
 		tokenSvc:       tokenSvc,
 		translationSvc: translationSvc,
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 	}
 }
 
 func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
-	user, userErr := svc.repo.UserRepo.GetOne(map[string]any{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return "", txErr
+	}
+	user, userErr := tx.UserRepo().GetOne(map[string]any{
 		"phone_number": dto.Phone,
 	}, nil)
 	if userErr != nil {
@@ -69,6 +73,9 @@ func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
 			"AuthServiceImpl.Login",
 			err,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return "", err
 	}
 	return accessToken, nil
 }

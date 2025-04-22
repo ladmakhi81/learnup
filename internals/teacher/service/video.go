@@ -13,22 +13,26 @@ type TeacherVideoService interface {
 }
 
 type TeacherVideoServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewTeacherVideoServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *TeacherVideoServiceImpl {
 	return &TeacherVideoServiceImpl{
 		translationSvc: translationSvc,
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 	}
 }
 
 func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error) {
-	isTitleDuplicated, titleDuplicatedErr := svc.repo.VideoRepo.Exist(map[string]any{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	isTitleDuplicated, titleDuplicatedErr := tx.VideoRepo().Exist(map[string]any{
 		"title": dto.Title,
 	})
 	if titleDuplicatedErr != nil {
@@ -41,7 +45,7 @@ func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*en
 	if isTitleDuplicated {
 		return nil, types.NewConflictError(svc.translationSvc.Translate("video.errors.title_duplicated"))
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
+	course, courseErr := tx.CourseRepo().GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
@@ -61,12 +65,15 @@ func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*en
 		IsVerified:  false,
 		Status:      entities2.VideoStatus_Pending,
 	}
-	if err := svc.repo.VideoRepo.Create(video); err != nil {
+	if err := tx.VideoRepo().Create(video); err != nil {
 		return nil, types.NewServerError(
 			"Create course throw error",
 			"VideoServiceImpl.AddVideo",
 			err,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return video, nil
 }

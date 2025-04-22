@@ -20,22 +20,26 @@ type CourseService interface {
 }
 
 type CourseServiceImpl struct {
-	repo         *db.Repositories
+	unitOfWork   db.UnitOfWork
 	translateSvc contracts.Translator
 }
 
 func NewCourseServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translateSvc contracts.Translator,
 ) *CourseServiceImpl {
 	return &CourseServiceImpl{
-		repo:         repo,
+		unitOfWork:   unitOfWork,
 		translateSvc: translateSvc,
 	}
 }
 
 func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
-	isCourseNameDuplicated, courseNameDuplicatedErr := svc.repo.CourseRepo.Exist(
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	isCourseNameDuplicated, courseNameDuplicatedErr := tx.CourseRepo().Exist(
 		map[string]any{"name": dto.Name},
 	)
 	if courseNameDuplicatedErr != nil {
@@ -50,7 +54,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 			svc.translateSvc.Translate("course.errors.name_duplicate"),
 		)
 	}
-	category, categoryErr := svc.repo.CategoryRepo.GetByID(dto.CategoryID, nil)
+	category, categoryErr := tx.CategoryRepo().GetByID(dto.CategoryID, nil)
 	if categoryErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching category by id",
@@ -61,7 +65,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 	if category == nil {
 		return nil, types.NewNotFoundError("course.errors.not_found_category")
 	}
-	teacher, teacherErr := svc.repo.UserRepo.GetByID(dto.TeacherID, nil)
+	teacher, teacherErr := tx.UserRepo().GetByID(dto.TeacherID, nil)
 	if teacherErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user teacher by id",
@@ -73,7 +77,7 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 		return nil, types.NewNotFoundError("course.errors.not_found_teacher")
 	}
 	authClaim := authContext.(*types.TokenClaim)
-	authUser, authUserErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
+	authUser, authUserErr := tx.UserRepo().GetByID(authClaim.UserID, nil)
 	if authUserErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching logged in user",
@@ -108,18 +112,25 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 	course.SetPrice(dto.Price)
 	course.SetFee(dto.Fee)
 
-	if err := svc.repo.CourseRepo.Create(course); err != nil {
+	if err := tx.CourseRepo().Create(course); err != nil {
 		return nil, types.NewServerError(
 			"Create Course Throw Error",
 			"CourseServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return course, nil
 }
 
 func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course, int, error) {
-	courses, count, coursesErr := svc.repo.CourseRepo.GetPaginated(repositories.GetPaginatedOptions{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	courses, count, coursesErr := tx.CourseRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
 		Relations: []string{
@@ -135,11 +146,18 @@ func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course,
 			coursesErr,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
 	return courses, count, nil
 }
 
 func (svc CourseServiceImpl) FindDetailById(id uint) (*entities.Course, error) {
-	course, courseErr := svc.repo.CourseRepo.GetByID(id, []string{"Teacher", "Category", "VerifiedBy"})
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByID(id, []string{"Teacher", "Category", "VerifiedBy"})
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Find Course Detail By ID Throw Error",
@@ -147,11 +165,18 @@ func (svc CourseServiceImpl) FindDetailById(id uint) (*entities.Course, error) {
 			courseErr,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return course, nil
 }
 
 func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error {
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.ID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByID(dto.ID, nil)
 	if courseErr != nil {
 		return types.NewServerError(
 			"Error in fetching course by id",
@@ -172,7 +197,7 @@ func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCour
 		)
 	}
 	adminClaim := authContext.(*types.TokenClaim)
-	admin, adminErr := svc.repo.UserRepo.GetByID(adminClaim.UserID, nil)
+	admin, adminErr := tx.UserRepo().GetByID(adminClaim.UserID, nil)
 	if adminErr != nil {
 		return types.NewServerError(
 			"Error in fetching user admin by id",
@@ -205,7 +230,7 @@ func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCour
 	course.VerifiedByID = &admin.ID
 	course.VerifiedDate = &now
 	course.IsVerifiedByAdmin = true
-	if err := svc.repo.CourseRepo.Update(course); err != nil {
+	if err := tx.CourseRepo().Update(course); err != nil {
 		return types.NewServerError(
 			"Error in verifying the course by admin",
 			"CourseServiceImpl.VerifyCourse",
@@ -215,11 +240,18 @@ func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCour
 	//TODO: notification system
 	// create notification for teacher that course verified
 	// send email for this notification
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc CourseServiceImpl) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error {
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseId, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByID(dto.CourseId, nil)
 	if courseErr != nil {
 		return types.NewServerError(
 			"Error in fetching course by id",
@@ -233,18 +265,25 @@ func (svc CourseServiceImpl) UpdateIntroductionURL(dto dtoreq.UpdateIntroduction
 		)
 	}
 	course.IntroductionVideo = dto.URL
-	if err := svc.repo.CourseRepo.Update(course); err != nil {
+	if err := tx.CourseRepo().Update(course); err != nil {
 		return types.NewServerError(
 			"Error in setting introduction video url",
 			"CourseServiceImpl.UpdateIntroductionURL",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc CourseServiceImpl) CreateCompleteIntroductionVideoNotification(id uint) error {
-	course, courseErr := svc.repo.CourseRepo.GetByID(id, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByID(id, nil)
 	if courseErr != nil {
 		return types.NewServerError(
 			"Error in fetching course by id",
@@ -266,13 +305,16 @@ func (svc CourseServiceImpl) CreateCompleteIntroductionVideoNotification(id uint
 		IsSeen: false,
 		UserID: course.TeacherID,
 	}
-	notificationErr := svc.repo.NotificationRepo.Create(notification)
+	notificationErr := tx.NotificationRepo().Create(notification)
 	if notificationErr != nil {
 		return types.NewServerError(
 			"Error in creating notification",
 			"CourseServiceImpl.CreateCompleteIntroductionVideoNotification",
 			notificationErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return err
 	}
 	return nil
 }

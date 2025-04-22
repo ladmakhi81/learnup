@@ -15,22 +15,26 @@ type NotificationService interface {
 }
 
 type NotificationServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewNotificationServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *NotificationServiceImpl {
 	return &NotificationServiceImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		translationSvc: translationSvc,
 	}
 }
 
 func (svc NotificationServiceImpl) SeenById(id uint) error {
-	notification, notificationErr := svc.repo.NotificationRepo.GetByID(id, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	notification, notificationErr := tx.NotificationRepo().GetByID(id, nil)
 	if notificationErr != nil {
 		return types.NewServerError(
 			"Error in fetching single notification with id",
@@ -44,18 +48,25 @@ func (svc NotificationServiceImpl) SeenById(id uint) error {
 	notification.IsSeen = true
 	now := time.Now()
 	notification.SeenAt = &now
-	if err := svc.repo.NotificationRepo.Update(notification); err != nil {
+	if err := tx.NotificationRepo().Update(notification); err != nil {
 		return types.NewServerError(
 			"Error in updating seen status in notification",
 			"NotificationServiceImpl.SeenById",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc NotificationServiceImpl) FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, int, error) {
-	notifications, count, notificationsErr := svc.repo.NotificationRepo.GetPaginated(
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	notifications, count, notificationsErr := tx.NotificationRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset:    &page,
 			Limit:     &pageSize,
@@ -68,6 +79,9 @@ func (svc NotificationServiceImpl) FetchPageable(page, pageSize int) ([]*notific
 			"NotificationServiceImpl.FetchPageable",
 			notificationsErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
 	}
 	return notifications, count, nil
 }

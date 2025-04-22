@@ -14,22 +14,26 @@ type UserSvc interface {
 }
 
 type UserSvcImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewUserSvcImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *UserSvcImpl {
 	return &UserSvcImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		translationSvc: translationSvc,
 	}
 }
 
 func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error) {
-	isPhoneExistBefore, isPhoneExistBeforeErr := svc.repo.UserRepo.Exist(map[string]any{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	isPhoneExistBefore, isPhoneExistBeforeErr := tx.UserRepo().Exist(map[string]any{
 		"phone_number": dto.Phone,
 	})
 	if isPhoneExistBeforeErr != nil {
@@ -58,12 +62,15 @@ func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.Use
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
 	}
-	if err := svc.repo.UserRepo.Create(user); err != nil {
+	if err := tx.UserRepo().Create(user); err != nil {
 		return nil, types.NewServerError(
 			"Create Basic User Throw Error",
 			"UserSvcImpl.CreateBasic",
 			err,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return user, nil
 }

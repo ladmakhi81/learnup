@@ -15,22 +15,26 @@ type QuestionAnswerService interface {
 }
 
 type QuestionAnswerServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewQuestionAnswerServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *QuestionAnswerServiceImpl {
 	return &QuestionAnswerServiceImpl{
 		translationSvc: translationSvc,
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 	}
 }
 
 func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
-	sender, senderErr := svc.repo.UserRepo.GetByID(dto.SenderID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	sender, senderErr := tx.UserRepo().GetByID(dto.SenderID, nil)
 	if senderErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user",
@@ -43,7 +47,7 @@ func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	question, questionErr := svc.repo.QuestionRepo.GetByID(dto.QuestionID, nil)
+	question, questionErr := tx.QuestionRepo().GetByID(dto.QuestionID, nil)
 	if questionErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching question by id",
@@ -66,18 +70,25 @@ func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq
 		Content:    dto.Content,
 		SenderID:   sender.ID,
 	}
-	if err := svc.repo.AnswerRepo.Create(answer); err != nil {
+	if err := tx.AnswerRepo().Create(answer); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating answer",
 			"QuestionAnswerServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return answer, nil
 }
 
 func (svc QuestionAnswerServiceImpl) GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error) {
-	question, questionErr := svc.repo.QuestionRepo.GetByID(questionID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	question, questionErr := tx.QuestionRepo().GetByID(questionID, nil)
 	if questionErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching question by id",
@@ -90,7 +101,7 @@ func (svc QuestionAnswerServiceImpl) GetQuestionAnswers(questionID uint) ([]*ent
 			svc.translationSvc.Translate("question.errors.not_found"),
 		)
 	}
-	answers, answersErr := svc.repo.AnswerRepo.GetAll(repositories.GetAllOptions{
+	answers, answersErr := tx.AnswerRepo().GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
 			"question_id": questionID,
 		},
@@ -102,6 +113,9 @@ func (svc QuestionAnswerServiceImpl) GetQuestionAnswers(questionID uint) ([]*ent
 			"QuestionAnswerServiceImpl.GetQuestionAnswers",
 			answersErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return answers, nil
 }

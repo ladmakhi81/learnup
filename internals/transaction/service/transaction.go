@@ -12,19 +12,23 @@ type TransactionService interface {
 }
 
 type TransactionServiceImpl struct {
-	repo *db.Repositories
+	unitOfWork db.UnitOfWork
 }
 
 func NewTransactionService(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 ) *TransactionServiceImpl {
 	return &TransactionServiceImpl{
-		repo: repo,
+		unitOfWork: unitOfWork,
 	}
 }
 
 func (svc TransactionServiceImpl) FetchPageable(page, pageSize int) ([]*entities.Transaction, int, error) {
-	transactions, count, transactionsErr := svc.repo.TransactionRepo.GetPaginated(
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	transactions, count, transactionsErr := tx.TransactionRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset: &page,
 			Limit:  &pageSize,
@@ -36,6 +40,9 @@ func (svc TransactionServiceImpl) FetchPageable(page, pageSize int) ([]*entities
 			"TransactionServiceImpl.FetchPageable",
 			transactionsErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
 	}
 	return transactions, count, nil
 }

@@ -18,7 +18,7 @@ type PaymentService interface {
 }
 
 type PaymentServiceImpl struct {
-	repo            *db.Repositories
+	unitOfWork      db.UnitOfWork
 	zarinpalGateway contracts.PaymentGateway
 	zibalGateway    contracts.PaymentGateway
 	stripeGateway   contracts.PaymentGateway
@@ -27,7 +27,7 @@ type PaymentServiceImpl struct {
 }
 
 func NewPaymentService(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	zarinpalGateway contracts.PaymentGateway,
 	zibalGateway contracts.PaymentGateway,
 	stripeGateway contracts.PaymentGateway,
@@ -40,11 +40,15 @@ func NewPaymentService(
 		stripeGateway:   stripeGateway,
 		config:          config,
 		translationSvc:  translationSvc,
-		repo:            repo,
+		unitOfWork:      unitOfWork,
 	}
 }
 
 func (svc PaymentServiceImpl) Create(dto paymentDtoReq.CreatePaymentReq) (*entities.Payment, error) {
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
 	gateway := svc.selectGateway(dto.Gateway)
 	if gateway == nil {
 		return nil, types.NewBadRequestError(
@@ -77,24 +81,31 @@ func (svc PaymentServiceImpl) Create(dto paymentDtoReq.CreatePaymentReq) (*entit
 		OrderID:    dto.OrderID,
 		PayLink:    resp.PayLink,
 	}
-	if err := svc.repo.PaymentRepo.Create(payment); err != nil {
+	if err := tx.PaymentRepo().Create(payment); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating payment",
 			"PaymentServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return payment, nil
 }
 
 func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
 	gateway := svc.selectGateway(dto.Gateway)
 	if gateway == nil {
 		return types.NewBadRequestError(
 			svc.translationSvc.Translate("payment.errors.gateway_not_found"),
 		)
 	}
-	payment, paymentErr := svc.repo.PaymentRepo.GetOne(map[string]any{
+	payment, paymentErr := tx.PaymentRepo().GetOne(map[string]any{
 		"authority": dto.Authority,
 	}, []string{"User", "Order"})
 	if paymentErr != nil {
@@ -129,7 +140,7 @@ func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 			Tag:      entities.TransactionTag_Sell,
 			Currency: svc.getCurrency(dto.Gateway),
 		}
-		if err := svc.repo.TransactionRepo.Create(transaction); err != nil {
+		if err := tx.TransactionRepo().Create(transaction); err != nil {
 			return types.NewServerError(
 				"Error in creating transaction based on the payment",
 				"PaymentServiceImpl.Verify",
@@ -145,7 +156,7 @@ func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 		payment.Status = entities.PaymentStatus_Failure
 		payment.Order.Status = entities.OrderStatus_Failed
 	}
-	if err := svc.repo.PaymentRepo.Update(payment); err != nil {
+	if err := tx.PaymentRepo().Update(payment); err != nil {
 		return types.NewServerError(
 			"Error in updating the payment",
 			"PaymentServiceImpl.Verify",
@@ -154,12 +165,15 @@ func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 	}
 	now := time.Now()
 	payment.Order.StatusChangedAt = &now
-	if err := svc.repo.OrderRepo.Update(payment.Order); err != nil {
+	if err := tx.OrderRepo().Update(payment.Order); err != nil {
 		return types.NewServerError(
 			"Error in updating status of order",
 			"PaymentServiceImpl.Verify",
 			err,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -204,7 +218,11 @@ func (svc PaymentServiceImpl) getCurrency(paymentGateway entities.PaymentGateway
 }
 
 func (svc PaymentServiceImpl) FetchPageable(page, pageSize int) ([]*entities.Payment, int, error) {
-	payments, count, paymentsErr := svc.repo.PaymentRepo.GetPaginated(
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	payments, count, paymentsErr := tx.PaymentRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset: &page,
 			Limit:  &pageSize,
@@ -216,6 +234,9 @@ func (svc PaymentServiceImpl) FetchPageable(page, pageSize int) ([]*entities.Pay
 			"PaymentServiceImpl.FetchPageable",
 			paymentsErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
 	}
 	return payments, count, nil
 }

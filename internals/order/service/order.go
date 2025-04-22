@@ -18,25 +18,29 @@ type OrderService interface {
 }
 
 type OrderServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 	paymentSvc     paymentService.PaymentService
 }
 
 func NewOrderService(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 	paymentSvc paymentService.PaymentService,
 ) *OrderServiceImpl {
 	return &OrderServiceImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		translationSvc: translationSvc,
 		paymentSvc:     paymentSvc,
 	}
 }
 
 func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
-	user, userErr := svc.repo.UserRepo.GetByID(dto.UserID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return "", txErr
+	}
+	user, userErr := tx.UserRepo().GetByID(dto.UserID, nil)
 	if userErr != nil {
 		return "", types.NewServerError(
 			"Error in fetching user by id",
@@ -49,7 +53,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	carts, cartsErr := svc.repo.CartRepo.GetAll(repositories.GetAllOptions{
+	carts, cartsErr := tx.CartRepo().GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
 			"id": dto.Carts,
 		},
@@ -74,7 +78,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 		FinalPrice:    0,
 		Status:        entities.OrderStatus_Pending,
 	}
-	if err := svc.repo.OrderRepo.Create(order); err != nil {
+	if err := tx.OrderRepo().Create(order); err != nil {
 		return "", types.NewServerError(
 			"Error in creating order",
 			"OrderServiceImpl.Create",
@@ -92,7 +96,7 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 		}
 		totalAmount += cart.Course.Price
 	}
-	if err := svc.repo.OrderItemRepo.BatchInsert(orderItems); err != nil {
+	if err := tx.OrderItemRepo().BatchInsert(orderItems); err != nil {
 		return "", types.NewServerError(
 			"Error in batch insert order items",
 			"OrderServiceImpl.Create",
@@ -101,13 +105,14 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 	}
 	order.TotalPrice = totalAmount
 	order.FinalPrice = totalAmount
-	if err := svc.repo.OrderRepo.Update(order); err != nil {
+	if err := tx.OrderRepo().Update(order); err != nil {
 		return "", types.NewServerError(
 			"Error in updating order",
 			"OrderServiceImpl.Create",
 			err,
 		)
 	}
+	//TODO: pass tx into paymentSvc.Create
 	payment, paymentErr := svc.paymentSvc.Create(paymentDtoReq.CreatePaymentReq{
 		Gateway: dto.Gateway,
 		UserID:  user.ID,
@@ -117,18 +122,25 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 	if paymentErr != nil {
 		return "", paymentErr
 	}
-	if err := svc.repo.CartRepo.BatchDelete(carts); err != nil {
+	if err := tx.CartRepo().BatchDelete(carts); err != nil {
 		return "", types.NewServerError(
 			"Error in deleting carts as batching",
 			"OrderServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
 	return payment.PayLink, nil
 }
 
 func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Order, int, error) {
-	orders, count, ordersErr := svc.repo.OrderRepo.GetPaginated(repositories.GetPaginatedOptions{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	orders, count, ordersErr := tx.OrderRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
 		Relations: []string{
@@ -142,17 +154,27 @@ func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Orde
 			ordersErr,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
 	return orders, count, nil
 }
 
 func (svc OrderServiceImpl) FetchDetailById(id uint) (*entities.Order, error) {
-	order, orderErr := svc.repo.OrderRepo.GetByID(id, []string{"User", "Items", "Items.Course"})
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	order, orderErr := tx.OrderRepo().GetByID(id, []string{"User", "Items", "Items.Course"})
 	if orderErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching detail by id",
 			"OrderServiceImpl.FetchDetailById",
 			orderErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return order, nil
 }

@@ -29,7 +29,7 @@ type VideoService interface {
 }
 
 type VideoServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	minioClient    contracts.Storage
 	ffmpegSvc      contracts.Ffmpeg
 	logSvc         contracts.Log
@@ -37,14 +37,14 @@ type VideoServiceImpl struct {
 }
 
 func NewVideoServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	minioClient contracts.Storage,
 	ffmpegSvc contracts.Ffmpeg,
 	logSvc contracts.Log,
 	translationSvc contracts.Translator,
 ) *VideoServiceImpl {
 	return &VideoServiceImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		minioClient:    minioClient,
 		ffmpegSvc:      ffmpegSvc,
 		logSvc:         logSvc,
@@ -53,7 +53,11 @@ func NewVideoServiceImpl(
 }
 
 func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) error {
-	course, courseErr := svc.repo.CourseRepo.GetByVideoID(videoID)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByVideoID(videoID)
 	if courseErr != nil {
 		return types.NewServerError(
 			"Error in fetching course by video id",
@@ -71,18 +75,25 @@ func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) 
 		IsSeen: false,
 		UserID: course.TeacherID,
 	}
-	if err := svc.repo.NotificationRepo.Create(notification); err != nil {
+	if err := tx.NotificationRepo().Create(notification); err != nil {
 		return types.NewServerError(
 			"Error in creating notification",
 			"VideoServiceImpl.CreateCompleteUploadVideoNotification",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*entities.Video, error) {
-	video, videoErr := svc.repo.VideoRepo.GetByID(dto.ID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	video, videoErr := tx.VideoRepo().GetByID(dto.ID, nil)
 	if videoErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching video by id",
@@ -96,12 +107,15 @@ func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDuration
 	video.URL = dto.URL
 	video.Duration = &dto.Duration
 	video.Status = entities.VideoStatus_Done
-	if err := svc.repo.VideoRepo.Update(video); err != nil {
+	if err := tx.VideoRepo().Update(video); err != nil {
 		return nil, types.NewServerError(
 			"Error in updating the video",
 			"VideoServiceImpl.UpdateVideoURL",
 			err,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return video, nil
 }
@@ -223,7 +237,11 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 }
 
 func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
-	video, videoErr := svc.repo.VideoRepo.GetByID(videoId, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	video, videoErr := tx.VideoRepo().GetByID(videoId, nil)
 	if videoErr != nil {
 		return types.NewServerError(
 			"Error in fetching video by id",
@@ -240,7 +258,7 @@ func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
 		return nil
 	}
 	adminClaim := authContext.(*types.TokenClaim)
-	admin, adminErr := svc.repo.UserRepo.GetByID(adminClaim.UserID, nil)
+	admin, adminErr := tx.UserRepo().GetByID(adminClaim.UserID, nil)
 	if adminErr != nil {
 		return types.NewServerError(
 			"Error in fetching logged in user",
@@ -257,18 +275,25 @@ func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
 	video.IsVerified = true
 	video.VerifiedDate = &now
 	video.VerifiedById = &admin.ID
-	if err := svc.repo.VideoRepo.Update(video); err != nil {
+	if err := tx.VideoRepo().Update(video); err != nil {
 		return types.NewServerError(
 			"Error in verify video",
 			"VideoServiceImpl.Verify",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*entities.Video, error) {
-	course, courseErr := svc.repo.CourseRepo.GetByID(courseID, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
+	course, courseErr := tx.CourseRepo().GetByID(courseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
@@ -279,7 +304,7 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*entities.Vid
 	if course == nil {
 		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
 	}
-	videos, videosErr := svc.repo.VideoRepo.GetAll(
+	videos, videosErr := tx.VideoRepo().GetAll(
 		repositories.GetAllOptions{
 			Conditions: map[string]any{
 				"course_id": courseID,
@@ -293,6 +318,9 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*entities.Vid
 			"VideoServiceImpl.FetchByCourseId",
 			videosErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 	return videos, nil
 }

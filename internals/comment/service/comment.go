@@ -16,23 +16,27 @@ type CommentService interface {
 }
 
 type CommentServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewCommentServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *CommentServiceImpl {
 	return &CommentServiceImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		translationSvc: translationSvc,
 	}
 }
 
 func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
+	user, userErr := tx.UserRepo().GetByID(authClaim.UserID, nil)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user logged in information",
@@ -47,7 +51,7 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 			),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseId, nil)
+	course, courseErr := tx.CourseRepo().GetByID(dto.CourseId, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course",
@@ -63,7 +67,7 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		)
 	}
 	if dto.ParentId != nil {
-		parent, parentErr := svc.repo.CommentRepo.GetByID(*dto.ParentId, nil)
+		parent, parentErr := tx.CommentRepo().GetByID(*dto.ParentId, nil)
 		if parentErr != nil {
 			return nil, types.NewServerError(
 				"Error in fetching comment by parent id",
@@ -85,18 +89,25 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		CourseID:        &course.ID,
 		ParentCommentId: dto.ParentId,
 	}
-	if err := svc.repo.CommentRepo.Create(comment); err != nil {
+	if err := tx.CommentRepo().Create(comment); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating comment",
 			"CommentServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return comment, nil
 }
 
 func (svc CommentServiceImpl) Delete(id uint) error {
-	comment, commentErr := svc.repo.CommentRepo.GetByID(id, nil)
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return txErr
+	}
+	comment, commentErr := tx.CommentRepo().GetByID(id, nil)
 	if commentErr != nil {
 		return types.NewServerError(
 			"Error in fetching comment by id",
@@ -109,18 +120,25 @@ func (svc CommentServiceImpl) Delete(id uint) error {
 			svc.translationSvc.Translate("comment.errors.not_found"),
 		)
 	}
-	if err := svc.repo.CommentRepo.Delete(comment); err != nil {
+	if err := tx.CommentRepo().Delete(comment); err != nil {
 		return types.NewServerError(
 			"Error in deleting comment",
 			"CommentServiceImpl.Delete",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (svc CommentServiceImpl) Fetch(page, pageSize int) ([]*entities.Comment, int, error) {
-	comments, count, commentsErr := svc.repo.CommentRepo.GetPaginated(repositories.GetPaginatedOptions{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	comments, count, commentsErr := tx.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset:    &page,
 		Limit:     &pageSize,
 		Relations: []string{"User", "Course"},
@@ -131,6 +149,9 @@ func (svc CommentServiceImpl) Fetch(page, pageSize int) ([]*entities.Comment, in
 			"CommentServiceImpl.Fetch",
 			commentsErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
 	}
 	return comments, count, nil
 }

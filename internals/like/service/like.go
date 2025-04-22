@@ -15,23 +15,27 @@ type LikeService interface {
 }
 
 type LikeServiceImpl struct {
-	repo           *db.Repositories
+	unitOfWork     db.UnitOfWork
 	translationSvc contracts.Translator
 }
 
 func NewLikeServiceImpl(
-	repo *db.Repositories,
+	unitOfWork db.UnitOfWork,
 	translationSvc contracts.Translator,
 ) *LikeServiceImpl {
 	return &LikeServiceImpl{
-		repo:           repo,
+		unitOfWork:     unitOfWork,
 		translationSvc: translationSvc,
 	}
 }
 
 func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, txErr
+	}
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.repo.UserRepo.GetByID(authClaim.UserID, nil)
+	user, userErr := tx.UserRepo().GetByID(authClaim.UserID, nil)
 	if userErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching logged in user",
@@ -44,7 +48,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := svc.repo.CourseRepo.GetByID(dto.CourseID, nil)
+	course, courseErr := tx.CourseRepo().GetByID(dto.CourseID, nil)
 	if courseErr != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course detail",
@@ -57,7 +61,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 			svc.translationSvc.Translate("course.errors.not_found"),
 		)
 	}
-	likedBefore, likedBeforeErr := svc.repo.LikeRepo.GetOne(map[string]any{
+	likedBefore, likedBeforeErr := tx.LikeRepo().GetOne(map[string]any{
 		"user_id":   user.ID,
 		"course_id": course.ID,
 	}, nil)
@@ -70,7 +74,7 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 	}
 	if likedBefore != nil {
 		likedBefore.Type = dto.Type
-		updateErr := svc.repo.LikeRepo.Update(likedBefore)
+		updateErr := tx.LikeRepo().Update(likedBefore)
 		if updateErr != nil {
 			return nil, types.NewServerError(
 				"Error in updating like type",
@@ -85,18 +89,25 @@ func (svc LikeServiceImpl) Create(authContext any, dto dtoreq.CreateLikeReq) (*e
 		CourseID: course.ID,
 		Type:     dto.Type,
 	}
-	if err := svc.repo.LikeRepo.Create(like); err != nil {
+	if err := tx.LikeRepo().Create(like); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating like entity for course",
 			"LikeServiceImpl.Create",
 			err,
 		)
 	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return like, nil
 }
 
 func (svc LikeServiceImpl) FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, int, error) {
-	likes, count, likesErr := svc.repo.LikeRepo.GetPaginated(repositories.GetPaginatedOptions{
+	tx, txErr := svc.unitOfWork.Begin()
+	if txErr != nil {
+		return nil, 0, txErr
+	}
+	likes, count, likesErr := tx.LikeRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
 		Conditions: map[string]any{
@@ -110,6 +121,9 @@ func (svc LikeServiceImpl) FetchByCourseID(page, pageSize int, courseId uint) ([
 			"LikeServiceImpl.Fetch",
 			likesErr,
 		)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
 	}
 	return likes, count, nil
 }
