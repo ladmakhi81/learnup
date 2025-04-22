@@ -59,3 +59,11 @@ func (course *Course) SetFee(fee *float64) {
 		course.Fee = *fee
 	}
 }
+
+func (course Course) CheckFee(fee float64) bool {
+	return fee > course.Price || fee < 0 || fee > course.Price-course.MaxDiscountAmount
+}
+
+func (course Course) IsTeacher(userID uint) bool {
+	return *course.TeacherID == userID
+}

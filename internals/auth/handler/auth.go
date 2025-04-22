@@ -50,9 +50,9 @@ func (h Handler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	accessToken, accessTokenErr := h.authSvc.Login(*dto)
-	if accessTokenErr != nil {
-		return nil, accessTokenErr
+	accessToken, err := h.authSvc.Login(*dto)
+	if err != nil {
+		return nil, err
 	}
 	loginRes := dtores.NewLoginRes(accessToken)
 	return types.NewApiResponse(http.StatusOK, loginRes), nil

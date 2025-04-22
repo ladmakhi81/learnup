@@ -13,3 +13,7 @@ type Cart struct {
 func (Cart) TableName() string {
 	return "_carts"
 }
+
+func (cart Cart) IsOwner(userID uint) bool {
+	return cart.UserID == userID
+}

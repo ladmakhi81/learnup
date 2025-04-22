@@ -1,13 +1,14 @@
 package service
 
 import (
+	cartError "github.com/ladmakhi81/learnup/internals/cart/error"
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	orderDtoReq "github.com/ladmakhi81/learnup/internals/order/dto/req"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
+	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
@@ -17,39 +18,24 @@ type OrderService interface {
 	FetchDetailById(id uint) (*entities.Order, error)
 }
 
-type OrderServiceImpl struct {
-	unitOfWork     db.UnitOfWork
-	translationSvc contracts.Translator
-	paymentSvc     paymentService.PaymentService
+type orderService struct {
+	unitOfWork db.UnitOfWork
+	paymentSvc paymentService.PaymentService
 }
 
-func NewOrderService(
-	unitOfWork db.UnitOfWork,
-	translationSvc contracts.Translator,
-	paymentSvc paymentService.PaymentService,
-) *OrderServiceImpl {
-	return &OrderServiceImpl{
-		unitOfWork:     unitOfWork,
-		translationSvc: translationSvc,
-		paymentSvc:     paymentSvc,
-	}
+func NewOrderService(unitOfWork db.UnitOfWork, paymentSvc paymentService.PaymentService) OrderService {
+	return &orderService{unitOfWork: unitOfWork, paymentSvc: paymentSvc}
 }
 
-func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
-	const operationName = "OrderServiceImpl.Create"
+func (svc orderService) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
+	const operationName = "orderService.Create"
 	return db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (string, error) {
 		user, err := tx.UserRepo().GetByID(dto.UserID, nil)
 		if err != nil {
-			return "", types.NewServerError(
-				"Error in fetching user by id",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in fetching user by id", operationName, err)
 		}
 		if user == nil {
-			return "", types.NewNotFoundError(
-				svc.translationSvc.Translate("user.errors.not_found"),
-			)
+			return "", userError.User_NotFound
 		}
 		carts, err := tx.CartRepo().GetAll(repositories.GetAllOptions{
 			Conditions: map[string]any{
@@ -58,24 +44,14 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 			Relations: []string{"Course"},
 		})
 		if err != nil {
-			return "", types.NewServerError(
-				"Error in fetching all carts based on carts ids",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in fetching all carts based on carts ids", operationName, err)
 		}
 		if len(carts) != len(dto.Carts) || len(carts) == 0 {
-			return "", types.NewNotFoundError(
-				svc.translationSvc.Translate("cart.errors.list_not_match"),
-			)
+			return "", cartError.Cart_ListNotMatch
 		}
 		order := entities.NewOrder(user.ID)
 		if err := tx.OrderRepo().Create(order); err != nil {
-			return "", types.NewServerError(
-				"Error in creating order",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in creating order", operationName, err)
 		}
 		var totalAmount float64
 		orderItems := make([]*entities.OrderItem, len(carts))
@@ -89,20 +65,12 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 			totalAmount += cart.Course.Price
 		}
 		if err := tx.OrderItemRepo().BatchInsert(orderItems); err != nil {
-			return "", types.NewServerError(
-				"Error in batch insert order items",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in batch insert order items", operationName, err)
 		}
 		order.TotalPrice = totalAmount
 		order.FinalPrice = totalAmount
 		if err := tx.OrderRepo().Update(order); err != nil {
-			return "", types.NewServerError(
-				"Error in updating order",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in updating order", operationName, err)
 		}
 		payment, err := svc.paymentSvc.Create(
 			tx,
@@ -117,18 +85,14 @@ func (svc OrderServiceImpl) Create(dto orderDtoReq.CreateOrderReq) (string, erro
 			return "", err
 		}
 		if err := tx.CartRepo().BatchDelete(carts); err != nil {
-			return "", types.NewServerError(
-				"Error in deleting carts as batching",
-				operationName,
-				err,
-			)
+			return "", types.NewServerError("Error in deleting carts as batching", operationName, err)
 		}
 		return payment.PayLink, nil
 	})
 }
 
-func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Order, int, error) {
-	const operationName = "OrderServiceImpl.FetchPaginated"
+func (svc orderService) FetchPaginated(page, pageSize int) ([]*entities.Order, int, error) {
+	const operationName = "orderService.FetchPaginated"
 	orders, count, err := svc.unitOfWork.OrderRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
@@ -137,24 +101,16 @@ func (svc OrderServiceImpl) FetchPaginated(page, pageSize int) ([]*entities.Orde
 		},
 	})
 	if err != nil {
-		return nil, 0, types.NewServerError(
-			"Error in fetching paginated list of orders",
-			operationName,
-			err,
-		)
+		return nil, 0, types.NewServerError("Error in fetching paginated list of orders", operationName, err)
 	}
 	return orders, count, nil
 }
 
-func (svc OrderServiceImpl) FetchDetailById(id uint) (*entities.Order, error) {
-	const operationName = "OrderServiceImpl.FetchDetailById"
+func (svc orderService) FetchDetailById(id uint) (*entities.Order, error) {
+	const operationName = "orderService.FetchDetailById"
 	order, err := svc.unitOfWork.OrderRepo().GetByID(id, []string{"User", "Items", "Items.Course"})
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in fetching detail by id",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in fetching detail by id", operationName, err)
 	}
 	return order, nil
 }

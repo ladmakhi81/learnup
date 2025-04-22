@@ -1,10 +1,11 @@
 package service
 
 import (
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
+	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
@@ -19,54 +20,33 @@ type TeacherQuestionService interface {
 	GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error)
 }
 
-type TeacherQuestionServiceImpl struct {
-	unitOfWork     db.UnitOfWork
-	translationSvc contracts.Translator
+type teacherQuestionService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewTeacherQuestionServiceImpl(
-	unitOfWork db.UnitOfWork,
-	translationSvc contracts.Translator,
-) *TeacherQuestionServiceImpl {
-	return &TeacherQuestionServiceImpl{
-		translationSvc: translationSvc,
-		unitOfWork:     unitOfWork,
-	}
+func NewTeacherQuestionSvc(unitOfWork db.UnitOfWork) TeacherQuestionService {
+	return &teacherQuestionService{unitOfWork: unitOfWork}
 }
 
-func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error) {
-	const operationName = "TeacherQuestionServiceImpl.GetQuestions"
+func (svc teacherQuestionService) GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error) {
+	const operationName = "teacherQuestionService.GetQuestions"
 	teacher, err := svc.unitOfWork.UserRepo().GetByID(options.TeacherID, nil)
 	if err != nil {
-		return nil, 0, types.NewServerError(
-			"Error in fetching teacher by id",
-			operationName,
-			err,
-		)
+		return nil, 0, types.NewServerError("Error in fetching teacher by id", operationName, err)
 	}
 	if teacher == nil {
-		return nil, 0, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.teacher_not_found"),
-		)
+		return nil, 0, userError.User_TeacherNotFound
 	}
 	if options.CourseID != nil {
 		course, err := svc.unitOfWork.CourseRepo().GetByID(*options.CourseID, nil)
 		if err != nil {
-			return nil, 0, types.NewServerError(
-				"Error in fetching course by id",
-				operationName,
-				err,
-			)
+			return nil, 0, types.NewServerError("Error in fetching course by id", operationName, err)
 		}
 		if course == nil {
-			return nil, 0, types.NewNotFoundError(
-				svc.translationSvc.Translate("course.errors.not_found"),
-			)
+			return nil, 0, courseError.Course_NotFound
 		}
-		if *course.TeacherID != teacher.ID {
-			return nil, 0, types.NewForbiddenAccessError(
-				svc.translationSvc.Translate("common.errors.forbidden_access"),
-			)
+		if !course.IsTeacher(teacher.ID) {
+			return nil, 0, courseError.Course_ForbiddenAccess
 		}
 	}
 	questionCondition := make(map[string]any)

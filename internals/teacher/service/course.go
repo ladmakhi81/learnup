@@ -1,11 +1,12 @@
 package service
 
 import (
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	teacherDtoReq "github.com/ladmakhi81/learnup/internals/teacher/dto/req"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
+	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
@@ -14,64 +15,37 @@ type TeacherCourseService interface {
 	FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, int, error)
 }
 
-type TeacherCourseServiceImpl struct {
-	unitOfWork     db.UnitOfWork
-	translationSvc contracts.Translator
+type teacherCourseService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewTeacherCourseServiceImpl(
-	unitOfWork db.UnitOfWork,
-	translationSvc contracts.Translator,
-) *TeacherCourseServiceImpl {
-	return &TeacherCourseServiceImpl{
-		unitOfWork:     unitOfWork,
-		translationSvc: translationSvc,
-	}
+func NewTeacherCourseService(unitOfWork db.UnitOfWork) TeacherCourseService {
+	return &teacherCourseService{unitOfWork: unitOfWork}
 }
 
-func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error) {
-	const operationName = "TeacherCourseServiceImpl.Create"
-	isDuplicate, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{
-		"name": dto.Name,
-	})
+func (svc teacherCourseService) Create(authContext any, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error) {
+	const operationName = "teacherCourseService.Create"
+	isDuplicate, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in checking existence of course name",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in checking existence of course name", operationName, err)
 	}
 	if isDuplicate {
-		return nil, types.NewConflictError(
-			svc.translationSvc.Translate("course.errors.name_duplicate"),
-		)
+		return nil, courseError.Course_NameDuplicated
 	}
 	category, err := svc.unitOfWork.CategoryRepo().GetByID(dto.CategoryID, nil)
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in fetching category by id",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in fetching category by id", operationName, err)
 	}
 	if category == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("course.errors.not_found_category"),
-		)
+		return nil, courseError.Course_NotFoundCategory
 	}
 	teacherAuth := authContext.(*types.TokenClaim)
 	teacher, err := svc.unitOfWork.UserRepo().GetByID(teacherAuth.UserID, nil)
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in fetching teacher by id",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in fetching teacher by id", operationName, err)
 	}
 	if teacher == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("course.errors.not_found_teacher"),
-		)
+		return nil, courseError.Course_NotFoundTeacher
 	}
 	course := &entities.Course{
 		Name:                dto.Name,
@@ -93,11 +67,7 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 		Status:              entities.CourseStatus_InProgress,
 	}
 	if err := svc.unitOfWork.CourseRepo().Create(course); err != nil {
-		return nil, types.NewServerError(
-			"Error in creating teacher course",
-			"TeacherCourseServiceImpl.Create",
-			err,
-		)
+		return nil, types.NewServerError("Error in creating teacher course", "teacherCourseService.Create", err)
 	}
 	// TODO: notification system
 	//send email for creating course
@@ -105,21 +75,15 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 	return course, nil
 }
 
-func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, int, error) {
-	const operationName = "TeacherCourseServiceImpl.FetchByTeacherId"
+func (svc teacherCourseService) FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, int, error) {
+	const operationName = "teacherCourseService.FetchByTeacherId"
 	authClaim := authContext.(*types.TokenClaim)
 	teacher, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
 	if err != nil {
-		return nil, 0, types.NewServerError(
-			"Error in fetching teacher by id",
-			operationName,
-			err,
-		)
+		return nil, 0, types.NewServerError("Error in fetching teacher by id", operationName, err)
 	}
 	if teacher == nil {
-		return nil, 0, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.teacher_not_found"),
-		)
+		return nil, 0, userError.User_TeacherNotFound
 	}
 	courses, count, err := svc.unitOfWork.CourseRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
@@ -129,11 +93,7 @@ func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, page
 		},
 	})
 	if err != nil {
-		return nil, 0, types.NewServerError(
-			"Error in fetching courses related to teacher",
-			operationName,
-			err,
-		)
+		return nil, 0, types.NewServerError("Error in fetching courses related to teacher", operationName, err)
 	}
 	return courses, count, nil
 }

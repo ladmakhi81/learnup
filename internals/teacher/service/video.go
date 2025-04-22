@@ -1,10 +1,11 @@
 package service
 
 import (
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
 	"github.com/ladmakhi81/learnup/internals/db"
 	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/teacher/dto/req"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
+	videoError "github.com/ladmakhi81/learnup/internals/video/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
@@ -12,46 +13,29 @@ type TeacherVideoService interface {
 	AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error)
 }
 
-type TeacherVideoServiceImpl struct {
-	unitOfWork     db.UnitOfWork
-	translationSvc contracts.Translator
+type teacherVideoService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewTeacherVideoServiceImpl(
-	unitOfWork db.UnitOfWork,
-	translationSvc contracts.Translator,
-) *TeacherVideoServiceImpl {
-	return &TeacherVideoServiceImpl{
-		translationSvc: translationSvc,
-		unitOfWork:     unitOfWork,
-	}
+func NewTeacherVideoSvc(unitOfWork db.UnitOfWork) TeacherVideoService {
+	return &teacherVideoService{unitOfWork: unitOfWork}
 }
 
-func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error) {
-	const operationName = "TeacherVideoServiceImpl.AddVideo"
-	isTitleDuplicated, err := svc.unitOfWork.VideoRepo().Exist(map[string]any{
-		"title": dto.Title,
-	})
+func (svc teacherVideoService) AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error) {
+	const operationName = "teacherVideoService.AddVideo"
+	isTitleDuplicated, err := svc.unitOfWork.VideoRepo().Exist(map[string]any{"title": dto.Title})
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in checking existence of video title",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in checking existence of video title", operationName, err)
 	}
 	if isTitleDuplicated {
-		return nil, types.NewConflictError(svc.translationSvc.Translate("video.errors.title_duplicated"))
+		return nil, videoError.Video_TitleDuplicated
 	}
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
 	if err != nil {
-		return nil, types.NewServerError(
-			"Error in fetching course by id",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
+		return nil, courseError.Course_NotFound
 	}
 	video := &entities2.Video{
 		Title:       dto.Title,
@@ -63,11 +47,7 @@ func (svc TeacherVideoServiceImpl) AddVideo(dto dtoreq.AddVideoToCourseReq) (*en
 		Status:      entities2.VideoStatus_Pending,
 	}
 	if err := svc.unitOfWork.VideoRepo().Create(video); err != nil {
-		return nil, types.NewServerError(
-			"Create course throw error",
-			operationName,
-			err,
-		)
+		return nil, types.NewServerError("Create course throw error", operationName, err)
 	}
 	return video, nil
 }

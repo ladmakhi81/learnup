@@ -4,7 +4,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db"
 	notificationEntity "github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
+	notificationError "github.com/ladmakhi81/learnup/internals/notification/error"
 	"github.com/ladmakhi81/learnup/types"
 	"time"
 )
@@ -14,49 +14,34 @@ type NotificationService interface {
 	FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, int, error)
 }
 
-type NotificationServiceImpl struct {
-	unitOfWork     db.UnitOfWork
-	translationSvc contracts.Translator
+type notificationService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewNotificationServiceImpl(
-	unitOfWork db.UnitOfWork,
-	translationSvc contracts.Translator,
-) *NotificationServiceImpl {
-	return &NotificationServiceImpl{
-		unitOfWork:     unitOfWork,
-		translationSvc: translationSvc,
-	}
+func NewNotificationSvc(unitOfWork db.UnitOfWork) NotificationService {
+	return &notificationService{unitOfWork: unitOfWork}
 }
 
-func (svc NotificationServiceImpl) SeenById(id uint) error {
-	const operationName = "NotificationServiceImpl.SeenById"
+func (svc notificationService) SeenById(id uint) error {
+	const operationName = "notificationService.SeenById"
 	notification, err := svc.unitOfWork.NotificationRepo().GetByID(id, nil)
 	if err != nil {
-		return types.NewServerError(
-			"Error in fetching single notification with id",
-			operationName,
-			err,
-		)
+		return types.NewServerError("Error in fetching single notification with id", operationName, err)
 	}
 	if notification == nil {
-		return types.NewNotFoundError(svc.translationSvc.Translate("notification.errors.not_found"))
+		return notificationError.Notification_NotFound
 	}
 	notification.IsSeen = true
 	now := time.Now()
 	notification.SeenAt = &now
 	if err := svc.unitOfWork.NotificationRepo().Update(notification); err != nil {
-		return types.NewServerError(
-			"Error in updating seen status in notification",
-			operationName,
-			err,
-		)
+		return types.NewServerError("Error in updating seen status in notification", operationName, err)
 	}
 	return nil
 }
 
-func (svc NotificationServiceImpl) FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, int, error) {
-	const operationName = "NotificationServiceImpl.FetchPageable"
+func (svc notificationService) FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, int, error) {
+	const operationName = "notificationService.FetchPageable"
 	notifications, count, err := svc.unitOfWork.NotificationRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset:    &page,
@@ -65,11 +50,7 @@ func (svc NotificationServiceImpl) FetchPageable(page, pageSize int) ([]*notific
 		},
 	)
 	if err != nil {
-		return nil, 0, types.NewServerError(
-			"Fetch All Notifications Throw Error",
-			operationName,
-			err,
-		)
+		return nil, 0, types.NewServerError("Fetch All Notifications Throw Error", operationName, err)
 	}
 	return notifications, count, nil
 }

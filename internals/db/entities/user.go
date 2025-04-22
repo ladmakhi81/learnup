@@ -1,6 +1,9 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -18,4 +21,9 @@ func (User) TableName() string {
 
 func (user User) FullName() string {
 	return user.FirstName + " " + user.LastName
+}
+
+func (user User) IsPasswordMatch(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	return err == nil
 }
