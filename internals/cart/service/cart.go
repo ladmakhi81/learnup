@@ -31,19 +31,16 @@ func NewCartService(
 }
 
 func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	isCartExist, cartExistErr := tx.CartRepo().Exist(map[string]any{
+	const operationName = "CartServiceImpl.Create"
+	isCartExist, err := svc.unitOfWork.CartRepo().Exist(map[string]any{
 		"course_id": dto.CourseID,
 		"user_id":   dto.UserID,
 	})
-	if cartExistErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in checking is cart exist or not",
-			"CartServiceImpl.Create",
-			cartExistErr,
+			operationName,
+			err,
 		)
 	}
 	if isCartExist {
@@ -51,12 +48,12 @@ func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart,
 			svc.translationSvc.Translate("cart.errors.exist_before"),
 		)
 	}
-	course, courseErr := tx.CourseRepo().GetByID(dto.CourseID, nil)
-	if courseErr != nil {
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
-			"CartServiceImpl.Create",
-			courseErr,
+			operationName,
+			err,
 		)
 	}
 	if course == nil {
@@ -68,27 +65,21 @@ func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart,
 		UserID:   dto.UserID,
 		CourseID: dto.CourseID,
 	}
-	if err := tx.CartRepo().Create(cart); err != nil {
+	if err := svc.unitOfWork.CartRepo().Create(cart); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating cart items",
-			"CartServiceImpl.Create",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return cart, nil
 }
 
 func (svc CartServiceImpl) DeleteByID(userID, id uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	cart, cartErr := tx.CartRepo().GetByID(id, nil)
-	if cartErr != nil {
-		return cartErr
+	const operationName = "CartServiceImpl.DeleteByID"
+	cart, err := svc.unitOfWork.CartRepo().GetByID(id, nil)
+	if err != nil {
+		return err
 	}
 	if cart == nil {
 		return types.NewNotFoundError(
@@ -100,31 +91,24 @@ func (svc CartServiceImpl) DeleteByID(userID, id uint) error {
 			svc.translationSvc.Translate("cart.errors.owner_delete"),
 		)
 	}
-	deleteErr := tx.CartRepo().Delete(cart)
-	if deleteErr != nil {
+	if err := svc.unitOfWork.CartRepo().Delete(cart); err != nil {
 		return types.NewServerError(
 			"Error in deleting cart by id",
-			"CartServiceImpl.DeleteByID",
-			deleteErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc CartServiceImpl) FetchAllByUserID(userID uint) ([]*entities.Cart, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	user, userErr := tx.UserRepo().GetByID(userID, nil)
-	if userErr != nil {
+	const operationName = "CartServiceImpl.FetchAllByUserID"
+	user, err := svc.unitOfWork.UserRepo().GetByID(userID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching carts by user id",
-			"CartServiceImpl.FetchAllByUserID",
-			userErr,
+			operationName,
+			err,
 		)
 	}
 	if user == nil {
@@ -132,21 +116,18 @@ func (svc CartServiceImpl) FetchAllByUserID(userID uint) ([]*entities.Cart, erro
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	carts, cartsErr := tx.CartRepo().GetAll(repositories.GetAllOptions{
+	carts, err := svc.unitOfWork.CartRepo().GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
 			"user_id": userID,
 		},
 		Relations: []string{"Course"},
 	})
-	if cartsErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching all carts by user id",
-			"CartServiceImpl.FetchAllByUserID",
-			cartsErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return carts, nil
 }

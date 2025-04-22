@@ -31,17 +31,14 @@ func NewCommentServiceImpl(
 }
 
 func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
+	const operationName = "CommentServiceImpl.Create"
 	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := tx.UserRepo().GetByID(authClaim.UserID, nil)
-	if userErr != nil {
+	user, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching user logged in information",
-			"CommentServiceImpl.Create",
-			userErr,
+			operationName,
+			err,
 		)
 	}
 	if user == nil {
@@ -51,12 +48,12 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 			),
 		)
 	}
-	course, courseErr := tx.CourseRepo().GetByID(dto.CourseId, nil)
-	if courseErr != nil {
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course",
-			"CommentServiceImpl.Create",
-			courseErr,
+			operationName,
+			err,
 		)
 	}
 	if course == nil {
@@ -67,12 +64,12 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		)
 	}
 	if dto.ParentId != nil {
-		parent, parentErr := tx.CommentRepo().GetByID(*dto.ParentId, nil)
-		if parentErr != nil {
+		parent, err := svc.unitOfWork.CommentRepo().GetByID(*dto.ParentId, nil)
+		if err != nil {
 			return nil, types.NewServerError(
 				"Error in fetching comment by parent id",
-				"CommentServiceImpl.Create",
-				parentErr,
+				operationName,
+				err,
 			)
 		}
 		if parent == nil {
@@ -89,30 +86,24 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		CourseID:        &course.ID,
 		ParentCommentId: dto.ParentId,
 	}
-	if err := tx.CommentRepo().Create(comment); err != nil {
+	if err := svc.unitOfWork.CommentRepo().Create(comment); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating comment",
-			"CommentServiceImpl.Create",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return comment, nil
 }
 
 func (svc CommentServiceImpl) Delete(id uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	comment, commentErr := tx.CommentRepo().GetByID(id, nil)
-	if commentErr != nil {
+	const operationName = "CommentServiceImpl.Delete"
+	comment, err := svc.unitOfWork.CommentRepo().GetByID(id, nil)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching comment by id",
-			"CommentServiceImpl.Delete",
-			commentErr,
+			operationName,
+			err,
 		)
 	}
 	if comment == nil {
@@ -120,38 +111,29 @@ func (svc CommentServiceImpl) Delete(id uint) error {
 			svc.translationSvc.Translate("comment.errors.not_found"),
 		)
 	}
-	if err := tx.CommentRepo().Delete(comment); err != nil {
+	if err := svc.unitOfWork.CommentRepo().Delete(comment); err != nil {
 		return types.NewServerError(
 			"Error in deleting comment",
-			"CommentServiceImpl.Delete",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc CommentServiceImpl) Fetch(page, pageSize int) ([]*entities.Comment, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
-	comments, count, commentsErr := tx.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
+	const operationName = "CommentServiceImpl.Fetch"
+	comments, count, err := svc.unitOfWork.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset:    &page,
 		Limit:     &pageSize,
 		Relations: []string{"User", "Course"},
 	})
-	if commentsErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching comments",
-			"CommentServiceImpl.Fetch",
-			commentsErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return comments, count, nil
 }

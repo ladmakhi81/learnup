@@ -24,25 +24,19 @@ func NewTransactionService(
 }
 
 func (svc TransactionServiceImpl) FetchPageable(page, pageSize int) ([]*entities.Transaction, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
-	transactions, count, transactionsErr := tx.TransactionRepo().GetPaginated(
+	const operationName = "TransactionServiceImpl.FetchPageable"
+	transactions, count, err := svc.unitOfWork.TransactionRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset: &page,
 			Limit:  &pageSize,
 		},
 	)
-	if transactionsErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching transactions",
-			"TransactionServiceImpl.FetchPageable",
-			transactionsErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return transactions, count, nil
 }

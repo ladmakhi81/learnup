@@ -35,18 +35,15 @@ func NewAuthServiceImpl(
 }
 
 func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return "", txErr
-	}
-	user, userErr := tx.UserRepo().GetOne(map[string]any{
+	const operationName = "AuthServiceImpl.Login"
+	user, err := svc.unitOfWork.UserRepo().GetOne(map[string]any{
 		"phone_number": dto.Phone,
 	}, nil)
-	if userErr != nil {
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in fetching user by phone number",
-			"AuthServiceImpl.Login",
-			userErr,
+			operationName,
+			err,
 		)
 	}
 	if user == nil {
@@ -59,23 +56,20 @@ func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
 			svc.translationSvc.Translate("auth.errors.invalid_credentials"),
 		)
 	}
-	accessToken, accessTokenErr := svc.tokenSvc.GenerateToken(user.ID)
-	if accessTokenErr != nil {
+	accessToken, err := svc.tokenSvc.GenerateToken(user.ID)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in generating access token",
-			"AuthServiceImpl.Login",
-			accessTokenErr,
+			operationName,
+			err,
 		)
 	}
 	if err := svc.cacheSvc.SetVal(constant.LoginCacheKey, accessToken); err != nil {
 		return "", types.NewServerError(
 			"Error in updating cache redis",
-			"AuthServiceImpl.Login",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return "", err
 	}
 	return accessToken, nil
 }

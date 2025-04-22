@@ -30,18 +30,15 @@ func NewTeacherCourseServiceImpl(
 }
 
 func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	isDuplicate, duplicateErr := tx.CourseRepo().Exist(map[string]any{
+	const operationName = "TeacherCourseServiceImpl.Create"
+	isDuplicate, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{
 		"name": dto.Name,
 	})
-	if duplicateErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in checking existence of course name",
-			"TeacherCourseServiceImpl.Create",
-			duplicateErr,
+			operationName,
+			err,
 		)
 	}
 	if isDuplicate {
@@ -49,12 +46,12 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 			svc.translationSvc.Translate("course.errors.name_duplicate"),
 		)
 	}
-	category, categoryErr := tx.CategoryRepo().GetByID(dto.CategoryID, nil)
-	if categoryErr != nil {
+	category, err := svc.unitOfWork.CategoryRepo().GetByID(dto.CategoryID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching category by id",
-			"TeacherCourseServiceImpl.Create",
-			categoryErr,
+			operationName,
+			err,
 		)
 	}
 	if category == nil {
@@ -63,12 +60,12 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 		)
 	}
 	teacherAuth := authContext.(*types.TokenClaim)
-	teacher, teacherErr := tx.UserRepo().GetByID(teacherAuth.UserID, nil)
-	if teacherErr != nil {
+	teacher, err := svc.unitOfWork.UserRepo().GetByID(teacherAuth.UserID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching teacher by id",
-			"TeacherCourseServiceImpl.Create",
-			teacherErr,
+			operationName,
+			err,
 		)
 	}
 	if teacher == nil {
@@ -95,7 +92,7 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 		ThumbnailImage:      dto.ThumbnailImage,
 		Status:              entities.CourseStatus_InProgress,
 	}
-	if err := tx.CourseRepo().Create(course); err != nil {
+	if err := svc.unitOfWork.CourseRepo().Create(course); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating teacher course",
 			"TeacherCourseServiceImpl.Create",
@@ -105,24 +102,18 @@ func (svc TeacherCourseServiceImpl) Create(authContext any, dto teacherDtoReq.Cr
 	// TODO: notification system
 	//send email for creating course
 	//create notification about creating new course for all admin
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return course, nil
 }
 
 func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, pageSize int) ([]*entities.Course, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
+	const operationName = "TeacherCourseServiceImpl.FetchByTeacherId"
 	authClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := tx.UserRepo().GetByID(authClaim.UserID, nil)
-	if teacherErr != nil {
+	teacher, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching teacher by id",
-			"TeacherCourseServiceImpl.FetchByTeacherId",
-			teacherErr,
+			operationName,
+			err,
 		)
 	}
 	if teacher == nil {
@@ -130,22 +121,19 @@ func (svc TeacherCourseServiceImpl) FetchByTeacherId(authContext any, page, page
 			svc.translationSvc.Translate("user.errors.teacher_not_found"),
 		)
 	}
-	courses, count, coursesErr := tx.CourseRepo().GetPaginated(repositories.GetPaginatedOptions{
+	courses, count, err := svc.unitOfWork.CourseRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
 		Conditions: map[string]any{
 			"teacher_id": teacher.ID,
 		},
 	})
-	if coursesErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching courses related to teacher",
-			"TeacherCourseServiceImpl.FetchByTeacherId",
-			coursesErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return courses, count, nil
 }

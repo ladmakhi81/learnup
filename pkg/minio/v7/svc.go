@@ -27,7 +27,7 @@ func NewMinioClientSvc(
 func (svc MinioClientSvc) BucketExist(
 	ctx context.Context,
 	bucketName string,
-) (bool, *dtos.StorageError) {
+) (bool, error) {
 	exist, err := svc.minio.BucketExists(ctx, bucketName)
 	if err != nil {
 		return false, dtos.NewStorageError(
@@ -41,7 +41,7 @@ func (svc MinioClientSvc) BucketExist(
 func (svc MinioClientSvc) CreateBucket(
 	ctx context.Context,
 	bucketName string,
-) *dtos.StorageError {
+) error {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return existErr
@@ -69,7 +69,7 @@ func (svc MinioClientSvc) CreateBucket(
 func (svc MinioClientSvc) DeleteBucket(
 	ctx context.Context,
 	bucketName string,
-) *dtos.StorageError {
+) error {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return existErr
@@ -96,7 +96,7 @@ func (svc MinioClientSvc) UploadFileByContent(
 	objectPath string,
 	contentType string,
 	fileContents []byte,
-) (*dtos.UploadResult, *dtos.StorageError) {
+) (*dtos.UploadResult, error) {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return nil, existErr
@@ -131,7 +131,7 @@ func (svc MinioClientSvc) GetFile(
 	ctx context.Context,
 	bucketName,
 	fileName string,
-) ([]byte, *dtos.StorageError) {
+) ([]byte, error) {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return nil, existErr
@@ -169,7 +169,7 @@ func (svc MinioClientSvc) GetFileReader(
 	ctx context.Context,
 	bucketName,
 	fileName string,
-) (io.Reader, *dtos.StorageError) {
+) (io.Reader, error) {
 	isBucketExist, existErr := svc.BucketExist(ctx, bucketName)
 	if existErr != nil {
 		return nil, existErr

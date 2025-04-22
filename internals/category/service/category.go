@@ -32,18 +32,15 @@ func NewCategoryServiceImpl(
 }
 
 func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.Category, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	isNameDuplicated, duplicatedNameErr := tx.CategoryRepo().Exist(map[string]any{
+	const operationName = "CategoryServiceImpl.Create"
+	isNameDuplicated, err := svc.unitOfWork.CategoryRepo().Exist(map[string]any{
 		"name": dto.Name,
 	})
-	if duplicatedNameErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in checking category name exist",
-			"CategoryServiceImpl.Create",
-			duplicatedNameErr,
+			operationName,
+			err,
 		)
 	}
 	if isNameDuplicated {
@@ -52,12 +49,12 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.C
 		)
 	}
 	if dto.ParentID != nil {
-		parentCategory, parentCategoryErr := tx.CategoryRepo().GetByID(*dto.ParentID, nil)
-		if parentCategoryErr != nil {
+		parentCategory, err := svc.unitOfWork.CategoryRepo().GetByID(*dto.ParentID, nil)
+		if err != nil {
 			return nil, types.NewServerError(
 				"Error in fetching parent category by id",
-				"CategoryServiceImpl.Create",
-				parentCategoryErr,
+				operationName,
+				err,
 			)
 		}
 		if parentCategory == nil {
@@ -72,30 +69,24 @@ func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.C
 		Name:             dto.Name,
 		ParentCategoryID: dto.ParentID,
 	}
-	if err := tx.CategoryRepo().Create(category); err != nil {
+	if err := svc.unitOfWork.CategoryRepo().Create(category); err != nil {
 		return nil, types.NewServerError(
 			"Create Category Throw Error",
-			"CategoryServiceImpl.Create",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return category, nil
 }
 
 func (svc CategoryServiceImpl) DeleteById(id uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	category, categoryErr := tx.CategoryRepo().GetByID(id, nil)
-	if categoryErr != nil {
+	const operationName = "CategoryServiceImpl.DeleteById"
+	category, err := svc.unitOfWork.CategoryRepo().GetByID(id, nil)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching category by id",
-			"CategoryServiceImpl.DeleteById",
-			categoryErr,
+			operationName,
+			err,
 		)
 	}
 	if category == nil {
@@ -103,30 +94,24 @@ func (svc CategoryServiceImpl) DeleteById(id uint) error {
 			svc.translationSvc.Translate("category.errors.not_found"),
 		)
 	}
-	if err := tx.CategoryRepo().Delete(category); err != nil {
+	if err := svc.unitOfWork.CategoryRepo().Delete(category); err != nil {
 		return types.NewServerError(
 			"Delete Category By ID Throw Error",
-			"CategoryServiceImpl.DeleteById",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]*entities.Category, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	subCategories, subCategoriesErr := tx.CategoryRepo().GetChildren(category.ID)
-	if subCategoriesErr != nil {
+	const operationName = "CategoryServiceImpl.getSubCategories"
+	subCategories, err := svc.unitOfWork.CategoryRepo().GetChildren(category.ID)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching sub categories",
-			"CategoryServiceImpl.getSubCategories",
-			subCategoriesErr,
+			operationName,
+			err,
 		)
 	}
 	for _, subCategory := range subCategories {
@@ -136,60 +121,46 @@ func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]
 		}
 		subCategory.Children = nextSubCategory
 	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return subCategories, nil
 }
 
 func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entities.Category, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	rootCategories, rootCategoriesErr := tx.CategoryRepo().GetAll(repositories.GetAllOptions{
+	const operationName = "CategoryServiceImpl.GetCategoriesTree"
+	rootCategories, err := svc.unitOfWork.CategoryRepo().GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
 			"parent_category_id": nil,
 		},
 	})
-	if rootCategoriesErr != nil {
+	if err != nil {
 		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
-			"CategoryServiceImpl.GetCategoriesTree",
-			rootCategoriesErr,
+			operationName,
+			err,
 		)
 	}
 	treeCategories := make([]*entities.Category, len(rootCategories))
 	for rootCategoryIndex, rootCategory := range rootCategories {
-		subCategory, subCategoryErr := svc.getSubCategories(rootCategory)
-		if subCategoryErr != nil {
-			return nil, subCategoryErr
+		subCategory, err := svc.getSubCategories(rootCategory)
+		if err != nil {
+			return nil, err
 		}
 		rootCategory.Children = subCategory
 		treeCategories[rootCategoryIndex] = rootCategory
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return treeCategories, nil
 }
 
 func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entities.Category, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
-	categories, count, categoriesErr := tx.CategoryRepo().GetPaginated(repositories.GetPaginatedOptions{
+	const operationName = "CategoryServiceImpl.GetCategories"
+	categories, count, err := svc.unitOfWork.CategoryRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Offset: &page,
 		Limit:  &pageSize,
 	})
-	if categoriesErr != nil {
-		return nil, 0, types.NewServerError("Get Categories List Throw Error",
-			"CategoryServiceImpl.FetchPage",
-			categoriesErr,
+	if err != nil {
+		return nil, 0, types.NewServerError(
+			"Get Categories List Throw Error",
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return categories, count, nil
 }

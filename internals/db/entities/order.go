@@ -20,3 +20,13 @@ type Order struct {
 func (Order) TableName() string {
 	return "_orders"
 }
+
+func NewOrder(userID uint) *Order {
+	return &Order{
+		UserID:        userID,
+		TotalPrice:    0,
+		DiscountPrice: 0,
+		FinalPrice:    0,
+		Status:        OrderStatus_Pending,
+	}
+}

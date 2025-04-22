@@ -53,16 +53,13 @@ func NewVideoServiceImpl(
 }
 
 func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	course, courseErr := tx.CourseRepo().GetByVideoID(videoID)
-	if courseErr != nil {
+	const operationName = "VideoServiceImpl.CreateCompleteUploadVideoNotification"
+	course, err := svc.unitOfWork.CourseRepo().GetByVideoID(videoID)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching course by video id",
-			"VideoServiceImpl.CreateCompleteUploadVideoNotification",
-			courseErr,
+			operationName,
+			err,
 		)
 	}
 	notification := &entities.Notification{
@@ -75,30 +72,24 @@ func (svc VideoServiceImpl) CreateCompleteUploadVideoNotification(videoID uint) 
 		IsSeen: false,
 		UserID: course.TeacherID,
 	}
-	if err := tx.NotificationRepo().Create(notification); err != nil {
+	if err := svc.unitOfWork.NotificationRepo().Create(notification); err != nil {
 		return types.NewServerError(
 			"Error in creating notification",
-			"VideoServiceImpl.CreateCompleteUploadVideoNotification",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*entities.Video, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	video, videoErr := tx.VideoRepo().GetByID(dto.ID, nil)
-	if videoErr != nil {
+	const operationName = "VideoServiceImpl.UpdateURLAndDuration"
+	video, err := svc.unitOfWork.VideoRepo().GetByID(dto.ID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching video by id",
-			"VideoServiceImpl.UpdateURLAndDuration",
-			videoErr,
+			operationName,
+			err,
 		)
 	}
 	if video == nil {
@@ -107,42 +98,40 @@ func (svc VideoServiceImpl) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDuration
 	video.URL = dto.URL
 	video.Duration = &dto.Duration
 	video.Status = entities.VideoStatus_Done
-	if err := tx.VideoRepo().Update(video); err != nil {
+	if err := svc.unitOfWork.VideoRepo().Update(video); err != nil {
 		return nil, types.NewServerError(
 			"Error in updating the video",
-			"VideoServiceImpl.UpdateVideoURL",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return video, nil
 }
 
 func (svc VideoServiceImpl) CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error) {
-	file, fileErr := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
-	if fileErr != nil {
+	const operationName = "VideoServiceImpl.CalculateDuration"
+	file, err := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in get file from minio",
-			"VideoServiceImpl.CalculateDuration",
-			fileErr,
+			operationName,
+			err,
 		)
 	}
-	durationStr, durationErr := svc.ffmpegSvc.GetVideoDuration(file)
-	if durationErr != nil {
+	durationStr, err := svc.ffmpegSvc.GetVideoDuration(file)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in calculating video duration",
-			"VideoServiceImpl.CalculateDuration",
-			durationErr,
+			operationName,
+			err,
 		)
 	}
-	duration, durationErr := strconv.ParseFloat(durationStr, 64)
-	if durationErr != nil {
+	duration, err := strconv.ParseFloat(durationStr, 64)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in converting duration into number",
-			"VideoServiceImpl.CalculateDuration",
-			durationErr,
+			operationName,
+			err,
 		)
 	}
 	hours := int(duration) / 3600
@@ -152,32 +141,33 @@ func (svc VideoServiceImpl) CalculateDuration(ctx context.Context, dto dtoreq.Ca
 }
 
 func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error) {
+	const operationName = "VideoServiceImpl.Encode"
 	log.Println("encode function execute")
 	// encode
-	file, fileErr := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
-	if fileErr != nil {
+	file, err := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in get file from minio",
-			"VideoServiceImpl.Encode",
-			fileErr,
+			operationName,
+			err,
 		)
 	}
-	storeLocation, storeLocationErr := svc.ffmpegSvc.EncodeVideo(file)
-	if storeLocationErr != nil {
+	storeLocation, err := svc.ffmpegSvc.EncodeVideo(file)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in encoding video file",
-			"VideoServiceImpl.Encode",
-			storeLocationErr,
+			operationName,
+			err,
 		)
 	}
 
 	// move from local to minio
-	dirFiles, dirErr := os.ReadDir(storeLocation)
-	if dirErr != nil {
+	dirFiles, err := os.ReadDir(storeLocation)
+	if err != nil {
 		return "", types.NewServerError(
 			"Error in finding directories of encoded files",
-			"VideoServiceImpl.Encode",
-			dirErr,
+			operationName,
+			err,
 		)
 	}
 	contentTypes := map[string]string{
@@ -186,12 +176,12 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 	}
 	encodedFilePath := uuid.NewString()
 	for _, dirFile := range dirFiles {
-		file, fileErr := os.ReadFile(path.Join(storeLocation, dirFile.Name()))
-		if fileErr != nil {
+		file, err := os.ReadFile(path.Join(storeLocation, dirFile.Name()))
+		if err != nil {
 			return "", types.NewServerError(
 				"Error in finding file of directories of encoded files",
-				"VideoServiceImpl.Encode",
-				fileErr,
+				operationName,
+				err,
 			)
 		}
 		fileExt := filepath.Ext(dirFile.Name())
@@ -205,7 +195,7 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 		); err != nil {
 			return "", types.NewServerError(
 				"Error in storing encoded video into storage",
-				"VideoServiceImpl.Encode",
+				operationName,
 				err,
 			)
 		}
@@ -215,21 +205,21 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 	if err := os.RemoveAll(storeLocation); err != nil {
 		return "", types.NewServerError(
 			"Error in deleting file from disk",
-			"VideoServiceImpl.EncodeVideoWithObjectID",
+			operationName,
 			err,
 		)
 	}
 	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", dto.ObjectId); err != nil {
 		return "", types.NewServerError(
 			"Error in deleting file from minio",
-			"VideoServiceImpl.EncodeVideoWithObjectID",
+			operationName,
 			err,
 		)
 	}
 	if err := svc.minioClient.DeleteObject(context.TODO(), "videos", fmt.Sprintf("%s.info", dto.ObjectId)); err != nil {
 		return "", types.NewServerError(
 			"Error in deleting file from minio",
-			"VideoServiceImpl.EncodeVideoWithObjectID",
+			operationName,
 			err,
 		)
 	}
@@ -237,16 +227,13 @@ func (svc VideoServiceImpl) Encode(ctx context.Context, dto dtoreq.EncodeVideoRe
 }
 
 func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	video, videoErr := tx.VideoRepo().GetByID(videoId, nil)
-	if videoErr != nil {
+	const operationName = "VideoServiceImpl.Verify"
+	video, err := svc.unitOfWork.VideoRepo().GetByID(videoId, nil)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching video by id",
-			"VideoServiceImpl.Verify",
-			videoErr,
+			operationName,
+			err,
 		)
 	}
 	if video == nil {
@@ -258,12 +245,12 @@ func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
 		return nil
 	}
 	adminClaim := authContext.(*types.TokenClaim)
-	admin, adminErr := tx.UserRepo().GetByID(adminClaim.UserID, nil)
-	if adminErr != nil {
+	admin, err := svc.unitOfWork.UserRepo().GetByID(adminClaim.UserID, nil)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching logged in user",
-			"VideoServiceImpl.Verify",
-			adminErr,
+			operationName,
+			err,
 		)
 	}
 	if admin == nil {
@@ -275,36 +262,30 @@ func (svc VideoServiceImpl) Verify(authContext any, videoId uint) error {
 	video.IsVerified = true
 	video.VerifiedDate = &now
 	video.VerifiedById = &admin.ID
-	if err := tx.VideoRepo().Update(video); err != nil {
+	if err := svc.unitOfWork.VideoRepo().Update(video); err != nil {
 		return types.NewServerError(
 			"Error in verify video",
-			"VideoServiceImpl.Verify",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*entities.Video, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	course, courseErr := tx.CourseRepo().GetByID(courseID, nil)
-	if courseErr != nil {
+	const operatioName = "VideoServiceImpl.FindVideosByCourseID"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(courseID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
-			"VideoServiceImpl.FindVideosByCourseID",
-			courseErr,
+			operatioName,
+			err,
 		)
 	}
 	if course == nil {
 		return nil, types.NewNotFoundError(svc.translationSvc.Translate("course.errors.not_found"))
 	}
-	videos, videosErr := tx.VideoRepo().GetAll(
+	videos, err := svc.unitOfWork.VideoRepo().GetAll(
 		repositories.GetAllOptions{
 			Conditions: map[string]any{
 				"course_id": courseID,
@@ -312,15 +293,12 @@ func (svc VideoServiceImpl) FindVideosByCourseID(courseID uint) ([]*entities.Vid
 			Relations: []string{"VerifiedBy"},
 		},
 	)
-	if videosErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Finding videos by course id throw error",
-			"VideoServiceImpl.FetchByCourseId",
-			videosErr,
+			operatioName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return videos, nil
 }

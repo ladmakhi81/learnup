@@ -1,42 +1,35 @@
 package db
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	"github.com/ladmakhi81/learnup/types"
 	"gorm.io/gorm"
 )
 
 type UnitOfWork interface {
 	Begin() (UnitOfWorkTx, error)
+	Repo
 }
 
 type UnitOfWorkTx interface {
+	Repo
 	Commit() error
 	Rollback() error
-
-	AnswerRepo() repositories.AnswerRepo
-	CartRepo() repositories.CartRepo
-	CategoryRepo() repositories.CategoryRepo
-	CommentRepo() repositories.CommentRepo
-	CourseRepo() repositories.CourseRepo
-	LikeRepo() repositories.LikeRepo
-	NotificationRepo() repositories.NotificationRepo
-	OrderRepo() repositories.OrderRepo
-	OrderItemRepo() repositories.OrderItemRepo
-	PaymentRepo() repositories.PaymentRepo
-	QuestionRepo() repositories.QuestionRepo
-	TransactionRepo() repositories.TransactionRepo
-	UserRepo() repositories.UserRepo
-	VideoRepo() repositories.VideoRepo
 }
 
 type UnitOfWorkImpl struct {
 	db *gorm.DB
+	*RepoProvider
 }
 
-func NewUnitOfWork(db *gorm.DB) *UnitOfWorkImpl {
+type UnitOfWorkTxImpl struct {
+	tx *gorm.DB
+	*RepoProvider
+}
+
+func NewUnitOfWork(db *gorm.DB) UnitOfWork {
 	return &UnitOfWorkImpl{
-		db: db,
+		db:           db,
+		RepoProvider: NewRepoProvider(db),
 	}
 }
 
@@ -52,73 +45,53 @@ func (svc UnitOfWorkImpl) Begin() (UnitOfWorkTx, error) {
 	return NewUnitOfWorkTx(tx), nil
 }
 
-type UnitOfWorkTxImpl struct {
-	tx *gorm.DB
-}
-
-func NewUnitOfWorkTx(tx *gorm.DB) *UnitOfWorkTxImpl {
+func NewUnitOfWorkTx(tx *gorm.DB) UnitOfWorkTx {
 	return &UnitOfWorkTxImpl{
-		tx: tx,
+		tx:           tx,
+		RepoProvider: NewRepoProvider(tx),
 	}
 }
 
 func (svc UnitOfWorkTxImpl) Commit() error {
-	err := svc.tx.Commit().Error
-	return types.NewServerError(
-		"Error in commit changes",
-		"UnitOfWorkTxImpl.Commit",
-		err,
-	)
+	if err := svc.tx.Commit().Error; err != nil {
+		return types.NewServerError(
+			"Error in commit changes",
+			"UnitOfWorkTxImpl.Commit",
+			err,
+		)
+	}
+	return nil
 }
 
 func (svc UnitOfWorkTxImpl) Rollback() error {
-	err := svc.tx.Rollback().Error
-	return types.NewServerError(
-		"Error in rollback",
-		"UnitOfWorkTxImpl.Rollback",
-		err,
-	)
+	if err := svc.tx.Rollback().Error; err != nil {
+		return types.NewServerError(
+			"Error in rollback",
+			"UnitOfWorkTxImpl.Rollback",
+			err,
+		)
+	}
+	return nil
 }
 
-func (svc UnitOfWorkTxImpl) AnswerRepo() repositories.AnswerRepo {
-	return repositories.NewAnswerRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) CartRepo() repositories.CartRepo {
-	return repositories.NewCartRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) CategoryRepo() repositories.CategoryRepo {
-	return repositories.NewCategoryRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) CommentRepo() repositories.CommentRepo {
-	return repositories.NewCommentRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) CourseRepo() repositories.CourseRepo {
-	return repositories.NewCourseRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) LikeRepo() repositories.LikeRepo {
-	return repositories.NewLikeRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) NotificationRepo() repositories.NotificationRepo {
-	return repositories.NewNotificationRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) OrderRepo() repositories.OrderRepo {
-	return repositories.NewOrderRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) OrderItemRepo() repositories.OrderItemRepo {
-	return repositories.NewOrderItemRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) PaymentRepo() repositories.PaymentRepo {
-	return repositories.NewPaymentRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) QuestionRepo() repositories.QuestionRepo {
-	return repositories.NewQuestionRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) TransactionRepo() repositories.TransactionRepo {
-	return repositories.NewTransactionRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) UserRepo() repositories.UserRepo {
-	return repositories.NewUserRepo(svc.tx)
-}
-func (svc UnitOfWorkTxImpl) VideoRepo() repositories.VideoRepo {
-	return repositories.NewVideoRepo(svc.tx)
+func WithTx[T any](unitOfWork UnitOfWork, fn func(tx UnitOfWorkTx) (T, error)) (T, error) {
+	var defaultRes T
+	tx, err := unitOfWork.Begin()
+	if err != nil {
+		return defaultRes, err
+	}
+	resp, err := fn(tx)
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+	if err != nil {
+		tx.Rollback()
+		return defaultRes, err
+	}
+
+	tx.Commit()
+	return resp, nil
 }

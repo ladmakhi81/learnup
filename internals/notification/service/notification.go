@@ -30,16 +30,13 @@ func NewNotificationServiceImpl(
 }
 
 func (svc NotificationServiceImpl) SeenById(id uint) error {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return txErr
-	}
-	notification, notificationErr := tx.NotificationRepo().GetByID(id, nil)
-	if notificationErr != nil {
+	const operationName = "NotificationServiceImpl.SeenById"
+	notification, err := svc.unitOfWork.NotificationRepo().GetByID(id, nil)
+	if err != nil {
 		return types.NewServerError(
 			"Error in fetching single notification with id",
-			"NotificationServiceImpl.SeenById",
-			notificationErr,
+			operationName,
+			err,
 		)
 	}
 	if notification == nil {
@@ -48,40 +45,31 @@ func (svc NotificationServiceImpl) SeenById(id uint) error {
 	notification.IsSeen = true
 	now := time.Now()
 	notification.SeenAt = &now
-	if err := tx.NotificationRepo().Update(notification); err != nil {
+	if err := svc.unitOfWork.NotificationRepo().Update(notification); err != nil {
 		return types.NewServerError(
 			"Error in updating seen status in notification",
-			"NotificationServiceImpl.SeenById",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 	return nil
 }
 
 func (svc NotificationServiceImpl) FetchPageable(page, pageSize int) ([]*notificationEntity.Notification, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
-	notifications, count, notificationsErr := tx.NotificationRepo().GetPaginated(
+	const operationName = "NotificationServiceImpl.FetchPageable"
+	notifications, count, err := svc.unitOfWork.NotificationRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Offset:    &page,
 			Limit:     &pageSize,
 			Relations: []string{"User"},
 		},
 	)
-	if notificationsErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Fetch All Notifications Throw Error",
-			"NotificationServiceImpl.FetchPageable",
-			notificationsErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return notifications, count, nil
 }

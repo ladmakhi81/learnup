@@ -30,16 +30,13 @@ func NewQuestionServiceImpl(
 }
 
 func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Question, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	sender, senderErr := tx.UserRepo().GetByID(dto.UserID, nil)
-	if senderErr != nil {
+	const operationName = "QuestionServiceImpl.Create"
+	sender, err := svc.unitOfWork.UserRepo().GetByID(dto.UserID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching sender data",
-			"QuestionServiceImpl.Create",
-			senderErr,
+			operationName,
+			err,
 		)
 	}
 	if sender == nil {
@@ -47,12 +44,12 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 			svc.translationSvc.Translate("user.errors.not_found"),
 		)
 	}
-	course, courseErr := tx.CourseRepo().GetByID(dto.CourseID, nil)
-	if courseErr != nil {
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in fetching course by id",
-			"QuestionServiceImpl.Create",
-			courseErr,
+			operationName,
+			err,
 		)
 	}
 	if course == nil {
@@ -67,12 +64,12 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 		Priority: dto.Priority,
 	}
 	if dto.VideoID != nil {
-		video, videoErr := tx.VideoRepo().GetByID(*dto.VideoID, nil)
-		if videoErr != nil {
+		video, err := svc.unitOfWork.VideoRepo().GetByID(*dto.VideoID, nil)
+		if err != nil {
 			return nil, types.NewServerError(
 				"Error in fetching video",
-				"QuestionServiceImpl.Create",
-				videoErr,
+				operationName,
+				err,
 			)
 		}
 		if video == nil {
@@ -82,27 +79,21 @@ func (svc QuestionServiceImpl) Create(dto dtoreq.CreateQuestionReq) (*entities.Q
 		}
 		question.VideoID = &video.ID
 	}
-	if err := tx.QuestionRepo().Create(question); err != nil {
+	if err := svc.unitOfWork.QuestionRepo().Create(question); err != nil {
 		return nil, types.NewServerError(
 			"Error in creating question",
-			"QuestionServiceImpl.Create",
+			operationName,
 			err,
 		)
 	}
 	// TODO: notification system
 	// send notification for teacher that we have new question
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return question, nil
 }
 
 func (svc QuestionServiceImpl) GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
-	questions, count, questionErr := tx.QuestionRepo().GetPaginated(
+	const operationName = "QuestionServiceImpl.GetPageable"
+	questions, count, err := svc.unitOfWork.QuestionRepo().GetPaginated(
 		repositories.GetPaginatedOptions{
 			Limit:  &pageSize,
 			Offset: &page,
@@ -115,15 +106,12 @@ func (svc QuestionServiceImpl) GetPageable(courseId *uint, page, pageSize int) (
 				"Video",
 			},
 		})
-	if questionErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching related questions",
-			"QuestionServiceImpl.GetPageable",
-			questionErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, err
 	}
 	return questions, count, nil
 }

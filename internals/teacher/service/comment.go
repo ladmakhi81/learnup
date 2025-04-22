@@ -28,17 +28,14 @@ func NewTeacherCommentServiceImpl(
 }
 
 func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, 0, txErr
-	}
+	const operationName = "TeacherCommentServiceImpl.GetPageableCommentByCourseId"
 	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := tx.UserRepo().GetByID(teacherClaim.UserID, nil)
-	if teacherErr != nil {
+	teacher, err := svc.unitOfWork.UserRepo().GetByID(teacherClaim.UserID, nil)
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in finding teacher by id",
-			"TeacherCommentServiceImpl.GetPageableCommentByCourseId",
-			teacherErr,
+			operationName,
+			err,
 		)
 	}
 	if teacher == nil {
@@ -46,12 +43,12 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			svc.translationSvc.Translate("user.errors.teacher_not_found"),
 		)
 	}
-	course, courseErr := tx.CourseRepo().GetByID(courseId, nil)
-	if courseErr != nil {
+	course, err := svc.unitOfWork.CourseRepo().GetByID(courseId, nil)
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching course detail",
-			"TeacherCommentServiceImpl.GetPageableCommentByCourseId",
-			courseErr,
+			operationName,
+			err,
 		)
 	}
 	if course == nil {
@@ -59,7 +56,7 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			svc.translationSvc.Translate("course.errors.not_found"),
 		)
 	}
-	comments, count, commentsErr := tx.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
+	comments, count, err := svc.unitOfWork.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
 		Limit:     &pageSize,
 		Offset:    &page,
 		Relations: []string{"User", "Course"},
@@ -68,15 +65,12 @@ func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext an
 			"user_id":   teacher.ID,
 		},
 	})
-	if commentsErr != nil {
+	if err != nil {
 		return nil, 0, types.NewServerError(
 			"Error in fetching comments",
-			"TeacherCommentServiceImpl.GetPageableCommentByCourseId",
-			commentsErr,
+			operationName,
+			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, 0, txErr
 	}
 	return comments, count, nil
 }

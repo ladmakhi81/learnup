@@ -29,18 +29,15 @@ func NewUserSvcImpl(
 }
 
 func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error) {
-	tx, txErr := svc.unitOfWork.Begin()
-	if txErr != nil {
-		return nil, txErr
-	}
-	isPhoneExistBefore, isPhoneExistBeforeErr := tx.UserRepo().Exist(map[string]any{
+	const operationName = "UserSvcImpl.CreateBasic"
+	isPhoneExistBefore, err := svc.unitOfWork.UserRepo().Exist(map[string]any{
 		"phone_number": dto.Phone,
 	})
-	if isPhoneExistBeforeErr != nil {
+	if err != nil {
 		return nil, types.NewServerError(
 			"Error in checking phone number exist",
-			"UserSvcImpl.CreateBasic",
-			isPhoneExistBeforeErr,
+			operationName,
+			err,
 		)
 	}
 	if isPhoneExistBefore {
@@ -48,12 +45,12 @@ func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.Use
 			svc.translationSvc.Translate("user.errors.phone_duplicate"),
 		)
 	}
-	hashedPassword, hashedPasswordErr := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
-	if hashedPasswordErr != nil {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.Password), bcrypt.DefaultCost)
+	if err != nil {
 		return nil, types.NewServerError(
 			"Generating Password Throw Error",
-			"UserSvcImpl.CreateBasic",
-			hashedPasswordErr,
+			operationName,
+			err,
 		)
 	}
 	user := &entities.User{
@@ -62,15 +59,12 @@ func (svc UserSvcImpl) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.Use
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
 	}
-	if err := tx.UserRepo().Create(user); err != nil {
+	if err := svc.unitOfWork.UserRepo().Create(user); err != nil {
 		return nil, types.NewServerError(
 			"Create Basic User Throw Error",
-			"UserSvcImpl.CreateBasic",
+			operationName,
 			err,
 		)
-	}
-	if err := tx.Commit(); err != nil {
-		return nil, err
 	}
 	return user, nil
 }
