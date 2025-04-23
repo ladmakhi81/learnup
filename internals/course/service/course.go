@@ -8,7 +8,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
-	"time"
+	"github.com/ladmakhi81/learnup/utils"
 )
 
 type CourseService interface {
@@ -56,7 +56,6 @@ func (svc courseService) Create(authContext any, dto dtoreq.CreateCourseReq) (*e
 	if err != nil {
 		return nil, types.NewServerError("Error in fetching logged in user", operationName, err)
 	}
-	verifiedDate := time.Now()
 	course := &entities.Course{
 		CategoryID:                  &category.ID,
 		Name:                        dto.Name,
@@ -76,7 +75,7 @@ func (svc courseService) Create(authContext any, dto dtoreq.CreateCourseReq) (*e
 		Tags:                        dto.Tags,
 		TeacherID:                   &teacher.ID,
 		ThumbnailImage:              dto.ThumbnailImage,
-		VerifiedDate:                &verifiedDate,
+		VerifiedDate:                utils.Now(),
 		VerifiedByID:                &authUser.ID,
 	}
 	course.SetPrice(dto.Price)
@@ -139,22 +138,36 @@ func (svc courseService) VerifyCourse(authContext any, dto dtoreq.VerifyCourseRe
 	if dto.DiscountFeeAmountPercentage > 100 {
 		return courseError.Course_InvalidMaxDiscountPercentage
 	}
-	now := time.Now()
 	course.Fee = dto.Fee
 	if course.CanHaveDiscount {
 		course.DiscountFeeAmountPercentage = dto.DiscountFeeAmountPercentage
 	}
+	now := utils.Now()
 	course.Status = entities.CourseStatus_Verified
-	course.StatusChangedAt = &now
+	course.StatusChangedAt = now
 	course.VerifiedByID = &admin.ID
-	course.VerifiedDate = &now
+	course.VerifiedDate = now
 	course.IsVerifiedByAdmin = true
 	if err := svc.unitOfWork.CourseRepo().Update(course); err != nil {
 		return types.NewServerError("Error in verifying the course by admin", operationName, err)
 	}
-	//TODO: notification system
-	// create notification for teacher that course verified
-	// send email for this notification
+	notification := &entities.Notification{
+		Type:   entities.NotificationType_CourseVerified,
+		UserID: course.TeacherID,
+		Metadata: map[string]any{
+			"course_id":            course.ID,
+			"verified_by":          admin.ID,
+			"course_name":          course.Name,
+			"verified_by_fullname": admin.FullName(),
+		},
+	}
+	if err := svc.unitOfWork.NotificationRepo().Create(notification); err != nil {
+		return types.NewServerError(
+			"Error in creating notification when course verified",
+			"CourseService.VerifyCourse",
+			err,
+		)
+	}
 	return nil
 }
 

@@ -62,11 +62,13 @@ func (svc questionAnswerService) GetQuestionAnswers(questionID uint) ([]*entitie
 	if question == nil {
 		return nil, questionError.Question_NotFound
 	}
+	order := "created_at asc"
 	answers, err := svc.unitOfWork.AnswerRepo().GetAll(repositories.GetAllOptions{
 		Conditions: map[string]any{
 			"question_id": questionID,
 		},
 		Relations: []string{"Sender"},
+		Order:     &order,
 	})
 	if err != nil {
 		return nil, types.NewServerError("Error in fetching answers", operationName, err)

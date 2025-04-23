@@ -6,7 +6,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	notificationError "github.com/ladmakhi81/learnup/internals/notification/error"
 	"github.com/ladmakhi81/learnup/types"
-	"time"
+	"github.com/ladmakhi81/learnup/utils"
 )
 
 type NotificationService interface {
@@ -32,8 +32,7 @@ func (svc notificationService) SeenById(id uint) error {
 		return notificationError.Notification_NotFound
 	}
 	notification.IsSeen = true
-	now := time.Now()
-	notification.SeenAt = &now
+	notification.SeenAt = utils.Now()
 	if err := svc.unitOfWork.NotificationRepo().Update(notification); err != nil {
 		return types.NewServerError("Error in updating seen status in notification", operationName, err)
 	}

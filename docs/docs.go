@@ -749,7 +749,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem"
                                                             }
                                                         }
                                                     }
@@ -2581,101 +2581,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.CourseStatus": {
-            "type": "string",
-            "enum": [
-                "in-progress",
-                "verified",
-                "starting",
-                "done",
-                "pause",
-                "cancel"
-            ],
-            "x-enum-varnames": [
-                "CourseStatus_InProgress",
-                "CourseStatus_Verified",
-                "CourseStatus_Starting",
-                "CourseStatus_Done",
-                "CourseStatus_Pause",
-                "CourseStatus_Cancel"
-            ]
-        },
-        "entities.OrderStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "success",
-                "failed"
-            ],
-            "x-enum-varnames": [
-                "OrderStatus_Pending",
-                "OrderStatus_Success",
-                "OrderStatus_Failed"
-            ]
-        },
-        "entities.PaymentStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "success",
-                "failed"
-            ],
-            "x-enum-varnames": [
-                "PaymentStatus_Pending",
-                "PaymentStatus_Success",
-                "PaymentStatus_Failure"
-            ]
-        },
-        "entities.TransactionTag": {
-            "type": "string",
-            "enum": [
-                "sell",
-                "charge_wallet",
-                "deposit_wallet",
-                "salary_payment"
-            ],
-            "x-enum-varnames": [
-                "TransactionTag_Sell",
-                "TransactionTag_ChargeWallet",
-                "TransactionTag_DepositWallet",
-                "TransactionTag_SalaryPayment"
-            ]
-        },
-        "entities.TransactionType": {
-            "type": "string",
-            "enum": [
-                "withdraw",
-                "deposit"
-            ],
-            "x-enum-varnames": [
-                "TransactionType_Withdraw",
-                "TransactionType_Deposit"
-            ]
-        },
-        "entities.VideoAccessLevel": {
-            "type": "string",
-            "enum": [
-                "private",
-                "public"
-            ],
-            "x-enum-varnames": [
-                "VideoAccessLevel_Private",
-                "VideoAccessLevel_Public"
-            ]
-        },
-        "entities.VideoStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "fail",
-                "done"
-            ],
-            "x-enum-varnames": [
-                "VideoStatus_Pending",
-                "VideoStatus_Fail",
-                "VideoStatus_Done"
-            ]
-        },
         "github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq": {
             "type": "object",
             "required": [
@@ -2942,7 +2847,7 @@ const docTemplate = `{
                 "discountFeeAmountPercentage": {
                     "type": "number",
                     "maximum": 100,
-                    "minimum": 1
+                    "minimum": 0
                 },
                 "fee": {
                     "type": "number",
@@ -2990,10 +2895,6 @@ const docTemplate = `{
         },
         "github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReq": {
             "type": "object",
-            "required": [
-                "discountFeeAmountPercentage",
-                "fee"
-            ],
             "properties": {
                 "discountFeeAmountPercentage": {
                     "type": "number",
@@ -3032,7 +2933,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "courseStatus": {
-                    "$ref": "#/definitions/entities.CourseStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
                 },
                 "description": {
                     "type": "string"
@@ -3171,7 +3072,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "status": {
-                    "$ref": "#/definitions/entities.CourseStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3199,17 +3100,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes": {
-            "type": "object",
-            "properties": {
-                "courses": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems"
-                    }
-                }
-            }
-        },
         "github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem": {
             "type": "object",
             "properties": {
@@ -3218,6 +3108,59 @@ const docTemplate = `{
                 },
                 "user": {
                     "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.userItem"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "introductionVideo": {
+                    "type": "string"
+                },
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isVerified": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "status": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
+                },
+                "statusChangedAt": {
+                    "type": "string"
+                },
+                "teacher": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "verifiedBy": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier"
+                },
+                "verifiedDate": {
+                    "type": "string"
                 }
             }
         },
@@ -3291,59 +3234,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "deletedAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "introductionVideo": {
-                    "type": "string"
-                },
-                "isPublished": {
-                    "type": "boolean"
-                },
-                "isVerified": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "status": {
-                    "$ref": "#/definitions/entities.CourseStatus"
-                },
-                "statusChangedAt": {
-                    "type": "string"
-                },
-                "teacher": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher"
-                },
-                "thumbnail": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "verifiedBy": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier"
-                },
-                "verifiedDate": {
                     "type": "string"
                 }
             }
@@ -3466,7 +3356,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessLevel": {
-                    "$ref": "#/definitions/entities.VideoAccessLevel"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
                 },
                 "createdAt": {
                     "type": "string"
@@ -3487,7 +3377,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "status": {
-                    "$ref": "#/definitions/entities.VideoStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus"
                 },
                 "title": {
                     "type": "string"
@@ -3505,6 +3395,101 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus": {
+            "type": "string",
+            "enum": [
+                "in-progress",
+                "verified",
+                "starting",
+                "done",
+                "pause",
+                "cancel"
+            ],
+            "x-enum-varnames": [
+                "CourseStatus_InProgress",
+                "CourseStatus_Verified",
+                "CourseStatus_Starting",
+                "CourseStatus_Done",
+                "CourseStatus_Pause",
+                "CourseStatus_Cancel"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "OrderStatus_Pending",
+                "OrderStatus_Success",
+                "OrderStatus_Failed"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "PaymentStatus_Pending",
+                "PaymentStatus_Success",
+                "PaymentStatus_Failure"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag": {
+            "type": "string",
+            "enum": [
+                "sell",
+                "charge_wallet",
+                "deposit_wallet",
+                "salary_payment"
+            ],
+            "x-enum-varnames": [
+                "TransactionTag_Sell",
+                "TransactionTag_ChargeWallet",
+                "TransactionTag_DepositWallet",
+                "TransactionTag_SalaryPayment"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.TransactionType": {
+            "type": "string",
+            "enum": [
+                "withdraw",
+                "deposit"
+            ],
+            "x-enum-varnames": [
+                "TransactionType_Withdraw",
+                "TransactionType_Deposit"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel": {
+            "type": "string",
+            "enum": [
+                "private",
+                "public"
+            ],
+            "x-enum-varnames": [
+                "VideoAccessLevel_Private",
+                "VideoAccessLevel_Public"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "fail",
+                "done"
+            ],
+            "x-enum-varnames": [
+                "VideoStatus_Pending",
+                "VideoStatus_Fail",
+                "VideoStatus_Done"
+            ]
         },
         "github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq": {
             "type": "object",
@@ -3607,7 +3592,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/entities.OrderStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3642,7 +3627,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/entities.OrderStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3733,7 +3718,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/entities.PaymentStatus"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -3851,7 +3836,7 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/entities.VideoAccessLevel"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
                         }
                     ]
                 },
@@ -3958,7 +3943,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessLevel": {
-                    "$ref": "#/definitions/entities.VideoAccessLevel"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
                 },
                 "courseId": {
                     "type": "integer"
@@ -4155,10 +4140,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tag": {
-                    "$ref": "#/definitions/entities.TransactionTag"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag"
                 },
                 "type": {
-                    "$ref": "#/definitions/entities.TransactionType"
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionType"
                 },
                 "user": {
                     "type": "string"

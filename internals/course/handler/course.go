@@ -114,7 +114,7 @@ func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]questionDtoRes.GetCoursesRes}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]questionDtoRes.GetPageableCourseItem}}
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/courses/page [get]
@@ -129,7 +129,7 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 	if coursesErr != nil {
 		return nil, coursesErr
 	}
-	mappedCourses := questionDtoRes.NewGetCoursesRes(courses)
+	mappedCourses := questionDtoRes.MapPageableCourseItems(courses)
 	paginationRes := types.NewPaginationRes(
 		mappedCourses,
 		page,

@@ -13,13 +13,13 @@ import (
 	videoError "github.com/ladmakhi81/learnup/internals/video/error"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/utils"
 	"log"
 	"math"
 	"os"
 	"path"
 	"path/filepath"
 	"strconv"
-	"time"
 )
 
 type VideoService interface {
@@ -186,9 +186,8 @@ func (svc videoService) Verify(authContext any, videoId uint) error {
 	if admin == nil {
 		return userError.User_AdminNotFound
 	}
-	now := time.Now()
 	video.IsVerified = true
-	video.VerifiedDate = &now
+	video.VerifiedDate = utils.Now()
 	video.VerifiedById = &admin.ID
 	if err := svc.unitOfWork.VideoRepo().Update(video); err != nil {
 		return types.NewServerError("Error in verify video", operationName, err)

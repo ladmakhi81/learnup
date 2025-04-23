@@ -9,8 +9,8 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/utils"
 	"log"
-	"time"
 )
 
 type PaymentService interface {
@@ -117,8 +117,7 @@ func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
 		if err := tx.PaymentRepo().Update(payment); err != nil {
 			return 0, types.NewServerError("Error in updating the payment", operationName, err)
 		}
-		now := time.Now()
-		payment.Order.StatusChangedAt = &now
+		payment.Order.StatusChangedAt = utils.Now()
 		if err := tx.OrderRepo().Update(payment.Order); err != nil {
 			return 0, types.NewServerError("Error in updating status of order", operationName, err)
 		}

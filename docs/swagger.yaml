@@ -1,79 +1,5 @@
 basePath: /api
 definitions:
-  entities.CourseStatus:
-    enum:
-    - in-progress
-    - verified
-    - starting
-    - done
-    - pause
-    - cancel
-    type: string
-    x-enum-varnames:
-    - CourseStatus_InProgress
-    - CourseStatus_Verified
-    - CourseStatus_Starting
-    - CourseStatus_Done
-    - CourseStatus_Pause
-    - CourseStatus_Cancel
-  entities.OrderStatus:
-    enum:
-    - pending
-    - success
-    - failed
-    type: string
-    x-enum-varnames:
-    - OrderStatus_Pending
-    - OrderStatus_Success
-    - OrderStatus_Failed
-  entities.PaymentStatus:
-    enum:
-    - pending
-    - success
-    - failed
-    type: string
-    x-enum-varnames:
-    - PaymentStatus_Pending
-    - PaymentStatus_Success
-    - PaymentStatus_Failure
-  entities.TransactionTag:
-    enum:
-    - sell
-    - charge_wallet
-    - deposit_wallet
-    - salary_payment
-    type: string
-    x-enum-varnames:
-    - TransactionTag_Sell
-    - TransactionTag_ChargeWallet
-    - TransactionTag_DepositWallet
-    - TransactionTag_SalaryPayment
-  entities.TransactionType:
-    enum:
-    - withdraw
-    - deposit
-    type: string
-    x-enum-varnames:
-    - TransactionType_Withdraw
-    - TransactionType_Deposit
-  entities.VideoAccessLevel:
-    enum:
-    - private
-    - public
-    type: string
-    x-enum-varnames:
-    - VideoAccessLevel_Private
-    - VideoAccessLevel_Public
-  entities.VideoStatus:
-    enum:
-    - pending
-    - fail
-    - done
-    type: string
-    x-enum-varnames:
-    - VideoStatus_Pending
-    - VideoStatus_Fail
-    - VideoStatus_Done
   github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq:
     properties:
       password:
@@ -240,7 +166,7 @@ definitions:
         type: string
       discountFeeAmountPercentage:
         maximum: 100
-        minimum: 1
+        minimum: 0
         type: number
       fee:
         minimum: 0
@@ -296,9 +222,6 @@ definitions:
       fee:
         minimum: 0
         type: number
-    required:
-    - discountFeeAmountPercentage
-    - fee
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentRes:
     properties:
@@ -318,7 +241,7 @@ definitions:
       commentAccessMode:
         type: string
       courseStatus:
-        $ref: '#/definitions/entities.CourseStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus'
       description:
         type: string
       discountFeeAmountPercentage:
@@ -410,7 +333,7 @@ definitions:
       price:
         type: number
       status:
-        $ref: '#/definitions/entities.CourseStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus'
       statusChangedAt:
         type: string
       tags:
@@ -428,19 +351,47 @@ definitions:
       verifiedDate:
         type: string
     type: object
-  github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes:
-    properties:
-      courses:
-        items:
-          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems'
-        type: array
-    type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem:
     properties:
       type:
         type: string
       user:
         $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.userItem'
+    type: object
+  github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem:
+    properties:
+      category:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory'
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      id:
+        type: integer
+      introductionVideo:
+        type: string
+      isPublished:
+        type: boolean
+      isVerified:
+        type: boolean
+      name:
+        type: string
+      price:
+        type: number
+      status:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus'
+      statusChangedAt:
+        type: string
+      teacher:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher'
+      thumbnail:
+        type: string
+      updatedAt:
+        type: string
+      verifiedBy:
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier'
+      verifiedDate:
+        type: string
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemRes:
     properties:
@@ -488,41 +439,6 @@ definitions:
       isPublished:
         type: boolean
       name:
-        type: string
-    type: object
-  github_com_ladmakhi81_learnup_internals_course_dto_res.courseItems:
-    properties:
-      category:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseCategory'
-      createdAt:
-        type: string
-      deletedAt:
-        type: string
-      id:
-        type: integer
-      introductionVideo:
-        type: string
-      isPublished:
-        type: boolean
-      isVerified:
-        type: boolean
-      name:
-        type: string
-      price:
-        type: number
-      status:
-        $ref: '#/definitions/entities.CourseStatus'
-      statusChangedAt:
-        type: string
-      teacher:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher'
-      thumbnail:
-        type: string
-      updatedAt:
-        type: string
-      verifiedBy:
-        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.courseUserVerifier'
-      verifiedDate:
         type: string
     type: object
   github_com_ladmakhi81_learnup_internals_course_dto_res.courseTeacher:
@@ -601,7 +517,7 @@ definitions:
   github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem:
     properties:
       accessLevel:
-        $ref: '#/definitions/entities.VideoAccessLevel'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel'
       createdAt:
         type: string
       description:
@@ -615,7 +531,7 @@ definitions:
       isVerified:
         type: boolean
       status:
-        $ref: '#/definitions/entities.VideoStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus'
       title:
         type: string
       updatedAt:
@@ -627,6 +543,80 @@ definitions:
       verifiedDate:
         type: string
     type: object
+  github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus:
+    enum:
+    - in-progress
+    - verified
+    - starting
+    - done
+    - pause
+    - cancel
+    type: string
+    x-enum-varnames:
+    - CourseStatus_InProgress
+    - CourseStatus_Verified
+    - CourseStatus_Starting
+    - CourseStatus_Done
+    - CourseStatus_Pause
+    - CourseStatus_Cancel
+  github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus:
+    enum:
+    - pending
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - OrderStatus_Pending
+    - OrderStatus_Success
+    - OrderStatus_Failed
+  github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus:
+    enum:
+    - pending
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - PaymentStatus_Pending
+    - PaymentStatus_Success
+    - PaymentStatus_Failure
+  github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag:
+    enum:
+    - sell
+    - charge_wallet
+    - deposit_wallet
+    - salary_payment
+    type: string
+    x-enum-varnames:
+    - TransactionTag_Sell
+    - TransactionTag_ChargeWallet
+    - TransactionTag_DepositWallet
+    - TransactionTag_SalaryPayment
+  github_com_ladmakhi81_learnup_internals_db_entities.TransactionType:
+    enum:
+    - withdraw
+    - deposit
+    type: string
+    x-enum-varnames:
+    - TransactionType_Withdraw
+    - TransactionType_Deposit
+  github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel:
+    enum:
+    - private
+    - public
+    type: string
+    x-enum-varnames:
+    - VideoAccessLevel_Private
+    - VideoAccessLevel_Public
+  github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus:
+    enum:
+    - pending
+    - fail
+    - done
+    type: string
+    x-enum-varnames:
+    - VideoStatus_Pending
+    - VideoStatus_Fail
+    - VideoStatus_Done
   github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq:
     properties:
       type:
@@ -695,7 +685,7 @@ definitions:
           $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.orderItem'
         type: array
       status:
-        $ref: '#/definitions/entities.OrderStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus'
       statusChangedAt:
         type: string
       totalPrice:
@@ -718,7 +708,7 @@ definitions:
       id:
         type: integer
       status:
-        $ref: '#/definitions/entities.OrderStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus'
       statusChangedAt:
         type: string
       totalPrice:
@@ -777,7 +767,7 @@ definitions:
       id:
         type: integer
       status:
-        $ref: '#/definitions/entities.PaymentStatus'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus'
       updatedAt:
         type: string
       userId:
@@ -847,7 +837,7 @@ definitions:
     properties:
       accessLevel:
         allOf:
-        - $ref: '#/definitions/entities.VideoAccessLevel'
+        - $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel'
         enum:
         - private
         - public
@@ -934,7 +924,7 @@ definitions:
   github_com_ladmakhi81_learnup_internals_teacher_dto_res.AddVideoToCourseRes:
     properties:
       accessLevel:
-        $ref: '#/definitions/entities.VideoAccessLevel'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel'
       courseId:
         type: integer
       description:
@@ -1062,9 +1052,9 @@ definitions:
       phone:
         type: string
       tag:
-        $ref: '#/definitions/entities.TransactionTag'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag'
       type:
-        $ref: '#/definitions/entities.TransactionType'
+        $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionType'
       user:
         type: string
     type: object
@@ -1934,7 +1924,7 @@ paths:
                   - properties:
                       row:
                         items:
-                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCoursesRes'
+                          $ref: '#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem'
                         type: array
                     type: object
               type: object
