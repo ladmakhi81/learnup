@@ -12,7 +12,7 @@ import (
 )
 
 type CartService interface {
-	Create(user *entities.User, dto cartDtoReq.CreateCartReq) (*entities.Cart, error)
+	Create(user *entities.User, dto cartDtoReq.CreateCartReqDto) (*entities.Cart, error)
 	DeleteByID(userID, id uint) error
 	FetchAllByUserID(userID uint) ([]*entities.Cart, error)
 }
@@ -25,7 +25,7 @@ func NewCartSvc(unitOfWork db.UnitOfWork) CartService {
 	return &cartService{unitOfWork: unitOfWork}
 }
 
-func (svc cartService) Create(user *entities.User, dto cartDtoReq.CreateCartReq) (*entities.Cart, error) {
+func (svc cartService) Create(user *entities.User, dto cartDtoReq.CreateCartReqDto) (*entities.Cart, error) {
 	const operationName = "cartService.Create"
 	isCartExist, err := svc.unitOfWork.CartRepo().Exist(map[string]any{"course_id": dto.CourseID, "user_id": user.ID})
 	if err != nil {

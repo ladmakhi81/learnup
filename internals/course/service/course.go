@@ -11,11 +11,11 @@ import (
 )
 
 type CourseService interface {
-	Create(createdBy *entities.User, dto dtoreq.CreateCourseReq) (*entities.Course, error)
+	Create(createdBy *entities.User, dto dtoreq.CreateCourseReqDto) (*entities.Course, error)
 	GetCourses(page, pageSize int) ([]*entities.Course, int, error)
 	FindDetailById(id uint) (*entities.Course, error)
-	VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReq) error
-	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error
+	VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReqDto) error
+	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReqDto) error
 	CreateCompleteIntroductionVideoNotification(id uint) error
 }
 
@@ -27,7 +27,7 @@ func NewCourseSvc(unitOfWork db.UnitOfWork) CourseService {
 	return &courseService{unitOfWork: unitOfWork}
 }
 
-func (svc courseService) Create(createdBy *entities.User, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
+func (svc courseService) Create(createdBy *entities.User, dto dtoreq.CreateCourseReqDto) (*entities.Course, error) {
 	const operationName = "courseService.Create"
 	isCourseNameDuplicated, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
 	if err != nil {
@@ -106,7 +106,7 @@ func (svc courseService) FindDetailById(id uint) (*entities.Course, error) {
 	return course, nil
 }
 
-func (svc courseService) VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReq) error {
+func (svc courseService) VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReqDto) error {
 	const operationName = "courseService.VerifyCourse"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.ID, nil)
 	if err != nil {
@@ -157,7 +157,7 @@ func (svc courseService) VerifyCourse(admin *entities.User, dto dtoreq.VerifyCou
 	return nil
 }
 
-func (svc courseService) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error {
+func (svc courseService) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReqDto) error {
 	const operationName = "courseService.UpdateIntroductionURL"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
 	if err != nil {

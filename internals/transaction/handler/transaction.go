@@ -29,19 +29,19 @@ func NewHandler(
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"		default(0)
 //	@Param		pageSize	query		int	false	"Items per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=transactionDtoRes.GetTransactionPageableItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=transactionDtoRes.GetTransactionPageableItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/transactions/page [get]
 //	@Security	BearerAuth
 func (h Handler) GetTransactionsPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	transactions, count, transactionErr := h.transactionSvc.FetchPageable(page, pageSize)
-	if transactionErr != nil {
-		return nil, transactionErr
+	transactions, count, err := h.transactionSvc.FetchPageable(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 	res := types.NewPaginationRes(
-		transactionDtoRes.MapGetTransactionPageableItems(transactions),
+		transactionDtoRes.MapGetTransactionPageableItemsDto(transactions),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,

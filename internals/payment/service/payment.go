@@ -14,8 +14,8 @@ import (
 )
 
 type PaymentService interface {
-	Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReq) (*entities.Payment, error)
-	Verify(dto paymentDtoReq.VerifyPaymentReq) error
+	Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReqDto) (*entities.Payment, error)
+	Verify(dto paymentDtoReq.VerifyPaymentReqDto) error
 	FetchPageable(page, pageSize int) ([]*entities.Payment, int, error)
 }
 
@@ -43,7 +43,7 @@ func NewPaymentService(
 	}
 }
 
-func (svc paymentService) Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReq) (*entities.Payment, error) {
+func (svc paymentService) Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReqDto) (*entities.Payment, error) {
 	const operationName = "paymentService.Create"
 	gateway := svc.selectGateway(dto.Gateway)
 	if gateway == nil {
@@ -73,7 +73,7 @@ func (svc paymentService) Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePay
 	return payment, nil
 }
 
-func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
+func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReqDto) error {
 	const operationName = "paymentService.Verify"
 	transactionID, err := db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (uint, error) {
 		gateway := svc.selectGateway(dto.Gateway)

@@ -23,7 +23,7 @@ type questionVideoItem struct {
 	Description string `json:"description"`
 }
 
-type GetQuestionItemRes struct {
+type GetQuestionItemDto struct {
 	ID        uint                       `json:"id"`
 	CreatedAt time.Time                  `json:"createdAt"`
 	UpdatedAt time.Time                  `json:"updatedAt"`
@@ -35,10 +35,10 @@ type GetQuestionItemRes struct {
 	Video     *questionVideoItem         `json:"video"`
 }
 
-func MapGetQuestionItemRes(questions []*entities2.Question) []*GetQuestionItemRes {
-	res := make([]*GetQuestionItemRes, len(questions))
+func MapGetQuestionItemsDto(questions []*entities2.Question) []*GetQuestionItemDto {
+	res := make([]*GetQuestionItemDto, len(questions))
 	for index, question := range questions {
-		res[index] = &GetQuestionItemRes{
+		res[index] = &GetQuestionItemDto{
 			ID:        question.ID,
 			CreatedAt: question.CreatedAt,
 			UpdatedAt: question.UpdatedAt,

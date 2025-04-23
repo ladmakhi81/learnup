@@ -39,8 +39,8 @@ func NewHandler(
 //	@Tags		carts
 //	@Accept		json
 //	@Produce	json
-//	@Param		body	body		cartDtoReq.CreateCartReq	true	" "
-//	@Success	201		{object}	types.ApiResponse{data=cartDtoRes.AddCartRes}
+//	@Param		body	body		cartDtoReq.CreateCartReqDto	true	" "
+//	@Success	201		{object}	types.ApiResponse{data=cartDtoRes.AddCartResDto}
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	401		{object}	types.ApiError
 //	@Failure	404		{object}	types.ApiError
@@ -48,7 +48,7 @@ func NewHandler(
 //	@Security	BearerAuth
 //	@Router		/carts [post]
 func (h Handler) AddCart(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &cartDtoReq.CreateCartReq{}
+	dto := &cartDtoReq.CreateCartReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -61,16 +61,11 @@ func (h Handler) AddCart(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	cart, cartErr := h.cartSvc.Create(user, *dto)
-	if cartErr != nil {
-		return nil, cartErr
+	cart, err := h.cartSvc.Create(user, *dto)
+	if err != nil {
+		return nil, err
 	}
-	cartRes := cartDtoRes.AddCartRes{
-		ID:       cart.ID,
-		UserID:   cart.UserID,
-		CourseID: cart.CourseID,
-	}
-	return types.NewApiResponse(http.StatusCreated, cartRes), nil
+	return types.NewApiResponse(http.StatusCreated, cartDtoRes.NewAddCartResDto(cart)), nil
 }
 
 // DeleteCartByID godoc
@@ -107,7 +102,7 @@ func (h Handler) DeleteCartByID(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Summary	Get all cart items for the authenticated user
 //	@Tags		carts
 //	@Produce	json
-//	@Success	200	{object}	types.ApiResponse{data=[]cartDtoRes.GetCartItem}
+//	@Success	200	{object}	types.ApiResponse{data=[]cartDtoRes.GetCartItemDto}
 //	@Failure	401	{object}	types.ApiError
 //	@Failure	500	{object}	types.ApiError
 //	@Security	BearerAuth
@@ -121,6 +116,6 @@ func (h Handler) GetCartsByUserID(ctx *gin.Context) (*types.ApiResponse, error) 
 	if cartsErr != nil {
 		return nil, cartsErr
 	}
-	cartRes := cartDtoRes.MapGetCartItems(carts)
+	cartRes := cartDtoRes.MapGetCartItemDto(carts)
 	return types.NewApiResponse(http.StatusOK, cartRes), nil
 }

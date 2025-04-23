@@ -18,7 +18,7 @@ type getCourseItem struct {
 	Description string `json:"description"`
 }
 
-type GetCommentPageItem struct {
+type GetCommentPageItemDto struct {
 	ID        uint           `json:"id"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
@@ -29,10 +29,10 @@ type GetCommentPageItem struct {
 	IsReport  bool           `json:"isReport"`
 }
 
-func NewGetCommentsPageableItem(comments []*entities.Comment) []*GetCommentPageItem {
-	result := make([]*GetCommentPageItem, len(comments))
+func MapGetCommentPageItemsDto(comments []*entities.Comment) []*GetCommentPageItemDto {
+	result := make([]*GetCommentPageItemDto, len(comments))
 	for index, comment := range comments {
-		result[index] = &GetCommentPageItem{
+		result[index] = &GetCommentPageItemDto{
 			ID:        comment.ID,
 			CreatedAt: comment.CreatedAt,
 			UpdatedAt: comment.UpdatedAt,

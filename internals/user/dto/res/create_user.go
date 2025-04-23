@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type CreateBasicUserRes struct {
+type CreateBasicUserResDto struct {
 	ID        uint      `json:"id"`
 	FirstName string    `json:"firstName"`
 	LastName  string    `json:"lastName"`
@@ -14,8 +14,8 @@ type CreateBasicUserRes struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-func NewCreateUserResponse(user *entities.User) CreateBasicUserRes {
-	return CreateBasicUserRes{
+func NewCreateBasicUserResDto(user *entities.User) CreateBasicUserResDto {
+	return CreateBasicUserResDto{
 		ID:        user.ID,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,

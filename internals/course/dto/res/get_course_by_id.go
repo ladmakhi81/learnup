@@ -21,7 +21,7 @@ type verifiedByItem struct {
 	FullName string `json:"fullName"`
 }
 
-type GetCourseByIdRes struct {
+type GetCourseByItemDto struct {
 	ID                          uint                             `json:"id"`
 	CreatedAt                   time.Time                        `json:"createdAt"`
 	UpdatedAt                   time.Time                        `json:"updatedAt"`
@@ -50,8 +50,8 @@ type GetCourseByIdRes struct {
 	DiscountFeeAmountPercentage float64                          `json:"discountFeeAmountPercentage"`
 }
 
-func NewGetCourseByIdRes(course *entities.Course) GetCourseByIdRes {
-	res := GetCourseByIdRes{
+func NewGetCourseByItemDto(course *entities.Course) GetCourseByItemDto {
+	res := GetCourseByItemDto{
 		ID:                course.ID,
 		Status:            course.Status,
 		VerifiedDate:      course.VerifiedDate,

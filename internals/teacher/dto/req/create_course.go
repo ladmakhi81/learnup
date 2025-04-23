@@ -4,7 +4,7 @@ import (
 	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
-type CreateCourseReq struct {
+type CreateCourseReqDto struct {
 	Name                string                            `json:"name" validate:"required,min=3,max=255"`
 	CategoryID          uint                              `json:"categoryId" validate:"required,numeric"`
 	Price               float64                           `json:"price" validate:"required,gte=0"`

@@ -38,7 +38,7 @@ func NewQuestionHandler(
 //	@Param		course-id	query		uint	false	"Course ID"
 //	@Param		page		query		int		false	"Page number"		default(0)
 //	@Param		pageSize	query		int		false	"Items per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.GetQuestionItemRes}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.GetQuestionItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -49,8 +49,8 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 	courseIDParam := ctx.Query("course-id")
 	var courseID *uint
 	if courseIDParam != "" {
-		parsedCourseID, parsedCourseIDErr := utils.ToUint(courseIDParam)
-		if parsedCourseIDErr != nil {
+		parsedCourseID, err := utils.ToUint(courseIDParam)
+		if err != nil {
 			return nil, types.NewBadRequestError(
 				h.translationSvc.Translate("course.errors.invalid_course_id"),
 			)
@@ -62,12 +62,12 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 		return nil, err
 	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	questions, count, questionsErr := h.teacherQuestionSvc.GetQuestions(user, teacherService.GetQuestionOptions{PageSize: pageSize, Page: page, CourseID: courseID})
-	if questionsErr != nil {
-		return nil, questionsErr
+	questions, count, err := h.teacherQuestionSvc.GetQuestions(user, teacherService.GetQuestionOptions{PageSize: pageSize, Page: page, CourseID: courseID})
+	if err != nil {
+		return nil, err
 	}
 	questionsRes := types.NewPaginationRes(
-		dtores.MapGetQuestionItemRes(questions),
+		dtores.MapGetQuestionItemsDto(questions),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type CreateAnswerRes struct {
+type CreateAnswerResDto struct {
 	ID         uint      `json:"id"`
 	CreateAt   time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
@@ -14,8 +14,8 @@ type CreateAnswerRes struct {
 	SenderID   uint      `json:"senderId"`
 }
 
-func NewCreateAnswerRes(answer *entities.QuestionAnswer) CreateAnswerRes {
-	return CreateAnswerRes{
+func NewCreateAnswerResDto(answer *entities.QuestionAnswer) CreateAnswerResDto {
+	return CreateAnswerResDto{
 		ID:         answer.ID,
 		CreateAt:   answer.CreatedAt,
 		UpdatedAt:  answer.UpdatedAt,

@@ -19,7 +19,7 @@ func NewTusHookHandler(tusHookSvc service.TusService) *TusHookHandler {
 }
 
 func (h TusHookHandler) VideoWebhook(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &reqdto.TusWebhookDTO{}
+	dto := &reqdto.TusWebhookDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewServerError(
 			"Error in convert data into tus dto",

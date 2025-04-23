@@ -39,15 +39,15 @@ func NewHandler(
 //	@Tags		orders
 //	@Accept		json
 //	@Produce	json
-//	@Param		order	body		orderDtoReq.CreateOrderReq	true	" "
-//	@Success	201		{object}	types.ApiResponse{data=orderDtoRes.CreateOrderRes}
+//	@Param		order	body		orderDtoReq.CreateOrderReqDto	true	" "
+//	@Success	201		{object}	types.ApiResponse{data=orderDtoRes.CreateOrderResDto}
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	401		{object}	types.ApiError
 //	@Failure	500		{object}	types.ApiError
 //	@Security	BearerAuth
 //	@Router		/orders [post]
 func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &orderDtoReq.CreateOrderReq{}
+	dto := &orderDtoReq.CreateOrderReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -64,7 +64,7 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := orderDtoRes.CreateOrderRes{PayLink: payLink}
+	res := orderDtoRes.CreateOrderResDto{PayLink: payLink}
 	return types.NewApiResponse(http.StatusCreated, res), nil
 }
 
@@ -76,7 +76,7 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"		default(0)
 //	@Param		pageSize	query		int	false	"Items per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]orderDtoRes.PaginatedOrderItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]orderDtoRes.PaginatedOrderItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -84,12 +84,12 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/orders [get]
 func (h Handler) GetOrdersPage(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	orders, count, ordersErr := h.orderSvc.FetchPaginated(page, pageSize)
-	if ordersErr != nil {
-		return nil, ordersErr
+	orders, count, err := h.orderSvc.FetchPaginated(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 	res := types.NewPaginationRes(
-		orderDtoRes.MapPaginatedOrderItems(orders),
+		orderDtoRes.MapPaginatedOrderItemsDto(orders),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,
@@ -104,7 +104,7 @@ func (h Handler) GetOrdersPage(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		order-id	path		uint	true	" "
-//	@Success	200			{object}	orderDtoRes.GetOrderDetailRes
+//	@Success	200			{object}	orderDtoRes.GetOrderDetailItemDto
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -112,16 +112,16 @@ func (h Handler) GetOrdersPage(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Security	BearerAuth
 //	@Router		/orders/{order-id} [get]
 func (h Handler) GetOrderByID(ctx *gin.Context) (*types.ApiResponse, error) {
-	parsedOrderID, parsedErr := utils.ToUint(ctx.Param("order-id"))
-	if parsedErr != nil {
+	orderID, err := utils.ToUint(ctx.Param("order-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("order.errors.invalid_id"),
 		)
 	}
-	order, orderErr := h.orderSvc.FetchDetailById(parsedOrderID)
-	if orderErr != nil {
-		return nil, orderErr
+	order, err := h.orderSvc.FetchDetailById(orderID)
+	if err != nil {
+		return nil, err
 	}
-	res := orderDtoRes.NewGetOrderDetailRes(order)
+	res := orderDtoRes.NewGetOrderDetailItemDto(order)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

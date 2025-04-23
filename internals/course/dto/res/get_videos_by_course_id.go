@@ -11,7 +11,7 @@ type verifiedByUser struct {
 	Phone    string `json:"phone"`
 }
 
-type videosItem struct {
+type GetVideoByCourseItemDto struct {
 	ID           uint                       `json:"id"`
 	CreatedAt    time.Time                  `json:"createdAt"`
 	UpdatedAt    time.Time                  `json:"updatedAt"`
@@ -27,15 +27,10 @@ type videosItem struct {
 	Status       entities2.VideoStatus      `json:"status"`
 }
 
-type GetVideosByCourseIDRes struct {
-	Videos   []*videosItem `json:"videos"`
-	CourseID uint          `json:"courseId"`
-}
-
-func mapper(videos []*entities2.Video) []*videosItem {
-	result := make([]*videosItem, len(videos))
+func MapGetVideoByCourseItemsDto(videos []*entities2.Video) []*GetVideoByCourseItemDto {
+	result := make([]*GetVideoByCourseItemDto, len(videos))
 	for videoIndex, video := range videos {
-		result[videoIndex] = &videosItem{
+		result[videoIndex] = &GetVideoByCourseItemDto{
 			URL:          video.URL,
 			AccessLevel:  video.AccessLevel,
 			Description:  video.Description,
@@ -58,11 +53,4 @@ func mapper(videos []*entities2.Video) []*videosItem {
 		}
 	}
 	return result
-}
-
-func NewGetVideosByCourseIDRes(videos []*entities2.Video, courseID uint) GetVideosByCourseIDRes {
-	return GetVideosByCourseIDRes{
-		Videos:   mapper(videos),
-		CourseID: courseID,
-	}
 }

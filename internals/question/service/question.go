@@ -11,7 +11,7 @@ import (
 )
 
 type QuestionService interface {
-	Create(sender *entities.User, dto dtoreq.CreateQuestionReq) (*entities.Question, error)
+	Create(sender *entities.User, dto dtoreq.CreateQuestionReqDto) (*entities.Question, error)
 	GetPageable(courseId *uint, page, pageSize int) ([]*entities.Question, int, error)
 }
 
@@ -23,7 +23,7 @@ func NewQuestionSvc(unitOfWork db.UnitOfWork) QuestionService {
 	return &questionService{unitOfWork: unitOfWork}
 }
 
-func (svc questionService) Create(sender *entities.User, dto dtoreq.CreateQuestionReq) (*entities.Question, error) {
+func (svc questionService) Create(sender *entities.User, dto dtoreq.CreateQuestionReqDto) (*entities.Question, error) {
 	const operationName = "questionService.Create"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
 	if err != nil {

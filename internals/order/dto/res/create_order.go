@@ -1,5 +1,5 @@
 package dtores
 
-type CreateOrderRes struct {
+type CreateOrderResDto struct {
 	PayLink string `json:"payLink"`
 }

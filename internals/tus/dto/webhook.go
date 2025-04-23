@@ -16,7 +16,7 @@ const (
 	TusActionType_AddIntroductionVideo TusActionType = "add-introduction-video"
 )
 
-type TusWebhookDTO struct {
+type TusWebhookDto struct {
 	Type  TusHookType `json:"Type"`
 	Event struct {
 		Upload struct {

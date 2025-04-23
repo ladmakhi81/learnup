@@ -10,7 +10,7 @@ import (
 )
 
 type QuestionAnswerService interface {
-	Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error)
+	Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReqDto) (*entities.QuestionAnswer, error)
 	GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error)
 }
 
@@ -22,7 +22,7 @@ func NewQuestionAnswerSvc(unitOfWork db.UnitOfWork) QuestionAnswerService {
 	return &questionAnswerService{unitOfWork: unitOfWork}
 }
 
-func (svc questionAnswerService) Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
+func (svc questionAnswerService) Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReqDto) (*entities.QuestionAnswer, error) {
 	const operationName = "questionAnswerService.Create"
 	question, err := svc.unitOfWork.QuestionRepo().GetByID(dto.QuestionID, nil)
 	if err != nil {

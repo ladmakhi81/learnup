@@ -11,7 +11,7 @@ import (
 )
 
 type UserSvc interface {
-	CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error)
+	CreateBasic(dto dtoreq.CreateBasicUserReqDto) (*entities.User, error)
 	GetLoggedInUser(ctx *gin.Context) (*entities.User, error)
 }
 
@@ -23,7 +23,7 @@ func NewUserSvc(unitOfWork db.UnitOfWork) UserSvc {
 	return &userService{unitOfWork: unitOfWork}
 }
 
-func (svc userService) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error) {
+func (svc userService) CreateBasic(dto dtoreq.CreateBasicUserReqDto) (*entities.User, error) {
 	const operationName = "userService.CreateBasic"
 	isPhoneExistBefore, err := svc.unitOfWork.UserRepo().Exist(map[string]any{"phone_number": dto.Phone})
 	if err != nil {

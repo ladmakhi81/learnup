@@ -23,7 +23,7 @@ type courseCategory struct {
 	IsPublished bool   `json:"isPublished"`
 }
 
-type GetPageableCourseItem struct {
+type GetPageableCourseItemDto struct {
 	ID                uint                  `json:"id"`
 	Name              string                `json:"name"`
 	Teacher           *courseTeacher        `json:"teacher"`
@@ -42,8 +42,8 @@ type GetPageableCourseItem struct {
 	StatusChangedAt   *time.Time            `json:"statusChangedAt"`
 }
 
-func MapPageableCourseItems(courses []*entities.Course) []*GetPageableCourseItem {
-	mappedCourses := make([]*GetPageableCourseItem, len(courses))
+func MapGetPageableCourseItemsDto(courses []*entities.Course) []*GetPageableCourseItemDto {
+	mappedCourses := make([]*GetPageableCourseItemDto, len(courses))
 	for courseIndex, course := range courses {
 		var verifiedBy *courseUserVerifier
 		if course.VerifiedBy != nil {
@@ -53,7 +53,7 @@ func MapPageableCourseItems(courses []*entities.Course) []*GetPageableCourseItem
 				Phone:    course.VerifiedBy.Phone,
 			}
 		}
-		mappedCourses[courseIndex] = &GetPageableCourseItem{
+		mappedCourses[courseIndex] = &GetPageableCourseItemDto{
 			ID:   course.ID,
 			Name: course.Name,
 			Teacher: &courseTeacher{

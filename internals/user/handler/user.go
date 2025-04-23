@@ -34,8 +34,8 @@ func NewHandler(
 //	@Tags		users
 //	@Accept		json
 //	@Produce	json
-//	@Param		CreateBasicUserReq	body		dtoreq.CreateBasicUserReq	true	" "
-//	@Success	201					{object}	types.ApiResponse{data=dtores.CreateBasicUserRes}
+//	@Param		CreateBasicUserReqDto	body		dtoreq.CreateBasicUserReqDto	true	" "
+//	@Success	201					{object}	types.ApiResponse{data=dtores.CreateBasicUserResDto}
 //	@Failure	400					{object}	types.ApiError
 //	@Failure	409					{object}	types.ApiError
 //	@Failure	500					{object}	types.ApiError
@@ -43,7 +43,7 @@ func NewHandler(
 //
 // @Security BearerAuth
 func (h Handler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := new(dtoreq.CreateBasicUserReq)
+	dto := new(dtoreq.CreateBasicUserReqDto)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -52,10 +52,9 @@ func (h Handler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	user, userErr := h.userSvc.CreateBasic(*dto)
-	if userErr != nil {
-		return nil, userErr
+	user, err := h.userSvc.CreateBasic(*dto)
+	if err != nil {
+		return nil, err
 	}
-	userResponse := dtores.NewCreateUserResponse(user)
-	return types.NewApiResponse(http.StatusCreated, userResponse), nil
+	return types.NewApiResponse(http.StatusCreated, dtores.NewCreateBasicUserResDto(user)), nil
 }

@@ -5,7 +5,7 @@ import (
 	commentDtoReq "github.com/ladmakhi81/learnup/internals/comment/dto/req"
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	courseDtoReq "github.com/ladmakhi81/learnup/internals/course/dto/req"
-	questionDtoRes "github.com/ladmakhi81/learnup/internals/course/dto/res"
+	courseDtoRes "github.com/ladmakhi81/learnup/internals/course/dto/res"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	likeDtoReq "github.com/ladmakhi81/learnup/internals/like/dto/req"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
@@ -58,8 +58,8 @@ func NewHandler(
 //	@Tags		courses
 //	@Accept		json
 //	@Produce	json
-//	@Param		requestBody	body		courseDtoReq.CreateCourseReq	true	" "
-//	@Success	201			{object}	types.ApiResponse{data=questionDtoRes.CreateCourseRes}
+//	@Param		requestBody	body		courseDtoReq.CreateCourseReqDto	true	" "
+//	@Success	201			{object}	types.ApiResponse{data=courseDtoRes.CreateCourseResDto}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	409			{object}	types.ApiError
@@ -67,7 +67,7 @@ func NewHandler(
 //	@Router		/courses [post]
 //	@Security	BearerAuth
 func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &courseDtoReq.CreateCourseReq{}
+	dto := &courseDtoReq.CreateCourseReqDto{}
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("common.errors.invalid_request_body"),
@@ -80,36 +80,11 @@ func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	course, courseErr := h.courseSvc.Create(user, *dto)
-	if courseErr != nil {
-		return nil, courseErr
+	course, err := h.courseSvc.Create(user, *dto)
+	if err != nil {
+		return nil, err
 	}
-	courseRes := questionDtoRes.CreateCourseRes{
-		ID:                          course.ID,
-		Fee:                         course.Fee,
-		Price:                       course.Price,
-		VerifiedByID:                course.VerifiedByID,
-		VerifiedDate:                course.VerifiedDate,
-		TeacherID:                   course.TeacherID,
-		ThumbnailImage:              course.ThumbnailImage,
-		Tags:                        course.Tags,
-		Status:                      course.Status,
-		Prerequisite:                course.Prerequisite,
-		MaxDiscountAmount:           course.MaxDiscountAmount,
-		Level:                       course.Level,
-		IsVerifiedByAdmin:           course.IsVerifiedByAdmin,
-		IntroductionVideo:           course.IntroductionVideo,
-		Image:                       course.Image,
-		IsPublished:                 course.IsPublished,
-		DiscountFeeAmountPercentage: course.DiscountFeeAmountPercentage,
-		Description:                 course.Description,
-		CommentAccessMode:           course.CommentAccessMode,
-		CanHaveDiscount:             course.CanHaveDiscount,
-		AbilityToAddComment:         course.AbilityToAddComment,
-		Name:                        course.Name,
-		CategoryID:                  course.CategoryID,
-	}
-	return types.NewApiResponse(http.StatusCreated, courseRes), nil
+	return types.NewApiResponse(http.StatusCreated, courseDtoRes.NewCreateCourseResDto(course)), nil
 }
 
 // GetCourses godoc
@@ -120,7 +95,7 @@ func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]questionDtoRes.GetPageableCourseItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]courseDtoRes.GetPageableCourseItemDto}}
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/courses/page [get]
@@ -131,13 +106,12 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	courses, count, coursesErr := h.courseSvc.GetCourses(page, pageSize)
-	if coursesErr != nil {
-		return nil, coursesErr
+	courses, count, err := h.courseSvc.GetCourses(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
-	mappedCourses := questionDtoRes.MapPageableCourseItems(courses)
 	paginationRes := types.NewPaginationRes(
-		mappedCourses,
+		courseDtoRes.MapGetPageableCourseItemsDto(courses),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,
@@ -150,7 +124,7 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Summary	Get Videos by Course ID
 //	@Tags		courses
 //	@Param		course-id	path		int	true	"Course ID"
-//	@Success	200			{object}	questionDtoRes.GetVideosByCourseIDRes
+//	@Success	200			{object}	courseDtoRes.GetVideosByCourseIDRes
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -162,12 +136,11 @@ func (h Handler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, erro
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	videos, videosErr := h.videoSvc.FindVideosByCourseID(courseID)
-	if videosErr != nil {
-		return nil, videosErr
+	videos, err := h.videoSvc.FindVideosByCourseID(courseID)
+	if err != nil {
+		return nil, err
 	}
-	videosRes := questionDtoRes.NewGetVideosByCourseIDRes(videos, courseID)
-	return types.NewApiResponse(http.StatusOK, videosRes), nil
+	return types.NewApiResponse(http.StatusOK, courseDtoRes.MapGetVideoByCourseItemsDto(videos)), nil
 }
 
 // GetCourseById godoc
@@ -175,7 +148,7 @@ func (h Handler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, erro
 //	@Summary	Get Course by ID
 //	@Tags		courses
 //	@Param		course-id	path		int	true	"Course ID"
-//	@Success	200			{object}	questionDtoRes.GetCourseByIdRes
+//	@Success	200			{object}	courseDtoRes.GetCourseByItemDto
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -187,12 +160,11 @@ func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	course, courseErr := h.courseSvc.FindDetailById(uint(courseID))
-	if courseErr != nil {
-		return nil, courseErr
+	course, err := h.courseSvc.FindDetailById(courseID)
+	if err != nil {
+		return nil, err
 	}
-	courseRes := questionDtoRes.NewGetCourseByIdRes(course)
-	return types.NewApiResponse(http.StatusOK, courseRes), nil
+	return types.NewApiResponse(http.StatusOK, courseDtoRes.NewGetCourseByItemDto(course)), nil
 }
 
 // VerifyCourse godoc
@@ -202,7 +174,7 @@ func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		course-id	path		int								true	"Course ID"
-//	@Param		request		body		courseDtoReq.VerifyCourseReq	true	" "
+//	@Param		request		body		courseDtoReq.VerifyCourseReqDto	true	" "
 //	@Success	200			{object}	types.ApiResponse
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
@@ -216,7 +188,7 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	dto := &courseDtoReq.VerifyCourseReq{
+	dto := &courseDtoReq.VerifyCourseReqDto{
 		ID: courseID,
 	}
 	if err := ctx.Bind(dto); err != nil {
@@ -244,7 +216,7 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		course-id	path		int							true	"Course ID"
-//	@Param		like		body		likeDtoReq.CreateLikeReq	true	" "
+//	@Param		like		body		likeDtoReq.CreateLikeReqDto	true	" "
 //	@Success	201			{object}	types.ApiResponse
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
@@ -262,7 +234,7 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	dto := &likeDtoReq.CreateLikeReq{}
+	dto := &likeDtoReq.CreateLikeReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("common.errors.invalid_request_body"),
@@ -272,9 +244,8 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, err
 	}
 	dto.CourseID = courseID
-	_, likeErr := h.likeSvc.Create(user, *dto)
-	if likeErr != nil {
-		return nil, likeErr
+	if _, err := h.likeSvc.Create(user, *dto); err != nil {
+		return nil, err
 	}
 	return types.NewApiResponse(http.StatusCreated, nil), nil
 }
@@ -288,7 +259,7 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Param		course-id	path		int	true	"Course ID"
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]questionDtoRes.GetLikesPageableItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]courseDtoRes.GetLikesPageableItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -300,12 +271,12 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	likes, count, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, courseID)
-	if likesErr != nil {
-		return nil, likesErr
+	likes, count, err := h.likeSvc.FetchByCourseID(page, pageSize, courseID)
+	if err != nil {
+		return nil, err
 	}
 	likesRes := types.NewPaginationRes(
-		questionDtoRes.MappedGetLikesPageableItem(likes),
+		courseDtoRes.MapGetLikesPageableItemsDto(likes),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,
@@ -320,8 +291,8 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		course-id	path		int								true	"Course ID"
-//	@Param		request		body		commentDtoReq.CreateCommentReq	true	" "
-//	@Success	201			{object}	types.ApiResponse{data=questionDtoRes.CreateCommentRes}
+//	@Param		request		body		commentDtoReq.CreateCommentReqDto	true	" "
+//	@Success	201			{object}	types.ApiResponse{data=courseDtoRes.CreateCommentResDto}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -333,7 +304,7 @@ func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	dto := &commentDtoReq.CreateCommentReq{}
+	dto := &commentDtoReq.CreateCommentReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("common.errors.invalid_request_body"),
@@ -347,12 +318,11 @@ func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	comment, commentErr := h.commentSvc.Create(user, *dto)
-	if commentErr != nil {
-		return nil, commentErr
+	comment, err := h.commentSvc.Create(user, *dto)
+	if err != nil {
+		return nil, err
 	}
-	commentRes := questionDtoRes.NewCreateCommentRes(comment)
-	return types.NewApiResponse(http.StatusCreated, commentRes), nil
+	return types.NewApiResponse(http.StatusCreated, courseDtoRes.NewCreateCommentResDto(comment)), nil
 }
 
 // DeleteComment godoc
@@ -389,8 +359,8 @@ func (h Handler) DeleteComment(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		course-id	path		int									true	"Course ID"
-//	@Param		question	body		questionDtoReq.CreateQuestionReq	true	" "
-//	@Success	201			{object}	types.ApiResponse{data=questionDtoRes.CreateQuestionRes}
+//	@Param		question	body		questionDtoReq.CreateQuestionReqDto	true	" "
+//	@Success	201			{object}	types.ApiResponse{data=courseDtoRes.CreateQuestionResDto}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -402,7 +372,7 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	dto := &questionDtoReq.CreateQuestionReq{}
+	dto := &questionDtoReq.CreateQuestionReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("common.errors.invalid_request_body"),
@@ -416,12 +386,11 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, err
 	}
 	dto.CourseID = courseID
-	question, questionErr := h.questionSvc.Create(user, *dto)
-	if questionErr != nil {
-		return nil, questionErr
+	question, err := h.questionSvc.Create(user, *dto)
+	if err != nil {
+		return nil, err
 	}
-	questionRes := questionDtoRes.NewCreateQuestionRes(question)
-	return types.NewApiResponse(http.StatusCreated, questionRes), nil
+	return types.NewApiResponse(http.StatusCreated, courseDtoRes.NewCreateQuestionResDto(question)), nil
 }
 
 // GetQuestions godoc
@@ -433,7 +402,7 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Param		course-id	path		int	true	"Course ID"
 //	@Param		page		query		int	false	"Page number"				default(0)
 //	@Param		pageSize	query		int	false	"Number of items per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]questionDtoRes.GetQuestionItemRes}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]courseDtoRes.GetQuestionItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -445,12 +414,12 @@ func (h Handler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	questions, count, questionsErr := h.questionSvc.GetPageable(&courseID, page, pageSize)
-	if questionsErr != nil {
-		return nil, questionsErr
+	questions, count, err := h.questionSvc.GetPageable(&courseID, page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 	questionRes := types.NewPaginationRes(
-		questionDtoRes.MapGetQuestionItemRes(questions),
+		courseDtoRes.MapGetQuestionItemsDto(questions),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,

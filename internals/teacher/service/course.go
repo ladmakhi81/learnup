@@ -10,7 +10,7 @@ import (
 )
 
 type TeacherCourseService interface {
-	Create(teacher *entities.User, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error)
+	Create(teacher *entities.User, dto teacherDtoReq.CreateCourseReqDto) (*entities.Course, error)
 	FetchByTeacherId(teacher *entities.User, page, pageSize int) ([]*entities.Course, int, error)
 }
 
@@ -22,7 +22,7 @@ func NewTeacherCourseService(unitOfWork db.UnitOfWork) TeacherCourseService {
 	return &teacherCourseService{unitOfWork: unitOfWork}
 }
 
-func (svc teacherCourseService) Create(teacher *entities.User, dto teacherDtoReq.CreateCourseReq) (*entities.Course, error) {
+func (svc teacherCourseService) Create(teacher *entities.User, dto teacherDtoReq.CreateCourseReqDto) (*entities.Course, error) {
 	const operationName = "teacherCourseService.Create"
 	isDuplicate, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
 	if err != nil {

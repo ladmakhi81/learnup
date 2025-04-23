@@ -14,9 +14,9 @@ import (
 )
 
 type TusService interface {
-	VideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO)
-	AddCourseVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO)
-	AddIntroductionVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO)
+	VideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto)
+	AddCourseVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto)
+	AddIntroductionVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto)
 }
 
 type TusServiceImpl struct {
@@ -40,7 +40,7 @@ func NewTusServiceImpl(
 	}
 }
 
-func (tus TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO) {
+func (tus TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto) {
 	fmt.Println(1, fmt.Sprintf("%v", reqdto.TusActionType_AddIntroductionVideo) == dto.Event.Upload.MetaData["actionType"], fmt.Sprintf("--%s--", dto.Event.Upload.MetaData["actionType"]))
 	switch dto.Event.Upload.MetaData["actionType"] {
 	case utils.ToString(reqdto.TusActionType_NewCourseVideo):
@@ -50,7 +50,7 @@ func (tus TusServiceImpl) VideoWebhook(ctx context.Context, dto reqdto.TusWebhoo
 	}
 }
 
-func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO) {
+func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto) {
 	objectId, objectIdExist := dto.Event.Upload.Storage["Key"]
 	courseIdParam, courseIdExist := dto.Event.Upload.MetaData["courseId"]
 	videoIdParam, videoIdExist := dto.Event.Upload.MetaData["videoId"]
@@ -65,7 +65,7 @@ func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.
 			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting video id"})
 			return
 		}
-		workflowDto := dtoreq.AddNewCourseVideoWorkflowReq{
+		workflowDto := dtoreq.AddNewCourseVideoWorkflowReqDto{
 			CourseID: courseID,
 			ObjectID: objectId.(string),
 			VideoID:  videoID,
@@ -91,7 +91,7 @@ func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.
 	return
 }
 
-func (tus TusServiceImpl) AddIntroductionVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDTO) {
+func (tus TusServiceImpl) AddIntroductionVideoWebhook(ctx context.Context, dto reqdto.TusWebhookDto) {
 	objectId, objectIdExist := dto.Event.Upload.Storage["Key"]
 	courseIdParam, courseIdExist := dto.Event.Upload.MetaData["courseId"]
 	if objectIdExist && courseIdExist {
@@ -100,7 +100,7 @@ func (tus TusServiceImpl) AddIntroductionVideoWebhook(ctx context.Context, dto r
 			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting course id"})
 			return
 		}
-		workflowDto := dtoreq.AddIntroductionVideoWorkflowReq{
+		workflowDto := dtoreq.AddIntroductionVideoWorkflowReqDto{
 			CourseId: courseID,
 			ObjectId: objectId.(string),
 		}

@@ -10,7 +10,7 @@ import (
 )
 
 type TeacherVideoService interface {
-	AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error)
+	AddVideo(dto dtoreq.AddVideoToCourseReqDto) (*entities2.Video, error)
 }
 
 type teacherVideoService struct {
@@ -21,7 +21,7 @@ func NewTeacherVideoSvc(unitOfWork db.UnitOfWork) TeacherVideoService {
 	return &teacherVideoService{unitOfWork: unitOfWork}
 }
 
-func (svc teacherVideoService) AddVideo(dto dtoreq.AddVideoToCourseReq) (*entities2.Video, error) {
+func (svc teacherVideoService) AddVideo(dto dtoreq.AddVideoToCourseReqDto) (*entities2.Video, error) {
 	const operationName = "teacherVideoService.AddVideo"
 	isTitleDuplicated, err := svc.unitOfWork.VideoRepo().Exist(map[string]any{"title": dto.Title})
 	if err != nil {

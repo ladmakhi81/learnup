@@ -24,7 +24,7 @@ func NewHandler(
 }
 
 func (h Handler) VerifyZarinpal(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("Authority"),
 		Gateway:   entities.PaymentGateway_Zarinpal,
 	}
@@ -35,7 +35,7 @@ func (h Handler) VerifyZarinpal(ctx *gin.Context) (*types.ApiResponse, error) {
 }
 
 func (h Handler) VerifyZibal(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("trackId"),
 		Gateway:   entities.PaymentGateway_Zibal,
 	}
@@ -46,7 +46,7 @@ func (h Handler) VerifyZibal(ctx *gin.Context) (*types.ApiResponse, error) {
 }
 
 func (h Handler) VerifyStripe(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("session_id"),
 		Gateway:   entities.PaymentGateway_Stripe,
 	}
@@ -64,19 +64,19 @@ func (h Handler) VerifyStripe(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=paymentDtoRes.GetPageablePaymentItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=paymentDtoRes.GetPageablePaymentItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/payments/page [get]
 //	@Security	BearerAuth
 func (h Handler) GetPayments(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	payments, count, paymentsErr := h.paymentSvc.FetchPageable(page, pageSize)
-	if paymentsErr != nil {
-		return nil, paymentsErr
+	payments, count, err := h.paymentSvc.FetchPageable(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 	res := types.NewPaginationRes(
-		paymentDtoRes.MapGetPageablePaymentItems(payments),
+		paymentDtoRes.MapGetPageablePaymentItemsDto(payments),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,

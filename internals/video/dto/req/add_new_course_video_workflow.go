@@ -1,6 +1,6 @@
 package dtoreq
 
-type AddNewCourseVideoWorkflowReq struct {
+type AddNewCourseVideoWorkflowReqDto struct {
 	CourseID uint
 	ObjectID string
 	VideoID  uint

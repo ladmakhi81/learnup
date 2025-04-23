@@ -10,7 +10,7 @@ import (
 )
 
 type LikeService interface {
-	Create(user *entities.User, dto dtoreq.CreateLikeReq) (*entities.Like, error)
+	Create(user *entities.User, dto dtoreq.CreateLikeReqDto) (*entities.Like, error)
 	FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, int, error)
 }
 
@@ -22,7 +22,7 @@ func NewLikeSvc(unitOfWork db.UnitOfWork) LikeService {
 	return &likeService{unitOfWork: unitOfWork}
 }
 
-func (svc likeService) Create(user *entities.User, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
+func (svc likeService) Create(user *entities.User, dto dtoreq.CreateLikeReqDto) (*entities.Like, error) {
 	const operationName = "likeService.Create"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
 	if err != nil {

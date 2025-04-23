@@ -22,10 +22,10 @@ import (
 )
 
 type VideoService interface {
-	UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*entities.Video, error)
+	UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReqDto) (*entities.Video, error)
 	CreateCompleteUploadVideoNotification(videoID uint) error
-	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error)
-	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error)
+	Encode(ctx context.Context, dto dtoreq.EncodeVideoReqDto) (string, error)
+	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReqDto) (string, error)
 	Verify(admin *entities.User, videoId uint) error
 	FindVideosByCourseID(courseID uint) ([]*entities.Video, error)
 }
@@ -73,7 +73,7 @@ func (svc videoService) CreateCompleteUploadVideoNotification(videoID uint) erro
 	return nil
 }
 
-func (svc videoService) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReq) (*entities.Video, error) {
+func (svc videoService) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVideoReqDto) (*entities.Video, error) {
 	const operationName = "videoService.UpdateURLAndDuration"
 	video, err := svc.unitOfWork.VideoRepo().GetByID(dto.ID, nil)
 	if err != nil {
@@ -91,7 +91,7 @@ func (svc videoService) UpdateURLAndDuration(dto dtoreq.UpdateURLAndDurationVide
 	return video, nil
 }
 
-func (svc videoService) CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error) {
+func (svc videoService) CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReqDto) (string, error) {
 	const operationName = "videoService.CalculateDuration"
 	file, err := svc.minioClient.GetFileReader(ctx, "videos", dto.ObjectId)
 	if err != nil {
@@ -111,7 +111,7 @@ func (svc videoService) CalculateDuration(ctx context.Context, dto dtoreq.Calcul
 	return fmt.Sprintf("%02d:%02d:%02d", hours, minutes, seconds), nil
 }
 
-func (svc videoService) Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error) {
+func (svc videoService) Encode(ctx context.Context, dto dtoreq.EncodeVideoReqDto) (string, error) {
 	const operationName = "videoService.Encode"
 	log.Println("encode function execute")
 	// encode

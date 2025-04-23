@@ -12,7 +12,7 @@ import (
 )
 
 type OrderService interface {
-	Create(user *entities.User, dto orderDtoReq.CreateOrderReq) (string, error)
+	Create(user *entities.User, dto orderDtoReq.CreateOrderReqDto) (string, error)
 	FetchPaginated(page, pageSize int) ([]*entities.Order, int, error)
 	FetchDetailById(id uint) (*entities.Order, error)
 }
@@ -26,7 +26,7 @@ func NewOrderService(unitOfWork db.UnitOfWork, paymentSvc paymentService.Payment
 	return &orderService{unitOfWork: unitOfWork, paymentSvc: paymentSvc}
 }
 
-func (svc orderService) Create(user *entities.User, dto orderDtoReq.CreateOrderReq) (string, error) {
+func (svc orderService) Create(user *entities.User, dto orderDtoReq.CreateOrderReqDto) (string, error) {
 	const operationName = "orderService.Create"
 	return db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (string, error) {
 		carts, err := tx.CartRepo().GetAll(repositories.GetAllOptions{
@@ -66,7 +66,7 @@ func (svc orderService) Create(user *entities.User, dto orderDtoReq.CreateOrderR
 		}
 		payment, err := svc.paymentSvc.Create(
 			tx,
-			paymentDtoReq.CreatePaymentReq{
+			paymentDtoReq.CreatePaymentReqDto{
 				Gateway: dto.Gateway,
 				UserID:  user.ID,
 				OrderID: order.ID,

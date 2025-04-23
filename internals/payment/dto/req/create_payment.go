@@ -4,7 +4,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
-type CreatePaymentReq struct {
+type CreatePaymentReqDto struct {
 	OrderID uint
 	UserID  uint
 	Gateway entities.PaymentGateway

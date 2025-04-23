@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type GetPageablePaymentItem struct {
+type GetPageablePaymentItemDto struct {
 	ID        uint                     `json:"id"`
 	CreatedAt time.Time                `json:"createdAt"`
 	UpdatedAt time.Time                `json:"updatedAt"`
@@ -15,10 +15,10 @@ type GetPageablePaymentItem struct {
 	Amount    float64                  `json:"amount"`
 }
 
-func MapGetPageablePaymentItems(payments []*entities2.Payment) []*GetPageablePaymentItem {
-	res := make([]*GetPageablePaymentItem, len(payments))
+func MapGetPageablePaymentItemsDto(payments []*entities2.Payment) []*GetPageablePaymentItemDto {
+	res := make([]*GetPageablePaymentItemDto, len(payments))
 	for i, payment := range payments {
-		res[i] = &GetPageablePaymentItem{
+		res[i] = &GetPageablePaymentItemDto{
 			ID:        payment.ID,
 			CreatedAt: payment.CreatedAt,
 			UpdatedAt: payment.UpdatedAt,

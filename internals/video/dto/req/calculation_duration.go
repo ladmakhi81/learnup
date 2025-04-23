@@ -1,5 +1,5 @@
 package dtoreq
 
-type CalculateVideoDurationReq struct {
+type CalculateVideoDurationReqDto struct {
 	ObjectId string
 }

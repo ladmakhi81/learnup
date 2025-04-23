@@ -40,8 +40,8 @@ func NewHandler(
 //	@Accept		json
 //	@Produce	json
 //	@Param		question-id	path		uint								true	" "
-//	@Param		answer		body		questionDtoReq.AnswerQuestionReq	true	" "
-//	@Success	201			{object}	types.ApiResponse{data=questionDtoRes.CreateAnswerRes}
+//	@Param		answer		body		questionDtoReq.AnswerQuestionReqDto	true	" "
+//	@Success	201			{object}	types.ApiResponse{data=questionDtoRes.CreateAnswerResDto}
 //	@Failure	400			{object}	types.ApiResponse
 //	@Failure	401			{object}	types.ApiResponse
 //	@Failure	404			{object}	types.ApiResponse
@@ -59,7 +59,7 @@ func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 			h.translationSvc.Translate("question.errors.invalid_id"),
 		)
 	}
-	dto := &questionDtoReq.AnswerQuestionReq{}
+	dto := &questionDtoReq.AnswerQuestionReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -73,7 +73,7 @@ func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	answerRes := questionDtoRes.NewCreateAnswerRes(answer)
+	answerRes := questionDtoRes.NewCreateAnswerResDto(answer)
 	return types.NewApiResponse(http.StatusCreated, answerRes), nil
 }
 
@@ -84,7 +84,7 @@ func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Accept		json
 //	@Produce	json
 //	@Param		question-id	path		uint	true	" "
-//	@Success	200			{object}	types.ApiResponse{data=[]questionDtoRes.GetAnswersRes}
+//	@Success	200			{object}	types.ApiResponse{data=[]questionDtoRes.GetAnswerItemDto}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -92,16 +92,15 @@ func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/questions/{question-id}/answers [get]
 //	@Security	BearerAuth
 func (h Handler) GetQuestionAnswers(ctx *gin.Context) (*types.ApiResponse, error) {
-	questionID, questionIDErr := utils.ToUint(ctx.Param("question-id"))
-	if questionIDErr != nil {
+	questionID, err := utils.ToUint(ctx.Param("question-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("question.errors.invalid_id"),
 		)
 	}
-	answers, answersErr := h.answerSvc.GetQuestionAnswers(questionID)
-	if answersErr != nil {
-		return nil, answersErr
+	answers, err := h.answerSvc.GetQuestionAnswers(questionID)
+	if err != nil {
+		return nil, err
 	}
-	answersRes := questionDtoRes.MapGetAnswersRes(answers)
-	return types.NewApiResponse(http.StatusOK, answersRes), nil
+	return types.NewApiResponse(http.StatusOK, questionDtoRes.MapGetAnswerItemsDto(answers)), nil
 }

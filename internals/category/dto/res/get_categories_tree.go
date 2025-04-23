@@ -4,32 +4,22 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
-type GetCategoriesTreeItem struct {
-	ID            uint                     `json:"id"`
-	Name          string                   `json:"name"`
-	ParentID      *uint                    `json:"parentCategoryId,omitempty"`
-	SubCategories []*GetCategoriesTreeItem `json:"subCategories,omitempty"`
+type GetCategoriesTreeItemDto struct {
+	ID            uint                        `json:"id"`
+	Name          string                      `json:"name"`
+	ParentID      *uint                       `json:"parentCategoryId,omitempty"`
+	SubCategories []*GetCategoriesTreeItemDto `json:"subCategories,omitempty"`
 }
 
-type GetCategoriesTreeRes struct {
-	Categories []*GetCategoriesTreeItem `json:"categories"`
-}
-
-func mapCategoryToCategoryTreeItem(categories []*entities.Category) []*GetCategoriesTreeItem {
-	categoriesTreeItems := make([]*GetCategoriesTreeItem, len(categories))
+func MapGetCategoriesTreeItemsDto(categories []*entities.Category) []*GetCategoriesTreeItemDto {
+	categoriesTreeItems := make([]*GetCategoriesTreeItemDto, len(categories))
 	for categoryIndex, category := range categories {
-		categoriesTreeItems[categoryIndex] = &GetCategoriesTreeItem{
+		categoriesTreeItems[categoryIndex] = &GetCategoriesTreeItemDto{
 			ID:            category.ID,
 			Name:          category.Name,
 			ParentID:      category.ParentCategoryID,
-			SubCategories: mapCategoryToCategoryTreeItem(category.Children),
+			SubCategories: MapGetCategoriesTreeItemsDto(category.Children),
 		}
 	}
 	return categoriesTreeItems
-}
-
-func NewGetCategoriesTreeRes(categories []*entities.Category) GetCategoriesTreeRes {
-	categoriesTree := GetCategoriesTreeRes{}
-	categoriesTree.Categories = mapCategoryToCategoryTreeItem(categories)
-	return categoriesTree
 }

@@ -54,7 +54,7 @@ func (h Handler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) 
 //	@Tags		notifications
 //	@Param		page		query		int	false	"Page number"		default(0)
 //	@Param		pageSize	query		int	false	"Number per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.NotificationPageItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.NotificationPageItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/notifications/page [get]
@@ -65,13 +65,12 @@ func (h Handler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, err
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	notifications, count, notificationsErr := h.notificationSvc.FetchPageable(page, pageSize)
-	if notificationsErr != nil {
-		return nil, notificationsErr
+	notifications, count, err := h.notificationSvc.FetchPageable(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
-	mappedNotifications := dtores.NewNotificationPageItems(notifications)
 	res := types.NewPaginationRes(
-		mappedNotifications,
+		dtores.NewNotificationPageItemsDto(notifications),
 		page,
 		count,
 		utils.CalculatePaginationTotalPage(count, pageSize),

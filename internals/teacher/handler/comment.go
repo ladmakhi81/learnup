@@ -38,7 +38,7 @@ func NewCommentHandler(
 //	@Param		course-id	path		int	true	"Course ID"
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]dtores.GetCommentPageableItemRes}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=[]dtores.GetCommentPageableItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	401			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
@@ -46,8 +46,8 @@ func NewCommentHandler(
 //	@Router		/teacher/comments/{course-id} [get]
 //	@Security	BearerAuth
 func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseId, courseIdErr := utils.ToUint(ctx.Param("course-id"))
-	if courseIdErr != nil {
+	courseId, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("course.errors.invalid_course_id"),
 		)
@@ -60,17 +60,17 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 	if err != nil {
 		return nil, err
 	}
-	comments, count, commentsErr := h.teacherCommentSvc.GetPageableCommentByCourseId(
+	comments, count, err := h.teacherCommentSvc.GetPageableCommentByCourseId(
 		user,
 		courseId,
 		page,
 		pageSize,
 	)
-	if commentsErr != nil {
-		return nil, commentsErr
+	if err != nil {
+		return nil, err
 	}
 	commentsRes := types.NewPaginationRes(
-		dtores.MappedGetCommentPageableItemsRes(comments),
+		dtores.MapGetCommentPageableItemsDto(comments),
 		page,
 		utils.CalculatePaginationTotalPage(count, pageSize),
 		count,

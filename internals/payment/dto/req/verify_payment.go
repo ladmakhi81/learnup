@@ -4,7 +4,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
-type VerifyPaymentReq struct {
+type VerifyPaymentReqDto struct {
 	Authority string
 	Gateway   entities.PaymentGateway
 }

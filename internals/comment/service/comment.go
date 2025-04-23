@@ -11,7 +11,7 @@ import (
 )
 
 type CommentService interface {
-	Create(user *entities.User, dto dtoreq.CreateCommentReq) (*entities.Comment, error)
+	Create(user *entities.User, dto dtoreq.CreateCommentReqDto) (*entities.Comment, error)
 	Delete(id uint) error
 	Fetch(page, pageSize int) ([]*entities.Comment, int, error)
 }
@@ -24,7 +24,7 @@ func NewCommentSvc(unitOfWork db.UnitOfWork) CommentService {
 	return &commentService{unitOfWork: unitOfWork}
 }
 
-func (svc commentService) Create(user *entities.User, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
+func (svc commentService) Create(user *entities.User, dto dtoreq.CreateCommentReqDto) (*entities.Comment, error) {
 	const operationName = "commentService.Create"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
 	if err != nil {

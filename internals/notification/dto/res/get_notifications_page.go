@@ -10,7 +10,7 @@ type userItem struct {
 	FullName string `json:"fullName"`
 }
 
-type NotificationPageItem struct {
+type NotificationPageItemDto struct {
 	Type     entities.NotificationType `json:"type"`
 	IsSeen   bool                      `json:"isSeen"`
 	SeenAt   *time.Time                `json:"seenAt"`
@@ -18,10 +18,10 @@ type NotificationPageItem struct {
 	Metadata any                       `json:"metadata"`
 }
 
-func NewNotificationPageItems(notifications []*entities.Notification) []*NotificationPageItem {
-	result := make([]*NotificationPageItem, len(notifications))
+func NewNotificationPageItemsDto(notifications []*entities.Notification) []*NotificationPageItemDto {
+	result := make([]*NotificationPageItemDto, len(notifications))
 	for index, notification := range notifications {
-		result[index] = &NotificationPageItem{
+		result[index] = &NotificationPageItemDto{
 			Type:     notification.Type,
 			IsSeen:   notification.IsSeen,
 			Metadata: notification.Metadata,

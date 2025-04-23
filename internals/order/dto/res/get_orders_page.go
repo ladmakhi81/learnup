@@ -12,7 +12,7 @@ type userOrderItem struct {
 	Phone    string `json:"phone"`
 }
 
-type PaginatedOrderItem struct {
+type PaginatedOrderItemDto struct {
 	ID              uint                  `json:"id"`
 	CreatedAt       time.Time             `json:"createdAt"`
 	UpdatedAt       time.Time             `json:"updatedAt"`
@@ -25,10 +25,10 @@ type PaginatedOrderItem struct {
 	StatusChangedAt *time.Time            `json:"statusChangedAt"`
 }
 
-func MapPaginatedOrderItems(orders []*entities2.Order) []*PaginatedOrderItem {
-	res := make([]*PaginatedOrderItem, len(orders))
+func MapPaginatedOrderItemsDto(orders []*entities2.Order) []*PaginatedOrderItemDto {
+	res := make([]*PaginatedOrderItemDto, len(orders))
 	for i, order := range orders {
-		res[i] = &PaginatedOrderItem{
+		res[i] = &PaginatedOrderItemDto{
 			ID:              order.ID,
 			CreatedAt:       order.CreatedAt,
 			UpdatedAt:       order.UpdatedAt,

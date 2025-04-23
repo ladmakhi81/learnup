@@ -25,7 +25,7 @@ type orderItem struct {
 	Course orderCourseItem `json:"course"`
 }
 
-type GetOrderDetailRes struct {
+type GetOrderDetailItemDto struct {
 	ID              uint                  `json:"id"`
 	CreatedAt       time.Time             `json:"createdAt"`
 	UpdatedAt       time.Time             `json:"updatedAt"`
@@ -39,7 +39,7 @@ type GetOrderDetailRes struct {
 	Items           []orderItem           `json:"items"`
 }
 
-func NewGetOrderDetailRes(order *entities2.Order) *GetOrderDetailRes {
+func NewGetOrderDetailItemDto(order *entities2.Order) *GetOrderDetailItemDto {
 	items := make([]orderItem, len(order.Items))
 
 	for i, item := range order.Items {
@@ -55,7 +55,7 @@ func NewGetOrderDetailRes(order *entities2.Order) *GetOrderDetailRes {
 		}
 	}
 
-	return &GetOrderDetailRes{
+	return &GetOrderDetailItemDto{
 		ID:        order.ID,
 		CreatedAt: order.CreatedAt,
 		UpdatedAt: order.UpdatedAt,

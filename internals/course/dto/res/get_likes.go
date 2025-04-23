@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/internals/db/entities"
 )
 
 type userItem struct {
@@ -9,15 +9,15 @@ type userItem struct {
 	FullName string `json:"full_name"`
 }
 
-type GetLikesPageableItem struct {
-	User *userItem          `json:"user"`
-	Type entities2.LikeType `json:"type"`
+type GetLikesPageableItemDto struct {
+	User *userItem         `json:"user"`
+	Type entities.LikeType `json:"type"`
 }
 
-func MappedGetLikesPageableItem(likes []*entities2.Like) []*GetLikesPageableItem {
-	res := make([]*GetLikesPageableItem, len(likes))
+func MapGetLikesPageableItemsDto(likes []*entities.Like) []*GetLikesPageableItemDto {
+	res := make([]*GetLikesPageableItemDto, len(likes))
 	for i, like := range likes {
-		res[i] = &GetLikesPageableItem{
+		res[i] = &GetLikesPageableItemDto{
 			User: &userItem{
 				ID:       like.UserID,
 				FullName: like.User.FullName(),

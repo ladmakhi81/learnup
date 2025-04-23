@@ -10,7 +10,7 @@ import (
 )
 
 type AuthService interface {
-	Login(req dtoreq.LoginReq) (string, error)
+	Login(req dtoreq.LoginReqDto) (string, error)
 }
 
 type authService struct {
@@ -31,7 +31,7 @@ func NewAuthSvc(
 	}
 }
 
-func (svc authService) Login(dto dtoreq.LoginReq) (string, error) {
+func (svc authService) Login(dto dtoreq.LoginReqDto) (string, error) {
 	const operationName = "authService.Login"
 	user, err := svc.unitOfWork.UserRepo().GetOne(map[string]any{"phone_number": dto.Phone}, nil)
 	if err != nil {
