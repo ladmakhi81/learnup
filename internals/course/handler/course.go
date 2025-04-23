@@ -16,7 +16,6 @@ import (
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -152,16 +151,15 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 //
 //	@Security	BearerAuth
 func (h Handler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	videos, videosErr := h.videoSvc.FindVideosByCourseID(uint(courseID))
+	videos, videosErr := h.videoSvc.FindVideosByCourseID(courseID)
 	if videosErr != nil {
 		return nil, videosErr
 	}
-	videosRes := questionDtoRes.NewGetVideosByCourseIDRes(videos, uint(courseID))
+	videosRes := questionDtoRes.NewGetVideosByCourseIDRes(videos, courseID)
 	return types.NewApiResponse(http.StatusOK, videosRes), nil
 }
 
@@ -178,9 +176,8 @@ func (h Handler) GetVideosByCourseID(ctx *gin.Context) (*types.ApiResponse, erro
 //
 //	@Security	BearerAuth
 func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	course, courseErr := h.courseSvc.FindDetailById(uint(courseID))
@@ -208,15 +205,12 @@ func (h Handler) GetCourseById(ctx *gin.Context) (*types.ApiResponse, error) {
 //
 //	@Security	BearerAuth
 func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIdParam := ctx.Param("course-id")
-	courseId, courseIdErr := strconv.Atoi(courseIdParam)
-	if courseIdErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	dto := &courseDtoReq.VerifyCourseReq{
-		ID: uint(courseId),
+		ID: courseID,
 	}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
@@ -250,12 +244,9 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 //
 //	@Security	BearerAuth
 func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	authContext, _ := ctx.Get("AUTH")
 	dto := &likeDtoReq.CreateLikeReq{}
@@ -267,7 +258,7 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	dto.CourseID = uint(courseID)
+	dto.CourseID = courseID
 	_, likeErr := h.likeSvc.Create(authContext, *dto)
 	if likeErr != nil {
 		return nil, likeErr
@@ -291,15 +282,12 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/courses/{course-id}/likes [get]
 //	@Security	BearerAuth
 func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	likes, count, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, uint(courseID))
+	likes, count, likesErr := h.likeSvc.FetchByCourseID(page, pageSize, courseID)
 	if likesErr != nil {
 		return nil, likesErr
 	}
@@ -328,12 +316,9 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/courses/{course-id}/comment [post]
 //	@Security	BearerAuth
 func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	dto := &commentDtoReq.CreateCommentReq{}
 	if err := ctx.Bind(dto); err != nil {
@@ -344,7 +329,7 @@ func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	dto.CourseId = uint(courseID)
+	dto.CourseId = courseID
 	authContext, _ := ctx.Get("AUTH")
 	comment, commentErr := h.commentSvc.Create(authContext, *dto)
 	if commentErr != nil {
@@ -369,14 +354,13 @@ func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/courses/comments/{comment-id} [delete]
 //	@Security	BearerAuth
 func (h Handler) DeleteComment(ctx *gin.Context) (*types.ApiResponse, error) {
-	commentIdParam := ctx.Param("comment-id")
-	commentId, commentIdErr := strconv.Atoi(commentIdParam)
-	if commentIdErr != nil {
+	commentID, err := utils.ToUint(ctx.Param("comment-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translateSvc.Translate("comment.errors.invalid_id"),
 		)
 	}
-	if err := h.commentSvc.Delete(uint(commentId)); err != nil {
+	if err := h.commentSvc.Delete(commentID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil
@@ -400,12 +384,9 @@ func (h Handler) DeleteComment(ctx *gin.Context) (*types.ApiResponse, error) {
 func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	authContext, _ := ctx.Get("AUTH")
 	senderClaim, _ := authContext.(*types.TokenClaim)
-	courseIDParam := ctx.Param("course-id")
-	courseID, courseIDErr := strconv.Atoi(courseIDParam)
-	if courseIDErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
 	dto := &questionDtoReq.CreateQuestionReq{}
 	if err := ctx.Bind(dto); err != nil {
@@ -416,7 +397,7 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	dto.CourseID = uint(courseID)
+	dto.CourseID = courseID
 	dto.UserID = senderClaim.UserID
 	question, questionErr := h.questionSvc.Create(*dto)
 	if questionErr != nil {
@@ -442,14 +423,10 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/courses/{course-id}/questions [get]
 //	@Security	BearerAuth
 func (h Handler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIDParam := ctx.Param("course-id")
-	parsedCourseId, parsedCourseIdErr := strconv.Atoi(courseIDParam)
-	if parsedCourseIdErr != nil {
-		return nil, types.NewBadRequestError(
-			h.translateSvc.Translate("course.errors.invalid_course_id"),
-		)
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	courseID := uint(parsedCourseId)
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
 	questions, count, questionsErr := h.questionSvc.GetPageable(&courseID, page, pageSize)
 	if questionsErr != nil {

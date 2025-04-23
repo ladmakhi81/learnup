@@ -11,7 +11,6 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/pkg/temporal"
 	"github.com/ladmakhi81/learnup/utils"
-	"strconv"
 )
 
 type TusService interface {
@@ -56,20 +55,20 @@ func (tus TusServiceImpl) AddCourseVideoWebhook(ctx context.Context, dto reqdto.
 	courseIdParam, courseIdExist := dto.Event.Upload.MetaData["courseId"]
 	videoIdParam, videoIdExist := dto.Event.Upload.MetaData["videoId"]
 	if objectIdExist && courseIdExist && videoIdExist {
-		courseId, courseIdErr := strconv.Atoi(courseIdParam.(string))
-		if courseIdErr != nil {
+		courseID, courseIDErr := utils.ToUint(courseIdParam.(string))
+		if courseIDErr != nil {
 			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting course id"})
 			return
 		}
-		videoId, videoIdErr := strconv.Atoi(videoIdParam.(string))
-		if videoIdErr != nil {
+		videoID, videoIDErr := utils.ToUint(videoIdParam.(string))
+		if videoIDErr != nil {
 			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting video id"})
 			return
 		}
 		workflowDto := dtoreq.AddNewCourseVideoWorkflowReq{
-			CourseID: uint(courseId),
+			CourseID: courseID,
 			ObjectID: objectId.(string),
-			VideoID:  uint(videoId),
+			VideoID:  videoID,
 		}
 		workflowErr := tus.temporalSvc.ExecuteWorker(
 			ctx,
@@ -96,13 +95,13 @@ func (tus TusServiceImpl) AddIntroductionVideoWebhook(ctx context.Context, dto r
 	objectId, objectIdExist := dto.Event.Upload.Storage["Key"]
 	courseIdParam, courseIdExist := dto.Event.Upload.MetaData["courseId"]
 	if objectIdExist && courseIdExist {
-		courseId, courseIdErr := strconv.Atoi(courseIdParam.(string))
-		if courseIdErr != nil {
+		courseID, courseIDErr := utils.ToUint(courseIdParam.(string))
+		if courseIDErr != nil {
 			tus.logSvc.Error(dtos.LogMessage{Message: "Error in converting course id"})
 			return
 		}
 		workflowDto := dtoreq.AddIntroductionVideoWorkflowReq{
-			CourseId: uint(courseId),
+			CourseId: courseID,
 			ObjectId: objectId.(string),
 		}
 		workflowErr := tus.temporalSvc.ExecuteWorker(

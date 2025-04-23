@@ -9,7 +9,6 @@ import (
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -134,14 +133,13 @@ func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 //
 // @Security BearerAuth
 func (h Handler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
-	categoryIDParam := ctx.Param("categoryId")
-	categoryId, categoryIdErr := strconv.Atoi(categoryIDParam)
-	if categoryIdErr != nil {
+	categoryID, err := utils.ToUint(ctx.Param("categoryId"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("category.errors.invalid_category_id"),
 		)
 	}
-	if err := h.categorySvc.DeleteById(uint(categoryId)); err != nil {
+	if err := h.categorySvc.DeleteById(categoryID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(

@@ -8,7 +8,6 @@ import (
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -39,12 +38,11 @@ func NewHandler(
 //
 //	@Security	BearerAuth
 func (h Handler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) {
-	notificationIdParam := ctx.Param("notification-id")
-	notificationID, notificationIDErr := strconv.Atoi(notificationIdParam)
-	if notificationIDErr != nil {
+	notificationID, err := utils.ToUint(ctx.Param("notification-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(h.translationSvc.Translate("notifications.errors.invalid_notification_id"))
 	}
-	if err := h.notificationSvc.SeenById(uint(notificationID)); err != nil {
+	if err := h.notificationSvc.SeenById(notificationID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, map[string]any{}), nil

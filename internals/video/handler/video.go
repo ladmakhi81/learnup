@@ -5,8 +5,8 @@ import (
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -43,14 +43,13 @@ func NewHandler(
 //	@Security	BearerAuth
 func (h Handler) VerifyVideo(ctx *gin.Context) (*types.ApiResponse, error) {
 	authContext, _ := ctx.Get("AUTH")
-	videoIdParam := ctx.Param("video-id")
-	videoId, videoIdErr := strconv.Atoi(videoIdParam)
+	videoId, videoIdErr := utils.ToUint(ctx.Param("video-id"))
 	if videoIdErr != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("video.errors.invalid_id"),
 		)
 	}
-	if err := h.videoSvc.Verify(authContext, uint(videoId)); err != nil {
+	if err := h.videoSvc.Verify(authContext, videoId); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil

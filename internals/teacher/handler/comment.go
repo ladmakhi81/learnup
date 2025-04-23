@@ -8,7 +8,6 @@ import (
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 	"net/http"
-	"strconv"
 )
 
 type CommentHandler struct {
@@ -43,8 +42,7 @@ func NewCommentHandler(
 //	@Router		/teacher/comments/{course-id} [get]
 //	@Security	BearerAuth
 func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.ApiResponse, error) {
-	courseIdParam := ctx.Param("course-id")
-	courseId, courseIdErr := strconv.Atoi(courseIdParam)
+	courseId, courseIdErr := utils.ToUint(ctx.Param("course-id"))
 	if courseIdErr != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("course.errors.invalid_course_id"),
@@ -57,7 +55,7 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 	authContext, _ := ctx.Get("AUTH")
 	comments, count, commentsErr := h.teacherCommentSvc.GetPageableCommentByCourseId(
 		authContext,
-		uint(courseId),
+		courseId,
 		page,
 		pageSize,
 	)
