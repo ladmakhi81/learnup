@@ -5,7 +5,6 @@ import (
 )
 
 type CreateQuestionReq struct {
-	UserID   uint                      `json:"-"`
 	CourseID uint                      `json:"-"`
 	Content  string                    `json:"content" validate:"required,min=4"`
 	Priority entities.QuestionPriority `json:"priority" validate:"required,oneof=high low"`

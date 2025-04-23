@@ -5,6 +5,7 @@ import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/teacher/dto/req"
 	dtores "github.com/ladmakhi81/learnup/internals/teacher/dto/res"
 	"github.com/ladmakhi81/learnup/internals/teacher/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -15,17 +16,20 @@ type CourseHandler struct {
 	courseSvc      service.TeacherCourseService
 	validationSvc  contracts.Validation
 	translationSvc contracts.Translator
+	userSvc        userService.UserSvc
 }
 
 func NewCourseHandler(
 	courseSvc service.TeacherCourseService,
 	validationSvc contracts.Validation,
 	translationSvc contracts.Translator,
+	userSvc userService.UserSvc,
 ) *CourseHandler {
 	return &CourseHandler{
 		courseSvc:      courseSvc,
 		validationSvc:  validationSvc,
 		translationSvc: translationSvc,
+		userSvc:        userSvc,
 	}
 }
 
@@ -54,8 +58,11 @@ func (h CourseHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	authContext, _ := ctx.Get("AUTH")
-	course, courseErr := h.courseSvc.Create(authContext, *dto)
+	teacher, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	course, courseErr := h.courseSvc.Create(teacher, *dto)
 	if courseErr != nil {
 		return nil, courseErr
 	}
@@ -82,9 +89,12 @@ func (h CourseHandler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error
 //	@Router		/teacher/courses [get]
 //	@Security	BearerAuth
 func (h CourseHandler) FetchCourses(ctx *gin.Context) (*types.ApiResponse, error) {
-	authContext, _ := ctx.Get("AUTH")
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Param("page"), ctx.Param("pageSize"))
-	courses, count, coursesErr := h.courseSvc.FetchByTeacherId(authContext, page, pageSize)
+	teacher, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	courses, count, coursesErr := h.courseSvc.FetchByTeacherId(teacher, page, pageSize)
 	if coursesErr != nil {
 		return nil, coursesErr
 	}

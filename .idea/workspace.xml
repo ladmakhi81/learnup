@@ -6,12 +6,30 @@
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/handler/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/category.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/cart/dto/req/create_cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/dto/req/create_cart.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/cart/handler/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/handler/cart.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/cart/service/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/service/cart.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/comment/service/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/service/comment.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/course/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/handler/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/handler/notification.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/like/service/like.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/like/service/like.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/order/handler/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/handler/order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/order/service/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/service/order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/question/dto/req/answer_question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/dto/req/answer_question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/question/dto/req/create_question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/dto/req/create_question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/question/handler/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/handler/question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/question/service/answer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/service/answer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/question/service/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/service/question.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/teacher/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/tus/service/tus.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/service/tus.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/teacher/service/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/comment.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/teacher/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/course.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/teacher/service/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/question.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/video/handler/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/handler/video.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

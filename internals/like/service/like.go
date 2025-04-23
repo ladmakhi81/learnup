@@ -6,12 +6,11 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	dtoreq "github.com/ladmakhi81/learnup/internals/like/dto/req"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type LikeService interface {
-	Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error)
+	Create(user *entities.User, dto dtoreq.CreateLikeReq) (*entities.Like, error)
 	FetchByCourseID(page, pageSize int, courseId uint) ([]*entities.Like, int, error)
 }
 
@@ -23,16 +22,8 @@ func NewLikeSvc(unitOfWork db.UnitOfWork) LikeService {
 	return &likeService{unitOfWork: unitOfWork}
 }
 
-func (svc likeService) Create(authContext any, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
+func (svc likeService) Create(user *entities.User, dto dtoreq.CreateLikeReq) (*entities.Like, error) {
 	const operationName = "likeService.Create"
-	authClaim := authContext.(*types.TokenClaim)
-	user, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching logged in user", operationName, err)
-	}
-	if user == nil {
-		return nil, userError.User_NotFound
-	}
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
 	if err != nil {
 		return nil, types.NewServerError("Error in fetching course detail", operationName, err)

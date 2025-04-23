@@ -6,16 +6,15 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
 )
 
 type CourseService interface {
-	Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error)
+	Create(createdBy *entities.User, dto dtoreq.CreateCourseReq) (*entities.Course, error)
 	GetCourses(page, pageSize int) ([]*entities.Course, int, error)
 	FindDetailById(id uint) (*entities.Course, error)
-	VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error
+	VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReq) error
 	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error
 	CreateCompleteIntroductionVideoNotification(id uint) error
 }
@@ -28,7 +27,7 @@ func NewCourseSvc(unitOfWork db.UnitOfWork) CourseService {
 	return &courseService{unitOfWork: unitOfWork}
 }
 
-func (svc courseService) Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
+func (svc courseService) Create(createdBy *entities.User, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
 	const operationName = "courseService.Create"
 	isCourseNameDuplicated, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
 	if err != nil {
@@ -51,11 +50,6 @@ func (svc courseService) Create(authContext any, dto dtoreq.CreateCourseReq) (*e
 	if teacher == nil {
 		return nil, courseError.Course_NotFoundTeacher
 	}
-	authClaim := authContext.(*types.TokenClaim)
-	authUser, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching logged in user", operationName, err)
-	}
 	course := &entities.Course{
 		CategoryID:                  &category.ID,
 		Name:                        dto.Name,
@@ -76,7 +70,7 @@ func (svc courseService) Create(authContext any, dto dtoreq.CreateCourseReq) (*e
 		TeacherID:                   &teacher.ID,
 		ThumbnailImage:              dto.ThumbnailImage,
 		VerifiedDate:                utils.Now(),
-		VerifiedByID:                &authUser.ID,
+		VerifiedByID:                &createdBy.ID,
 	}
 	course.SetPrice(dto.Price)
 	course.SetFee(dto.Fee)
@@ -112,7 +106,7 @@ func (svc courseService) FindDetailById(id uint) (*entities.Course, error) {
 	return course, nil
 }
 
-func (svc courseService) VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error {
+func (svc courseService) VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReq) error {
 	const operationName = "courseService.VerifyCourse"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.ID, nil)
 	if err != nil {
@@ -123,14 +117,6 @@ func (svc courseService) VerifyCourse(authContext any, dto dtoreq.VerifyCourseRe
 	}
 	if course.Status != entities.CourseStatus_InProgress {
 		return courseError.Course_UnableToVerify
-	}
-	adminClaim := authContext.(*types.TokenClaim)
-	admin, err := svc.unitOfWork.UserRepo().GetByID(adminClaim.UserID, nil)
-	if err != nil {
-		return types.NewServerError("Error in fetching user admin by id", operationName, err)
-	}
-	if admin == nil {
-		return userError.User_AdminNotFound
 	}
 	if course.CheckFee(dto.Fee) {
 		return courseError.Course_InvalidFee

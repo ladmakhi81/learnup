@@ -8,12 +8,11 @@ import (
 	orderDtoReq "github.com/ladmakhi81/learnup/internals/order/dto/req"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type OrderService interface {
-	Create(dto orderDtoReq.CreateOrderReq) (string, error)
+	Create(user *entities.User, dto orderDtoReq.CreateOrderReq) (string, error)
 	FetchPaginated(page, pageSize int) ([]*entities.Order, int, error)
 	FetchDetailById(id uint) (*entities.Order, error)
 }
@@ -27,16 +26,9 @@ func NewOrderService(unitOfWork db.UnitOfWork, paymentSvc paymentService.Payment
 	return &orderService{unitOfWork: unitOfWork, paymentSvc: paymentSvc}
 }
 
-func (svc orderService) Create(dto orderDtoReq.CreateOrderReq) (string, error) {
+func (svc orderService) Create(user *entities.User, dto orderDtoReq.CreateOrderReq) (string, error) {
 	const operationName = "orderService.Create"
 	return db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (string, error) {
-		user, err := tx.UserRepo().GetByID(dto.UserID, nil)
-		if err != nil {
-			return "", types.NewServerError("Error in fetching user by id", operationName, err)
-		}
-		if user == nil {
-			return "", userError.User_NotFound
-		}
 		carts, err := tx.CartRepo().GetAll(repositories.GetAllOptions{
 			Conditions: map[string]any{
 				"id": dto.Carts,

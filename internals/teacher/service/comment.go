@@ -5,12 +5,11 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type TeacherCommentService interface {
-	GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, int, error)
+	GetPageableCommentByCourseId(teacher *entities.User, courseId uint, page, pageSize int) ([]*entities.Comment, int, error)
 }
 
 type teacherCommentService struct {
@@ -21,16 +20,8 @@ func NewTeacherCommentSvc(unitOfWork db.UnitOfWork) TeacherCommentService {
 	return &teacherCommentService{unitOfWork: unitOfWork}
 }
 
-func (svc teacherCommentService) GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
+func (svc teacherCommentService) GetPageableCommentByCourseId(teacher *entities.User, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
 	const operationName = "teacherCommentService.GetPageableCommentByCourseId"
-	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, err := svc.unitOfWork.UserRepo().GetByID(teacherClaim.UserID, nil)
-	if err != nil {
-		return nil, 0, types.NewServerError("Error in finding teacher by id", operationName, err)
-	}
-	if teacher == nil {
-		return nil, 0, userError.User_TeacherNotFound
-	}
 	course, err := svc.unitOfWork.CourseRepo().GetByID(courseId, nil)
 	if err != nil {
 		return nil, 0, types.NewServerError("Error in fetching course detail", operationName, err)

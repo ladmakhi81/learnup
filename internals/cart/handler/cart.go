@@ -5,6 +5,7 @@ import (
 	cartDtoReq "github.com/ladmakhi81/learnup/internals/cart/dto/req"
 	cartDtoRes "github.com/ladmakhi81/learnup/internals/cart/dto/res"
 	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -15,17 +16,20 @@ type Handler struct {
 	translationSvc contracts.Translator
 	validationSvc  contracts.Validation
 	cartSvc        cartService.CartService
+	userSvc        userService.UserSvc
 }
 
 func NewHandler(
 	translationSvc contracts.Translator,
 	validationSvc contracts.Validation,
 	cartSvc cartService.CartService,
+	userSvc userService.UserSvc,
 ) *Handler {
 	return &Handler{
 		translationSvc: translationSvc,
 		validationSvc:  validationSvc,
 		cartSvc:        cartSvc,
+		userSvc:        userSvc,
 	}
 }
 
@@ -53,10 +57,11 @@ func (h Handler) AddCart(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	authContext, _ := ctx.Get("AUTH")
-	authClaim := authContext.(*types.TokenClaim)
-	dto.UserID = authClaim.UserID
-	cart, cartErr := h.cartSvc.Create(*dto)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cart, cartErr := h.cartSvc.Create(user, *dto)
 	if cartErr != nil {
 		return nil, cartErr
 	}
@@ -69,6 +74,7 @@ func (h Handler) AddCart(ctx *gin.Context) (*types.ApiResponse, error) {
 }
 
 // DeleteCartByID godoc
+//
 //	@Summary	Delete a cart item by ID
 //	@Tags		carts
 //	@Param		cart-id	path		uint	true	"Cart ID"
@@ -80,22 +86,24 @@ func (h Handler) AddCart(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Security	BearerAuth
 //	@Router		/carts/{cart-id} [delete]
 func (h Handler) DeleteCartByID(ctx *gin.Context) (*types.ApiResponse, error) {
-	parsedCartID, parsedErr := utils.ToUint(ctx.Param("cart-id"))
-	if parsedErr != nil {
+	cartID, err := utils.ToUint(ctx.Param("cart-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("cart.errors.invalid_id"),
 		)
 	}
-	authContext, _ := ctx.Get("AUTH")
-	authClaim := authContext.(*types.TokenClaim)
-	userID := authClaim.UserID
-	if err := h.cartSvc.DeleteByID(userID, parsedCartID); err != nil {
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := h.cartSvc.DeleteByID(user.ID, cartID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil
 }
 
 // GetCartsByUserID godoc
+//
 //	@Summary	Get all cart items for the authenticated user
 //	@Tags		carts
 //	@Produce	json
@@ -105,10 +113,11 @@ func (h Handler) DeleteCartByID(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Security	BearerAuth
 //	@Router		/carts [get]
 func (h Handler) GetCartsByUserID(ctx *gin.Context) (*types.ApiResponse, error) {
-	authContext, _ := ctx.Get("AUTH")
-	authClaim := authContext.(*types.TokenClaim)
-	userID := authClaim.UserID
-	carts, cartsErr := h.cartSvc.FetchAllByUserID(userID)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	carts, cartsErr := h.cartSvc.FetchAllByUserID(user.ID)
 	if cartsErr != nil {
 		return nil, cartsErr
 	}

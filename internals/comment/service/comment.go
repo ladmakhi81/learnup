@@ -11,7 +11,7 @@ import (
 )
 
 type CommentService interface {
-	Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error)
+	Create(user *entities.User, dto dtoreq.CreateCommentReq) (*entities.Comment, error)
 	Delete(id uint) error
 	Fetch(page, pageSize int) ([]*entities.Comment, int, error)
 }
@@ -24,16 +24,8 @@ func NewCommentSvc(unitOfWork db.UnitOfWork) CommentService {
 	return &commentService{unitOfWork: unitOfWork}
 }
 
-func (svc commentService) Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
+func (svc commentService) Create(user *entities.User, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
 	const operationName = "commentService.Create"
-	authClaim := authContext.(*types.TokenClaim)
-	user, err := svc.unitOfWork.UserRepo().GetByID(authClaim.UserID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching user logged in information", operationName, err)
-	}
-	if user == nil {
-		return nil, commentError.Comment_SenderNotFound
-	}
 	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
 	if err != nil {
 		return nil, types.NewServerError("Error in fetching course", operationName, err)

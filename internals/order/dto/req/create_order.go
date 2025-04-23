@@ -5,7 +5,6 @@ import (
 )
 
 type CreateOrderReq struct {
-	UserID  uint                    `json:"-"`
 	Carts   []uint                  `json:"carts" validate:"required,dive,gte=1"`
 	Gateway entities.PaymentGateway `json:"gateway" validate:"required,oneof=zibal zarinpal stripe"`
 }

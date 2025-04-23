@@ -5,19 +5,17 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type GetQuestionOptions struct {
-	TeacherID uint
-	CourseID  *uint
-	Page      int
-	PageSize  int
+	CourseID *uint
+	Page     int
+	PageSize int
 }
 
 type TeacherQuestionService interface {
-	GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error)
+	GetQuestions(teacher *entities.User, options GetQuestionOptions) ([]*entities.Question, int, error)
 }
 
 type teacherQuestionService struct {
@@ -28,15 +26,8 @@ func NewTeacherQuestionSvc(unitOfWork db.UnitOfWork) TeacherQuestionService {
 	return &teacherQuestionService{unitOfWork: unitOfWork}
 }
 
-func (svc teacherQuestionService) GetQuestions(options GetQuestionOptions) ([]*entities.Question, int, error) {
+func (svc teacherQuestionService) GetQuestions(teacher *entities.User, options GetQuestionOptions) ([]*entities.Question, int, error) {
 	const operationName = "teacherQuestionService.GetQuestions"
-	teacher, err := svc.unitOfWork.UserRepo().GetByID(options.TeacherID, nil)
-	if err != nil {
-		return nil, 0, types.NewServerError("Error in fetching teacher by id", operationName, err)
-	}
-	if teacher == nil {
-		return nil, 0, userError.User_TeacherNotFound
-	}
 	if options.CourseID != nil {
 		course, err := svc.unitOfWork.CourseRepo().GetByID(*options.CourseID, nil)
 		if err != nil {

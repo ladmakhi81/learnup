@@ -8,7 +8,6 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	dtoreq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	videoError "github.com/ladmakhi81/learnup/internals/video/error"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
@@ -27,7 +26,7 @@ type VideoService interface {
 	CreateCompleteUploadVideoNotification(videoID uint) error
 	Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (string, error)
 	CalculateDuration(ctx context.Context, dto dtoreq.CalculateVideoDurationReq) (string, error)
-	Verify(authContext any, videoId uint) error
+	Verify(admin *entities.User, videoId uint) error
 	FindVideosByCourseID(courseID uint) ([]*entities.Video, error)
 }
 
@@ -166,7 +165,7 @@ func (svc videoService) Encode(ctx context.Context, dto dtoreq.EncodeVideoReq) (
 	return encodedFilePath, nil
 }
 
-func (svc videoService) Verify(authContext any, videoId uint) error {
+func (svc videoService) Verify(admin *entities.User, videoId uint) error {
 	const operationName = "videoService.Verify"
 	video, err := svc.unitOfWork.VideoRepo().GetByID(videoId, nil)
 	if err != nil {
@@ -178,14 +177,6 @@ func (svc videoService) Verify(authContext any, videoId uint) error {
 	if video.IsVerified {
 		return nil
 	}
-	adminClaim := authContext.(*types.TokenClaim)
-	admin, err := svc.unitOfWork.UserRepo().GetByID(adminClaim.UserID, nil)
-	if err != nil {
-		return types.NewServerError("Error in fetching logged in user", operationName, err)
-	}
-	if admin == nil {
-		return userError.User_AdminNotFound
-	}
 	video.IsVerified = true
 	video.VerifiedDate = utils.Now()
 	video.VerifiedById = &admin.ID
@@ -196,10 +187,10 @@ func (svc videoService) Verify(authContext any, videoId uint) error {
 }
 
 func (svc videoService) FindVideosByCourseID(courseID uint) ([]*entities.Video, error) {
-	const operatioName = "videoService.FindVideosByCourseID"
+	const operationName = "videoService.FindVideosByCourseID"
 	course, err := svc.unitOfWork.CourseRepo().GetByID(courseID, nil)
 	if err != nil {
-		return nil, types.NewServerError("Error in fetching course by id", operatioName, err)
+		return nil, types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
 		return nil, courseError.Course_NotFound
@@ -213,7 +204,7 @@ func (svc videoService) FindVideosByCourseID(courseID uint) ([]*entities.Video, 
 		},
 	)
 	if err != nil {
-		return nil, types.NewServerError("Finding videos by course id throw error", operatioName, err)
+		return nil, types.NewServerError("Finding videos by course id throw error", operationName, err)
 	}
 	return videos, nil
 }

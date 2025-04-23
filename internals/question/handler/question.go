@@ -5,6 +5,7 @@ import (
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
 	questionDtoRes "github.com/ladmakhi81/learnup/internals/question/dto/res"
 	answerService "github.com/ladmakhi81/learnup/internals/question/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -15,17 +16,20 @@ type Handler struct {
 	answerSvc      answerService.QuestionAnswerService
 	translationSvc contracts.Translator
 	validationSvc  contracts.Validation
+	userSvc        userService.UserSvc
 }
 
 func NewHandler(
 	answerSvc answerService.QuestionAnswerService,
 	translationSvc contracts.Translator,
 	validationSvc contracts.Validation,
+	userSvc userService.UserSvc,
 ) *Handler {
 	return &Handler{
 		answerSvc:      answerSvc,
 		translationSvc: translationSvc,
 		validationSvc:  validationSvc,
+		userSvc:        userSvc,
 	}
 }
 
@@ -45,11 +49,12 @@ func NewHandler(
 //	@Router		/questions/{question-id}/answer [post]
 //	@Security	BearerAuth
 func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
-	authContext, _ := ctx.Get("AUTH")
-	senderClaim := authContext.(*types.TokenClaim)
-	senderID := senderClaim.UserID
-	questionID, questionIDErr := utils.ToUint(ctx.Param("question-id"))
-	if questionIDErr != nil {
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	questionID, err := utils.ToUint(ctx.Param("question-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("question.errors.invalid_id"),
 		)
@@ -63,11 +68,10 @@ func (h Handler) AnswerQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	dto.SenderID = senderID
 	dto.QuestionID = questionID
-	answer, answerErr := h.answerSvc.Create(*dto)
-	if answerErr != nil {
-		return nil, answerErr
+	answer, err := h.answerSvc.Create(user, *dto)
+	if err != nil {
+		return nil, err
 	}
 	answerRes := questionDtoRes.NewCreateAnswerRes(answer)
 	return types.NewApiResponse(http.StatusCreated, answerRes), nil

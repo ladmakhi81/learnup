@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	dtores "github.com/ladmakhi81/learnup/internals/teacher/dto/res"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -13,15 +14,18 @@ import (
 type QuestionHandler struct {
 	translationSvc     contracts.Translator
 	teacherQuestionSvc teacherService.TeacherQuestionService
+	userSvc            userService.UserSvc
 }
 
 func NewQuestionHandler(
 	translationSvc contracts.Translator,
 	teacherQuestionSvc teacherService.TeacherQuestionService,
+	userSvc userService.UserSvc,
 ) *QuestionHandler {
 	return &QuestionHandler{
 		translationSvc:     translationSvc,
 		teacherQuestionSvc: teacherQuestionSvc,
+		userSvc:            userSvc,
 	}
 }
 
@@ -53,15 +57,12 @@ func (h QuestionHandler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, err
 		}
 		courseID = &parsedCourseID
 	}
-	authContext, _ := ctx.Get("AUTH")
-	teacherClaim := authContext.(*types.TokenClaim)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	questions, count, questionsErr := h.teacherQuestionSvc.GetQuestions(teacherService.GetQuestionOptions{
-		PageSize:  pageSize,
-		Page:      page,
-		CourseID:  courseID,
-		TeacherID: teacherClaim.UserID,
-	})
+	questions, count, questionsErr := h.teacherQuestionSvc.GetQuestions(user, teacherService.GetQuestionOptions{PageSize: pageSize, Page: page, CourseID: courseID})
 	if questionsErr != nil {
 		return nil, questionsErr
 	}

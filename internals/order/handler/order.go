@@ -5,6 +5,7 @@ import (
 	orderDtoReq "github.com/ladmakhi81/learnup/internals/order/dto/req"
 	orderDtoRes "github.com/ladmakhi81/learnup/internals/order/dto/res"
 	orderService "github.com/ladmakhi81/learnup/internals/order/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -15,17 +16,20 @@ type Handler struct {
 	orderSvc       orderService.OrderService
 	translationSvc contracts.Translator
 	validationSvc  contracts.Validation
+	userSvc        userService.UserSvc
 }
 
 func NewHandler(
 	orderSvc orderService.OrderService,
 	translationSvc contracts.Translator,
 	validationSvc contracts.Validation,
+	userSvc userService.UserSvc,
 ) *Handler {
 	return &Handler{
 		orderSvc:       orderSvc,
 		translationSvc: translationSvc,
 		validationSvc:  validationSvc,
+		userSvc:        userSvc,
 	}
 }
 
@@ -52,11 +56,11 @@ func (h Handler) CreateOrder(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	authContext, _ := ctx.Get("AUTH")
-	authClaim := authContext.(*types.TokenClaim)
-	userID := authClaim.UserID
-	dto.UserID = userID
-	payLink, err := h.orderSvc.Create(*dto)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	payLink, err := h.orderSvc.Create(user, *dto)
 	if err != nil {
 		return nil, err
 	}

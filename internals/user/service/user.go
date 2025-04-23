@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/internals/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
@@ -11,6 +12,7 @@ import (
 
 type UserSvc interface {
 	CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.User, error)
+	GetLoggedInUser(ctx *gin.Context) (*entities.User, error)
 }
 
 type userService struct {
@@ -42,6 +44,21 @@ func (svc userService) CreateBasic(dto dtoreq.CreateBasicUserReq) (*entities.Use
 	}
 	if err := svc.unitOfWork.UserRepo().Create(user); err != nil {
 		return nil, types.NewServerError("Create Basic User Throw Error", operationName, err)
+	}
+	return user, nil
+}
+
+func (svc userService) GetLoggedInUser(ctx *gin.Context) (*entities.User, error) {
+	const operationName = "userService.GetLoggedInUser"
+	authContext, _ := ctx.Get("AUTH")
+	authClaims := authContext.(*types.TokenClaim)
+	userID := authClaims.UserID
+	user, err := svc.unitOfWork.UserRepo().GetByID(userID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in getting logged in user", operationName, err)
+	}
+	if user == nil {
+		return nil, userError.User_NotFound
 	}
 	return user, nil
 }

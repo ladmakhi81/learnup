@@ -12,7 +12,7 @@ import (
 )
 
 type CartService interface {
-	Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, error)
+	Create(user *entities.User, dto cartDtoReq.CreateCartReq) (*entities.Cart, error)
 	DeleteByID(userID, id uint) error
 	FetchAllByUserID(userID uint) ([]*entities.Cart, error)
 }
@@ -25,9 +25,9 @@ func NewCartSvc(unitOfWork db.UnitOfWork) CartService {
 	return &cartService{unitOfWork: unitOfWork}
 }
 
-func (svc cartService) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, error) {
+func (svc cartService) Create(user *entities.User, dto cartDtoReq.CreateCartReq) (*entities.Cart, error) {
 	const operationName = "cartService.Create"
-	isCartExist, err := svc.unitOfWork.CartRepo().Exist(map[string]any{"course_id": dto.CourseID, "user_id": dto.UserID})
+	isCartExist, err := svc.unitOfWork.CartRepo().Exist(map[string]any{"course_id": dto.CourseID, "user_id": user.ID})
 	if err != nil {
 		return nil, types.NewServerError("Error in checking cart exist", operationName, err)
 	}
@@ -42,7 +42,7 @@ func (svc cartService) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, err
 		return nil, courseError.Course_NotFound
 	}
 	cart := &entities.Cart{
-		UserID:   dto.UserID,
+		UserID:   user.ID,
 		CourseID: dto.CourseID,
 	}
 	if err := svc.unitOfWork.CartRepo().Create(cart); err != nil {

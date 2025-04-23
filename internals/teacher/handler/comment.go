@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	dtores "github.com/ladmakhi81/learnup/internals/teacher/dto/res"
 	"github.com/ladmakhi81/learnup/internals/teacher/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
 	"github.com/ladmakhi81/learnup/utils"
@@ -13,15 +14,18 @@ import (
 type CommentHandler struct {
 	teacherCommentSvc service.TeacherCommentService
 	translationSvc    contracts.Translator
+	userSvc           userService.UserSvc
 }
 
 func NewCommentHandler(
 	teacherCommentSvc service.TeacherCommentService,
 	translationSvc contracts.Translator,
+	userSvc userService.UserSvc,
 ) *CommentHandler {
 	return &CommentHandler{
 		teacherCommentSvc: teacherCommentSvc,
 		translationSvc:    translationSvc,
+		userSvc:           userSvc,
 	}
 }
 
@@ -52,9 +56,12 @@ func (h CommentHandler) GetPageableCommentByCourseId(ctx *gin.Context) (*types.A
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	authContext, _ := ctx.Get("AUTH")
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	comments, count, commentsErr := h.teacherCommentSvc.GetPageableCommentByCourseId(
-		authContext,
+		user,
 		courseId,
 		page,
 		pageSize,

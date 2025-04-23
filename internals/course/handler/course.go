@@ -11,6 +11,7 @@ import (
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
 	questionService "github.com/ladmakhi81/learnup/internals/question/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/types"
@@ -26,6 +27,7 @@ type Handler struct {
 	likeSvc       likeService.LikeService
 	commentSvc    commentService.CommentService
 	questionSvc   questionService.QuestionService
+	userSvc       userService.UserSvc
 }
 
 func NewHandler(
@@ -36,6 +38,7 @@ func NewHandler(
 	likeSvc likeService.LikeService,
 	commentSvc commentService.CommentService,
 	questionSvc questionService.QuestionService,
+	userSvc userService.UserSvc,
 ) *Handler {
 	return &Handler{
 		courseSvc:     courseSvc,
@@ -45,6 +48,7 @@ func NewHandler(
 		likeSvc:       likeSvc,
 		commentSvc:    commentSvc,
 		questionSvc:   questionSvc,
+		userSvc:       userSvc,
 	}
 }
 
@@ -72,8 +76,11 @@ func (h Handler) CreateCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	authContext, _ := ctx.Get("AUTH")
-	course, courseErr := h.courseSvc.Create(authContext, *dto)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	course, courseErr := h.courseSvc.Create(user, *dto)
 	if courseErr != nil {
 		return nil, courseErr
 	}
@@ -220,8 +227,11 @@ func (h Handler) VerifyCourse(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	authContext, _ := ctx.Get("AUTH")
-	if err := h.courseSvc.VerifyCourse(authContext, *dto); err != nil {
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := h.courseSvc.VerifyCourse(user, *dto); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil
@@ -248,7 +258,10 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
 	}
-	authContext, _ := ctx.Get("AUTH")
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	dto := &likeDtoReq.CreateLikeReq{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
@@ -259,7 +272,7 @@ func (h Handler) Like(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, err
 	}
 	dto.CourseID = courseID
-	_, likeErr := h.likeSvc.Create(authContext, *dto)
+	_, likeErr := h.likeSvc.Create(user, *dto)
 	if likeErr != nil {
 		return nil, likeErr
 	}
@@ -330,8 +343,11 @@ func (h Handler) CreateComment(ctx *gin.Context) (*types.ApiResponse, error) {
 		return nil, err
 	}
 	dto.CourseId = courseID
-	authContext, _ := ctx.Get("AUTH")
-	comment, commentErr := h.commentSvc.Create(authContext, *dto)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	comment, commentErr := h.commentSvc.Create(user, *dto)
 	if commentErr != nil {
 		return nil, commentErr
 	}
@@ -382,8 +398,6 @@ func (h Handler) DeleteComment(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Router		/courses/{course-id}/question [post]
 //	@Security	BearerAuth
 func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
-	authContext, _ := ctx.Get("AUTH")
-	senderClaim, _ := authContext.(*types.TokenClaim)
 	courseID, err := utils.ToUint(ctx.Param("course-id"))
 	if err != nil {
 		return nil, types.NewBadRequestError(h.translateSvc.Translate("course.errors.invalid_course_id"))
@@ -397,9 +411,12 @@ func (h Handler) CreateQuestion(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
 	dto.CourseID = courseID
-	dto.UserID = senderClaim.UserID
-	question, questionErr := h.questionSvc.Create(*dto)
+	question, questionErr := h.questionSvc.Create(user, *dto)
 	if questionErr != nil {
 		return nil, questionErr
 	}

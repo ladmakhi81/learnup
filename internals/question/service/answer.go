@@ -6,12 +6,11 @@ import (
 	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
 	questionError "github.com/ladmakhi81/learnup/internals/question/error"
-	userError "github.com/ladmakhi81/learnup/internals/user/error"
 	"github.com/ladmakhi81/learnup/types"
 )
 
 type QuestionAnswerService interface {
-	Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error)
+	Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error)
 	GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error)
 }
 
@@ -23,15 +22,8 @@ func NewQuestionAnswerSvc(unitOfWork db.UnitOfWork) QuestionAnswerService {
 	return &questionAnswerService{unitOfWork: unitOfWork}
 }
 
-func (svc questionAnswerService) Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
+func (svc questionAnswerService) Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
 	const operationName = "questionAnswerService.Create"
-	sender, err := svc.unitOfWork.UserRepo().GetByID(dto.SenderID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching user", operationName, err)
-	}
-	if sender == nil {
-		return nil, userError.User_NotFound
-	}
 	question, err := svc.unitOfWork.QuestionRepo().GetByID(dto.QuestionID, nil)
 	if err != nil {
 		return nil, types.NewServerError("Error in fetching question by id", operationName, err)
