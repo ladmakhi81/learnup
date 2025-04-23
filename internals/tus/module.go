@@ -2,19 +2,20 @@ package tus
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/tus/handler"
+	tusHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
+	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	hookHandler    *handler.TusHookHandler
+	hookHandler    *tusHandler.TusHookHandler
 	translationSvc contracts.Translator
 }
 
-func NewModule(hookHandler *handler.TusHookHandler, translationSvc contracts.Translator) *Module {
+func NewModule(tusHookSvc tusHookService.TusService, translationSvc contracts.Translator) *Module {
 	return &Module{
-		hookHandler:    hookHandler,
+		hookHandler:    tusHandler.NewTusHookHandler(tusHookSvc),
 		translationSvc: translationSvc,
 	}
 }

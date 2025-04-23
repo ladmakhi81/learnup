@@ -2,25 +2,29 @@ package cart
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/cart/handler"
+	cartHandler "github.com/ladmakhi81/learnup/internals/cart/handler"
+	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/middleware"
 	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	handler        *handler.Handler
+	handler        *cartHandler.Handler
 	middleware     *middleware.Middleware
 	translationSvc contracts.Translator
 }
 
 func NewModule(
-	handler *handler.Handler,
+	userSvc userService.UserSvc,
+	cartSvc cartService.CartService,
+	validationSvc contracts.Validation,
 	middleware *middleware.Middleware,
 	translationSvc contracts.Translator,
 ) *Module {
 	return &Module{
-		handler:        handler,
+		handler:        cartHandler.NewHandler(translationSvc, validationSvc, cartSvc, userSvc),
 		middleware:     middleware,
 		translationSvc: translationSvc,
 	}

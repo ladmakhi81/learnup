@@ -5,46 +5,33 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/ladmakhi81/learnup/internals/auth"
-	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/internals/cart"
-	cartApiHandler "github.com/ladmakhi81/learnup/internals/cart/handler"
 	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
 	"github.com/ladmakhi81/learnup/internals/category"
-	categoryApiHandler "github.com/ladmakhi81/learnup/internals/category/handler"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	"github.com/ladmakhi81/learnup/internals/comment"
-	commentApiHandler "github.com/ladmakhi81/learnup/internals/comment/handler"
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	"github.com/ladmakhi81/learnup/internals/course"
-	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	"github.com/ladmakhi81/learnup/internals/notification"
-	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/order"
-	orderApiHandler "github.com/ladmakhi81/learnup/internals/order/handler"
 	orderService "github.com/ladmakhi81/learnup/internals/order/service"
 	"github.com/ladmakhi81/learnup/internals/payment"
-	paymentApiHandler "github.com/ladmakhi81/learnup/internals/payment/handler"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
 	"github.com/ladmakhi81/learnup/internals/question"
-	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
 	questionService "github.com/ladmakhi81/learnup/internals/question/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
-	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/transaction"
-	transactionApiHandler "github.com/ladmakhi81/learnup/internals/transaction/handler"
 	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
-	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/internals/video"
-	videoApiHandler "github.com/ladmakhi81/learnup/internals/video/handler"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
 	"github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
@@ -151,39 +138,21 @@ func main() {
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
 
-	// handlers
-	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
-	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc)
-	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc, userSvc)
-	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
-	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
-	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc, userSvc)
-	teacherVideoHandler := teacherApiHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
-	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc, userSvc)
-	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc, userSvc)
-	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
-	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc, userSvc)
-	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc, userSvc)
-	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc, userSvc)
-	paymentHandler := paymentApiHandler.NewHandler(paymentSvc)
-	transactionHandler := transactionApiHandler.NewHandler(transactionSvc)
-
 	// modules
 	userModule := user.NewModule(middlewares, i18nTranslatorSvc, userSvc, validationSvc)
-	authModule := auth.NewModule(i18nTranslatorSvc, authHandler)
-	categoryModule := category.NewModule(categoryHandler, middlewares, i18nTranslatorSvc)
-	courseModule := course.NewModule(courseHandler, middlewares, i18nTranslatorSvc)
-	tusModule := tus.NewModule(tusHandler, i18nTranslatorSvc)
-	videoModule := video.NewModule(videoHandler, middlewares, i18nTranslatorSvc)
-	notificationModule := notification.NewModule(notificationHandler, middlewares, i18nTranslatorSvc)
-	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler, i18nTranslatorSvc)
-	commentModule := comment.NewModule(commentHandler, middlewares, i18nTranslatorSvc)
-	questionModule := question.NewModule(questionHandler, middlewares, i18nTranslatorSvc)
-	cartModule := cart.NewModule(cartHandler, middlewares, i18nTranslatorSvc)
-	orderModule := order.NewModule(orderHandler, middlewares, i18nTranslatorSvc)
-	paymentModule := payment.NewModule(paymentHandler, middlewares, i18nTranslatorSvc)
-	transactionModule := transaction.NewModule(transactionHandler, middlewares, i18nTranslatorSvc)
+	authModule := auth.NewModule(authSvc, validationSvc, i18nTranslatorSvc)
+	categoryModule := category.NewModule(categorySvc, middlewares, i18nTranslatorSvc, validationSvc)
+	courseModule := course.NewModule(courseSvc, validationSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc, middlewares, i18nTranslatorSvc)
+	tusModule := tus.NewModule(tusHookSvc, i18nTranslatorSvc)
+	videoModule := video.NewModule(userSvc, videoSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	notificationModule := notification.NewModule(notificationSvc, middlewares, i18nTranslatorSvc)
+	teacherModule := teacher.NewModule(teacherCourseSvc, teacherVideoSvc, teacherCommentSvc, teacherQuestionSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	commentModule := comment.NewModule(commentSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	questionModule := question.NewModule(questionAnswerSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	cartModule := cart.NewModule(userSvc, cartSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	orderModule := order.NewModule(orderSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	paymentModule := payment.NewModule(paymentSvc, middlewares, i18nTranslatorSvc)
+	transactionModule := transaction.NewModule(transactionSvc, middlewares, i18nTranslatorSvc)
 
 	// workers
 	if err := temporalSvc.AddWorker(

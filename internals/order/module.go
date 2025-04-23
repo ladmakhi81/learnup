@@ -2,25 +2,29 @@ package order
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/order/handler"
+	orderHandler "github.com/ladmakhi81/learnup/internals/order/handler"
+	orderService "github.com/ladmakhi81/learnup/internals/order/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/middleware"
 	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	handler        *handler.Handler
+	handler        *orderHandler.Handler
 	middleware     *middleware.Middleware
 	translationSvc contracts.Translator
 }
 
 func NewModule(
-	handler *handler.Handler,
+	orderSvc orderService.OrderService,
+	validationSvc contracts.Validation,
+	userSvc userService.UserSvc,
 	middleware *middleware.Middleware,
 	translationSvc contracts.Translator,
 ) *Module {
 	return &Module{
-		handler:        handler,
+		handler:        orderHandler.NewHandler(orderSvc, translationSvc, validationSvc, userSvc),
 		middleware:     middleware,
 		translationSvc: translationSvc,
 	}

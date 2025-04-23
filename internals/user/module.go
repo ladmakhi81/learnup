@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	userApiHandler "github.com/ladmakhi81/learnup/internals/user/handler"
+	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/middleware"
@@ -12,7 +12,7 @@ import (
 type Module struct {
 	middleware     *middleware.Middleware
 	translationSvc contracts.Translator
-	userHandler    *userApiHandler.Handler
+	userHandler    *userHandler.Handler
 }
 
 func NewModule(
@@ -24,7 +24,7 @@ func NewModule(
 	return &Module{
 		middleware:     middleware,
 		translationSvc: translationSvc,
-		userHandler: userApiHandler.NewHandler(
+		userHandler: userHandler.NewHandler(
 			userSvc,
 			validationSvc,
 			translationSvc,

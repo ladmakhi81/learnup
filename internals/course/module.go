@@ -2,7 +2,13 @@ package course
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/course/handler"
+	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
+	courseHandler "github.com/ladmakhi81/learnup/internals/course/handler"
+	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	likeService "github.com/ladmakhi81/learnup/internals/like/service"
+	questionService "github.com/ladmakhi81/learnup/internals/question/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/middleware"
 	"github.com/ladmakhi81/learnup/shared/utils"
@@ -10,19 +16,34 @@ import (
 
 type Module struct {
 	middleware     *middleware.Middleware
-	courseHandler  *handler.Handler
+	courseHandler  *courseHandler.Handler
 	translationSvc contracts.Translator
 }
 
 func NewModule(
-	courseAdminHandler *handler.Handler,
+	courseSvc courseService.CourseService,
+	validationSvc contracts.Validation,
+	videoSvc videoService.VideoService,
+	likeSvc likeService.LikeService,
+	commentSvc commentService.CommentService,
+	questionSvc questionService.QuestionService,
+	userSvc userService.UserSvc,
 	middleware *middleware.Middleware,
 	translationSvc contracts.Translator,
 ) *Module {
 	return &Module{
 		middleware:     middleware,
-		courseHandler:  courseAdminHandler,
 		translationSvc: translationSvc,
+		courseHandler: courseHandler.NewHandler(
+			courseSvc,
+			validationSvc,
+			translationSvc,
+			videoSvc,
+			likeSvc,
+			commentSvc,
+			questionSvc,
+			userSvc,
+		),
 	}
 }
 
@@ -30,7 +51,6 @@ func (m Module) Register(api *gin.RouterGroup) {
 	coursesApi := api.Group("/courses")
 
 	coursesApi.Use(m.middleware.CheckAccessToken())
-
 	coursesApi.POST("/", utils.JsonHandler(m.translationSvc, m.courseHandler.CreateCourse))
 	coursesApi.GET("/page", utils.JsonHandler(m.translationSvc, m.courseHandler.GetCourses))
 	coursesApi.GET("/:course-id/videos", utils.JsonHandler(m.translationSvc, m.courseHandler.GetVideosByCourseID))

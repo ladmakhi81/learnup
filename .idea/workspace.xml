@@ -5,175 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bae3bb74-cf26-4afe-9a97-5ac4e4eac198" name="Changes" comment="Add ffmpeg library to project&#10;Update storage abstraction and add GetFileReader and DeleteObject&#10;Update service name in docker compose&#10;Add tus build stage as uploader&#10;Update minio accesskey and secretkey env&#10;Add tus handler webhook for uploading video&#10;Implement encoding and generate hsl and ts segment file">
-      <change afterPath="$PROJECT_DIR$/shared/db/entities/payment.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/shared/db/entities/question.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/app/api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/app/api/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/auth/error/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/error/auth.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/auth/handler/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/handler/auth.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/auth/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/auth/service/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/auth/service/auth.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/cart/dto/res/add_cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/dto/res/add_cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/cart/dto/res/get_carts.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/dto/res/get_carts.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/cart/error/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/error/cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/cart/handler/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/handler/cart.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/cart/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/cart/service/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/cart/service/cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/dto/res/create_category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/res/create_category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/dto/res/get_categories_pageable.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/res/get_categories_pageable.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/dto/res/get_categories_tree.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/dto/res/get_categories_tree.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/error/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/error/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/handler/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/handler/category.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/category/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/category/service/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/category/service/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/comment/dto/res/get_comments_pageable.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/dto/res/get_comments_pageable.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/comment/error/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/error/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/comment/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/handler/comment.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/comment/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/comment/service/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/comment/service/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/req/create_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/req/create_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/create_comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/create_comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/create_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/create_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/create_question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/create_question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_course_by_id.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_course_by_id.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_courses.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_courses.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_likes.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_likes.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_questions.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_questions.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/dto/res/get_videos_by_course_id.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/dto/res/get_videos_by_course_id.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/error/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/error/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/handler/course.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/course/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/course/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/course/service/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/course_comment_access_mode.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/course_comment_access_mode.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/course_level.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/course_level.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/course_status.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/course_status.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/like.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/like.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/like_type.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/like_type.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/notification.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/notification_type.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/notification_type.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/order_item.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/order_item.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/order_status.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/order_status.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/payment.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/payment_gateway.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/payment_gateway.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/payment_status.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/payment_status.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/question.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/question_answer.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/question_answer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/question_priority.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/question_priority.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/transaction_action.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/transaction_action.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/transaction_type.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/transaction_type.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/video_access_level.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/video_access_level.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/entities/video_status.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/entities/video_status.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/answer.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/answer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/cart.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/cart.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/category.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/category.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/like.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/like.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/notification.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/order_item.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/order_item.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/repositories/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/repositories/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/db/uow.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/db/uow.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/like/dto/req/create_like.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/like/dto/req/create_like.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/like/service/like.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/like/service/like.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/middleware/check_access_token.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/middleware/check_access_token.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/middleware/middleware.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/middleware/middleware.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/dto/res/get_notifications_page.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/dto/res/get_notifications_page.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/error/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/error/notification.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/handler/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/handler/notification.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/notification/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/notification/service/notification.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/notification/service/notification.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/dto/req/create_order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/dto/res/get_order_detail.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/dto/res/get_order_detail.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/dto/res/get_orders_page.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/dto/res/get_orders_page.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/handler/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/handler/order.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/order/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/order/service/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/order/service/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/dto/req/create_payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/dto/req/create_payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/dto/req/verify_payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/dto/req/verify_payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/dto/res/get_pageable_payments.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/dto/res/get_pageable_payments.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/error/payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/error/payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/handler/payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/handler/payment.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/payment/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/payment/service/payment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/payment/service/payment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/dto/req/create_question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/dto/req/create_question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/dto/res/create_answer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/dto/res/create_answer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/dto/res/get_answers.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/dto/res/get_answers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/error/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/error/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/handler/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/handler/question.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/question/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/service/answer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/service/answer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/question/service/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/question/service/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/req/add_video_to_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/req/add_video_to_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/req/create_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/req/create_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/res/add_video_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/res/add_video_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/res/create_course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/res/create_course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/res/fetch_comments.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/res/fetch_comments.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/res/fetch_courses.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/res/fetch_courses.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/dto/res/get_questions.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/dto/res/get_questions.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/handler/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/handler/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/teacher/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/service/comment.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/comment.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/service/course.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/course.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/service/question.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/question.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/teacher/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/teacher/service/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/transaction/dto/res/get_transactions_page.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/transaction/dto/res/get_transactions_page.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/transaction/handler/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/transaction/handler/transaction.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/transaction/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/transaction/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/transaction/service/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/transaction/service/transaction.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/tus/handler/hook.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/handler/hook.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/tus/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/tus/service/tus.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/tus/service/tus.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/dto/res/create_user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/error/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/error/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/handler/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/handler/user.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/user/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/user/service/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/user/service/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/video/error/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/error/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/video/handler/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/handler/video.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internals/video/module.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/module.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/video/service/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/service/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internals/video/workflow/video.go" beforeDir="false" afterPath="$PROJECT_DIR$/internals/video/workflow/video.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/contracts/token.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/contracts/token.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/contracts/validation.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/contracts/validation.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/i18n/v2/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/i18n/v2/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/jwt/v5/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/jwt/v5/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/minio/v7/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/minio/v7/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/redis/v6/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/redis/v6/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/smtp/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/smtp/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pkg/validator/v10/svc.go" beforeDir="false" afterPath="$PROJECT_DIR$/pkg/validator/v10/svc.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/mail/welcome.html" beforeDir="false" afterPath="$PROJECT_DIR$/shared/templates/mail/welcome.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/client_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/types/client_error.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/pagination.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/types/pagination.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/response.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/types/response.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/server_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/types/server_error.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/token_claim.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/types/token_claim.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/convertor.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/convertor.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/log.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/log.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/pagination.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/pagination.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/string.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/string.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/template.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/template.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/time.go" beforeDir="false" afterPath="$PROJECT_DIR$/shared/utils/time.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -2,25 +2,29 @@ package question
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/question/handler"
+	questionHandler "github.com/ladmakhi81/learnup/internals/question/handler"
+	questionService "github.com/ladmakhi81/learnup/internals/question/service"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/shared/middleware"
 	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	questionHandler *handler.Handler
+	questionHandler *questionHandler.Handler
 	middleware      *middleware.Middleware
 	translationSvc  contracts.Translator
 }
 
 func NewModule(
-	questionHandler *handler.Handler,
+	questionAnswerSvc questionService.QuestionAnswerService,
+	validationSvc contracts.Validation,
+	userSvc userService.UserSvc,
 	middleware *middleware.Middleware,
 	translationSvc contracts.Translator,
 ) *Module {
 	return &Module{
-		questionHandler: questionHandler,
+		questionHandler: questionHandler.NewHandler(questionAnswerSvc, translationSvc, validationSvc, userSvc),
 		middleware:      middleware,
 		translationSvc:  translationSvc,
 	}
