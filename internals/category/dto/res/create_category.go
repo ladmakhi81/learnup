@@ -1,21 +1,20 @@
 package dtores
 
-import "time"
+import (
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"time"
+)
 
-type CreateCategoryRes struct {
+type CreateCategoryResDto struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func NewCreateCategoryRes(
-	id uint,
-	name string,
-	createdAt time.Time,
-) CreateCategoryRes {
-	return CreateCategoryRes{
-		ID:        id,
-		Name:      name,
-		CreatedAt: createdAt,
+func NewCreateCategoryResDto(category *entities.Category) CreateCategoryResDto {
+	return CreateCategoryResDto{
+		ID:        category.ID,
+		Name:      category.Name,
+		CreatedAt: category.CreatedAt,
 	}
 }

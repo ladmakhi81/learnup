@@ -1,11 +1,11 @@
 package dtores
 
-type LoginRes struct {
+type LoginResDto struct {
 	AccessToken string `json:"accessToken"`
 }
 
-func NewLoginRes(accessToken string) LoginRes {
-	return LoginRes{
+func NewLoginResDto(accessToken string) LoginResDto {
+	return LoginResDto{
 		AccessToken: accessToken,
 	}
 }

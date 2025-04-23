@@ -1,5 +1,5 @@
 package dtoreq
 
-type EncodeVideoReq struct {
+type EncodeVideoReqDto struct {
 	ObjectId string
 }

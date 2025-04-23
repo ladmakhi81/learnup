@@ -2,28 +2,32 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
 	validationSvc  contracts.Validation
 	videoSvc       videoService.VideoService
 	translationSvc contracts.Translator
+	userSvc        userService.UserSvc
 }
 
 func NewHandler(
 	validationSvc contracts.Validation,
 	videoSvc videoService.VideoService,
 	translationSvc contracts.Translator,
+	userSvc userService.UserSvc,
 ) *Handler {
 	return &Handler{
 		validationSvc:  validationSvc,
 		videoSvc:       videoSvc,
 		translationSvc: translationSvc,
+		userSvc:        userSvc,
 	}
 }
 
@@ -42,15 +46,17 @@ func NewHandler(
 //	@Router		/videos/{video-id}/verify [patch]
 //	@Security	BearerAuth
 func (h Handler) VerifyVideo(ctx *gin.Context) (*types.ApiResponse, error) {
-	authContext, _ := ctx.Get("AUTH")
-	videoIdParam := ctx.Param("video-id")
-	videoId, videoIdErr := strconv.Atoi(videoIdParam)
+	user, err := h.userSvc.GetLoggedInUser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	videoId, videoIdErr := utils.ToUint(ctx.Param("video-id"))
 	if videoIdErr != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("video.errors.invalid_id"),
 		)
 	}
-	if err := h.videoSvc.Verify(authContext, uint(videoId)); err != nil {
+	if err := h.videoSvc.Verify(user, videoId); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, nil), nil

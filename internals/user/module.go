@@ -2,28 +2,37 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/middleware"
-	"github.com/ladmakhi81/learnup/internals/user/handler"
-	"github.com/ladmakhi81/learnup/utils"
+	userHandler "github.com/ladmakhi81/learnup/internals/user/handler"
+	userService "github.com/ladmakhi81/learnup/internals/user/service"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
+	"github.com/ladmakhi81/learnup/shared/middleware"
+	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	userAdminHandler *handler.Handler
-	middleware       *middleware.Middleware
+	middleware     *middleware.Middleware
+	translationSvc contracts.Translator
+	userHandler    *userHandler.Handler
 }
 
 func NewModule(
-	userAdminHandler *handler.Handler,
 	middleware *middleware.Middleware,
+	translationSvc contracts.Translator,
+	userSvc userService.UserSvc,
+	validationSvc contracts.Validation,
 ) *Module {
 	return &Module{
-		userAdminHandler: userAdminHandler,
-		middleware:       middleware,
+		middleware:     middleware,
+		translationSvc: translationSvc,
+		userHandler: userHandler.NewHandler(
+			userSvc,
+			validationSvc,
+			translationSvc,
+		),
 	}
 }
 
 func (m Module) Register(api *gin.RouterGroup) {
 	usersApi := api.Group("/users")
-
-	usersApi.POST("/basic", utils.JsonHandler(m.userAdminHandler.CreateBasicUser))
+	usersApi.POST("/basic", utils.JsonHandler(m.translationSvc, m.userHandler.CreateBasicUser))
 }

@@ -6,7 +6,7 @@ import (
 	dtores "github.com/ladmakhi81/learnup/internals/teacher/dto/res"
 	"github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"net/http"
 )
 
@@ -34,8 +34,8 @@ func NewVideoHandler(
 //	@Tags		teacher
 //	@Accept		json
 //	@Produce	json
-//	@Param		video	body		dtoreq.AddVideoToCourseReq	true	" "
-//	@Success	201		{object}	types.ApiResponse{data=dtores.AddVideoToCourseRes}
+//	@Param		video	body		dtoreq.AddVideoToCourseReqDto	true	" "
+//	@Success	201		{object}	types.ApiResponse{data=dtores.AddVideoToCourseResDto}
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	401		{object}	types.ApiError
 //	@Failure	409		{object}	types.ApiError
@@ -44,7 +44,7 @@ func NewVideoHandler(
 //
 //	@Security	BearerAuth
 func (h VideoHandler) AddVideoToCourse(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := &dtoreq.AddVideoToCourseReq{}
+	dto := &dtoreq.AddVideoToCourseReqDto{}
 	if err := ctx.Bind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -53,17 +53,9 @@ func (h VideoHandler) AddVideoToCourse(ctx *gin.Context) (*types.ApiResponse, er
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	video, videoErr := h.videoSvc.AddVideo(*dto)
-	if videoErr != nil {
-		return nil, videoErr
+	video, err := h.videoSvc.AddVideo(*dto)
+	if err != nil {
+		return nil, err
 	}
-	videoRes := dtores.AddVideoToCourseRes{
-		ID:          video.ID,
-		Description: video.Description,
-		AccessLevel: video.AccessLevel,
-		IsPublished: video.IsPublished,
-		CourseID:    *video.CourseId,
-		Title:       video.Title,
-	}
-	return types.NewApiResponse(http.StatusCreated, videoRes), nil
+	return types.NewApiResponse(http.StatusCreated, dtores.NewAddVideoToCourseResDto(video)), nil
 }

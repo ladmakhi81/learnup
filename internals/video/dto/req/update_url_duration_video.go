@@ -1,6 +1,6 @@
 package dtoreq
 
-type UpdateURLAndDurationVideoReq struct {
+type UpdateURLAndDurationVideoReqDto struct {
 	URL      string
 	Duration string
 	ID       uint

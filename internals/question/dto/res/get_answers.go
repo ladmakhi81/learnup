@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -11,7 +11,7 @@ type senderItem struct {
 	Phone    string `json:"phone"`
 }
 
-type GetAnswersRes struct {
+type GetAnswerItemDto struct {
 	ID        uint        `json:"id"`
 	CreatedAt time.Time   `json:"createdAt"`
 	UpdatedAt time.Time   `json:"updatedAt"`
@@ -19,10 +19,10 @@ type GetAnswersRes struct {
 	Sender    *senderItem `json:"sender"`
 }
 
-func MapGetAnswersRes(answers []*entities.QuestionAnswer) []*GetAnswersRes {
-	res := make([]*GetAnswersRes, len(answers))
+func MapGetAnswerItemsDto(answers []*entities.QuestionAnswer) []*GetAnswerItemDto {
+	res := make([]*GetAnswerItemDto, len(answers))
 	for index, answer := range answers {
-		res[index] = &GetAnswersRes{
+		res[index] = &GetAnswerItemDto{
 			ID:        answer.ID,
 			CreatedAt: answer.CreatedAt,
 			UpdatedAt: answer.UpdatedAt,

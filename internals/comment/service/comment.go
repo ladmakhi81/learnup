@@ -1,79 +1,45 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/comment/dto/req"
-	commentRepo "github.com/ladmakhi81/learnup/internals/comment/repo"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	commentError "github.com/ladmakhi81/learnup/internals/comment/error"
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type CommentService interface {
-	Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error)
-	FindById(id uint) (*entities.Comment, error)
+	Create(user *entities.User, dto dtoreq.CreateCommentReqDto) (*entities.Comment, error)
 	Delete(id uint) error
-	Fetch(page, pageSize int) ([]*entities.Comment, error)
-	FetchCount() (int, error)
+	Fetch(page, pageSize int) ([]*entities.Comment, int, error)
 }
 
-type CommentServiceImpl struct {
-	commentRepo    commentRepo.CommentRepo
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
-	translationSvc contracts.Translator
+type commentService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewCommentServiceImpl(
-	commentRepo commentRepo.CommentRepo,
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
-	translationSvc contracts.Translator,
-) *CommentServiceImpl {
-	return &CommentServiceImpl{
-		commentRepo:    commentRepo,
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
-		translationSvc: translationSvc,
-	}
+func NewCommentSvc(unitOfWork db.UnitOfWork) CommentService {
+	return &commentService{unitOfWork: unitOfWork}
 }
 
-func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentReq) (*entities.Comment, error) {
-	authClaim := authContext.(*types.TokenClaim)
-	user, userErr := svc.userSvc.FindById(authClaim.UserID)
-	if userErr != nil {
-		return nil, userErr
-	}
-	if user == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate(
-				"comment.errors.sender_not_found",
-			),
-		)
-	}
-	course, courseErr := svc.courseSvc.FindById(dto.CourseId)
-	if courseErr != nil {
-		return nil, courseErr
+func (svc commentService) Create(user *entities.User, dto dtoreq.CreateCommentReqDto) (*entities.Comment, error) {
+	const operationName = "commentService.Create"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching course", operationName, err)
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate(
-				"comment.errors.course_not_found",
-			),
-		)
+		return nil, courseError.Course_NotFound
 	}
 	if dto.ParentId != nil {
-		parent, parentErr := svc.FindById(*dto.ParentId)
-		if parentErr != nil {
-			return nil, parentErr
+		parent, err := svc.unitOfWork.CommentRepo().GetByID(*dto.ParentId, nil)
+		if err != nil {
+			return nil, types.NewServerError("Error in fetching comment by parent id", operationName, err)
 		}
 		if parent == nil {
-			return nil, types.NewNotFoundError(
-				svc.translationSvc.Translate(
-					"comment.errors.parent_comment_not_found",
-				),
-			)
+			return nil, commentError.Comment_ParentNotFound
 		}
 	}
 	comment := &entities.Comment{
@@ -82,76 +48,36 @@ func (svc CommentServiceImpl) Create(authContext any, dto dtoreq.CreateCommentRe
 		CourseID:        &course.ID,
 		ParentCommentId: dto.ParentId,
 	}
-	if err := svc.commentRepo.Create(comment); err != nil {
-		return nil, types.NewServerError(
-			"Error in creating comment",
-			"CommentServiceImpl.Create",
-			err,
-		)
+	if err := svc.unitOfWork.CommentRepo().Create(comment); err != nil {
+		return nil, types.NewServerError("Error in creating comment", operationName, err)
 	}
 	return comment, nil
 }
 
-func (svc CommentServiceImpl) FindById(id uint) (*entities.Comment, error) {
-	comment, commentErr := svc.commentRepo.FindById(id)
-	if commentErr != nil {
-		return nil, types.NewServerError(
-			"Error in finding comment by id",
-			"CommentServiceImpl.FetchById",
-			commentErr,
-		)
-	}
-	return comment, nil
-}
-
-func (svc CommentServiceImpl) Delete(id uint) error {
-	comment, commentErr := svc.FindById(id)
-	if commentErr != nil {
-		return commentErr
+func (svc commentService) Delete(id uint) error {
+	const operationName = "commentService.Delete"
+	comment, err := svc.unitOfWork.CommentRepo().GetByID(id, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching comment by id", operationName, err)
 	}
 	if comment == nil {
-		return types.NewNotFoundError(
-			svc.translationSvc.Translate("comment.errors.not_found"),
-		)
+		return commentError.Comment_NotFound
 	}
-	if err := svc.commentRepo.Delete(comment.ID); err != nil {
-		return types.NewServerError(
-			"Error in deleting comment",
-			"CommentServiceImpl.Delete",
-			err,
-		)
+	if err := svc.unitOfWork.CommentRepo().Delete(comment); err != nil {
+		return types.NewServerError("Error in deleting comment", operationName, err)
 	}
 	return nil
 }
 
-func (svc CommentServiceImpl) Fetch(page, pageSize int) ([]*entities.Comment, error) {
-	comments, commentsErr := svc.commentRepo.Fetch(
-		commentRepo.FetchCommentOption{
-			PageSize: &pageSize,
-			Page:     &page,
-			Preloads: []string{"User", "Course"},
-		},
-	)
-	if commentsErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching comments",
-			"CommentServiceImpl.Fetch",
-			commentsErr,
-		)
+func (svc commentService) Fetch(page, pageSize int) ([]*entities.Comment, int, error) {
+	const operationName = "commentService.Fetch"
+	comments, count, err := svc.unitOfWork.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
+		Offset:    &page,
+		Limit:     &pageSize,
+		Relations: []string{"User", "Course"},
+	})
+	if err != nil {
+		return nil, 0, types.NewServerError("Error in fetching comments", operationName, err)
 	}
-	return comments, nil
-}
-
-func (svc CommentServiceImpl) FetchCount() (int, error) {
-	count, countErr := svc.commentRepo.FetchCount(
-		commentRepo.FetchCountCommentOption{},
-	)
-	if countErr != nil {
-		return 0, types.NewServerError(
-			"Error in fetching count of comments",
-			"CommentServiceImpl.FetchCount",
-			countErr,
-		)
-	}
-	return count, nil
+	return comments, count, nil
 }

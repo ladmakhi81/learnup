@@ -1,6 +1,8 @@
 package contracts
 
-import "github.com/ladmakhi81/learnup/types"
+import (
+	"github.com/ladmakhi81/learnup/shared/types"
+)
 
 type Token interface {
 	GenerateToken(userID uint) (string, error)

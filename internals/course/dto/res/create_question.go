@@ -1,23 +1,22 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
-type CreateQuestionRes struct {
+type CreateQuestionResDto struct {
 	ID        uint                      `json:"id"`
 	CreatedAt time.Time                 `json:"createdAt"`
-	Content   string                    `json:"content"`
-	Priority  entities.QuestionPriority `json:"priority"`
+	Content  string                    `json:"content"`
+	Priority entities.QuestionPriority `json:"priority"`
 }
 
-func NewCreateQuestionRes(question *entities.Question) *CreateQuestionRes {
-	res := &CreateQuestionRes{
+func NewCreateQuestionResDto(question *entities.Question) CreateQuestionResDto {
+	return CreateQuestionResDto{
 		ID:        question.ID,
 		CreatedAt: question.CreatedAt,
 		Content:   question.Content,
 		Priority:  question.Priority,
 	}
-	return res
 }

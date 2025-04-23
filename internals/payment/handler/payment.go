@@ -2,12 +2,12 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/db/entities"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentDtoRes "github.com/ladmakhi81/learnup/internals/payment/dto/res"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
 )
 
@@ -24,7 +24,7 @@ func NewHandler(
 }
 
 func (h Handler) VerifyZarinpal(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("Authority"),
 		Gateway:   entities.PaymentGateway_Zarinpal,
 	}
@@ -35,7 +35,7 @@ func (h Handler) VerifyZarinpal(ctx *gin.Context) (*types.ApiResponse, error) {
 }
 
 func (h Handler) VerifyZibal(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("trackId"),
 		Gateway:   entities.PaymentGateway_Zibal,
 	}
@@ -46,7 +46,7 @@ func (h Handler) VerifyZibal(ctx *gin.Context) (*types.ApiResponse, error) {
 }
 
 func (h Handler) VerifyStripe(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := paymentDtoReq.VerifyPaymentReq{
+	dto := paymentDtoReq.VerifyPaymentReqDto{
 		Authority: ctx.Query("session_id"),
 		Gateway:   entities.PaymentGateway_Stripe,
 	}
@@ -64,26 +64,22 @@ func (h Handler) VerifyStripe(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Produce	json
 //	@Param		page		query		int	false	"Page number"	default(0)
 //	@Param		pageSize	query		int	false	"Page size"		default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=paymentDtoRes.GetPageablePaymentItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{rows=paymentDtoRes.GetPageablePaymentItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/payments/page [get]
 //	@Security	BearerAuth
 func (h Handler) GetPayments(ctx *gin.Context) (*types.ApiResponse, error) {
 	page, pageSize := utils.ExtractPaginationMetadata(ctx.Query("page"), ctx.Query("pageSize"))
-	payments, paymentsErr := h.paymentSvc.FetchPageable(page, pageSize)
-	if paymentsErr != nil {
-		return nil, paymentsErr
-	}
-	paymentCount, paymentCountErr := h.paymentSvc.FetchCount()
-	if paymentCountErr != nil {
-		return nil, paymentCountErr
+	payments, count, err := h.paymentSvc.FetchPageable(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
 	res := types.NewPaginationRes(
-		paymentDtoRes.MapGetPageablePaymentItems(payments),
+		paymentDtoRes.MapGetPageablePaymentItemsDto(payments),
 		page,
-		utils.CalculatePaginationTotalPage(paymentCount, pageSize),
-		paymentCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

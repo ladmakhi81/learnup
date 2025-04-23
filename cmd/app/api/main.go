@@ -1,70 +1,39 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-redis/redis"
-	"github.com/ladmakhi81/learnup/db"
 	"github.com/ladmakhi81/learnup/internals/auth"
-	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/internals/cart"
-	cartApiHandler "github.com/ladmakhi81/learnup/internals/cart/handler"
-	cartRepository "github.com/ladmakhi81/learnup/internals/cart/repo"
 	cartService "github.com/ladmakhi81/learnup/internals/cart/service"
 	"github.com/ladmakhi81/learnup/internals/category"
-	categoryApiHandler "github.com/ladmakhi81/learnup/internals/category/handler"
-	categoryRepository "github.com/ladmakhi81/learnup/internals/category/repo"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	"github.com/ladmakhi81/learnup/internals/comment"
-	commentApiHandler "github.com/ladmakhi81/learnup/internals/comment/handler"
-	commentRepository "github.com/ladmakhi81/learnup/internals/comment/repo"
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	"github.com/ladmakhi81/learnup/internals/course"
-	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
-	courseRepository "github.com/ladmakhi81/learnup/internals/course/repo"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	likeRepository "github.com/ladmakhi81/learnup/internals/like/repo"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
-	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/notification"
-	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
-	notificationRepository "github.com/ladmakhi81/learnup/internals/notification/repo"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/internals/order"
-	orderApiHandler "github.com/ladmakhi81/learnup/internals/order/handler"
-	orderRepository "github.com/ladmakhi81/learnup/internals/order/repo"
 	orderService "github.com/ladmakhi81/learnup/internals/order/service"
 	"github.com/ladmakhi81/learnup/internals/payment"
-	paymentApiHandler "github.com/ladmakhi81/learnup/internals/payment/handler"
-	paymentRepository "github.com/ladmakhi81/learnup/internals/payment/repo"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
 	"github.com/ladmakhi81/learnup/internals/question"
-	questionApiHandler "github.com/ladmakhi81/learnup/internals/question/handler"
-	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
 	questionService "github.com/ladmakhi81/learnup/internals/question/service"
 	"github.com/ladmakhi81/learnup/internals/teacher"
-	teacherApiHandler "github.com/ladmakhi81/learnup/internals/teacher/handler"
 	teacherService "github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/internals/transaction"
-	transactionApiHandler "github.com/ladmakhi81/learnup/internals/transaction/handler"
-	transactionRepository "github.com/ladmakhi81/learnup/internals/transaction/repo"
 	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
 	"github.com/ladmakhi81/learnup/internals/tus"
-	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
-	userApiHandler "github.com/ladmakhi81/learnup/internals/user/handler"
-	userRepository "github.com/ladmakhi81/learnup/internals/user/repo"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/internals/video"
-	videoApiHandler "github.com/ladmakhi81/learnup/internals/video/handler"
-	videoRepository "github.com/ladmakhi81/learnup/internals/video/repo"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
-	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
 	"github.com/ladmakhi81/learnup/pkg/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/jwt/v5"
@@ -79,13 +48,9 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/validator/v10"
 	zarinpalv1 "github.com/ladmakhi81/learnup/pkg/zarinpal/v1"
 	zibalv1 "github.com/ladmakhi81/learnup/pkg/zibal/v1"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/middleware"
 	"log"
-	"os"
-	"path"
 
 	_ "github.com/ladmakhi81/learnup/docs"
 	"github.com/swaggo/files"
@@ -112,15 +77,6 @@ func main() {
 		log.Fatalf("temporal throw error: %v", err)
 	}
 
-	// minio
-	minioClient, minioClientErr := SetupMinio(config)
-	if minioClientErr != nil {
-		log.Fatalf("Failed to connect minio: %v", minioClientErr)
-	}
-
-	// redis
-	redisClient := SetupRedis(config)
-
 	// database
 	dbClient := db.NewDatabase(config)
 	if err := dbClient.Connect(); err != nil {
@@ -132,55 +88,42 @@ func main() {
 	port := fmt.Sprintf(":%d", config.App.Port)
 	api := server.Group("/api")
 
-	localizer, localizerErr := SetupLocalizer()
-	if localizerErr != nil {
-		log.Fatalf("Failed to initialize localizer: %v\n", localizerErr)
-	}
-
 	// swagger documentation
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// repos
-	categoryRepo := categoryRepository.NewCategoryRepoImpl(dbClient)
-	userRepo := userRepository.NewUserRepoImpl(dbClient)
-	courseRepo := courseRepository.NewCourseRepoImpl(dbClient)
-	videoRepo := videoRepository.NewVideoRepoImpl(dbClient)
-	notificationRepo := notificationRepository.NewNotificationRepoImpl(dbClient)
-	commentRepo := commentRepository.NewCommentRepoImpl(dbClient)
-	likeRepo := likeRepository.NewLikeRepoImpl(dbClient)
-	questionRepo := questionRepository.NewQuestionRepoImpl(dbClient)
-	questionAnswerRepo := questionRepository.NewQuestionAnswerRepoImpl(dbClient)
-	cartRepo := cartRepository.NewCartRepo(dbClient)
-	orderRepo := orderRepository.NewOrderRepo(dbClient)
-	orderItemRepo := orderRepository.NewOrderItemRepo(dbClient)
-	paymentRepo := paymentRepository.NewPaymentRepo(dbClient)
-	transactionRepo := transactionRepository.NewTransactionRepo(dbClient)
+	unitOfWork := db.NewUnitOfWork(dbClient.Core)
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
-	minioSvc := miniov7.NewMinioClientSvc(minioClient, config.Minio.Region)
-	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
-	redisSvc := redisv6.NewRedisClientSvc(redisClient)
+	minioSvc, minioSvcErr := miniov7.NewMinioClientSvc(config)
+	if minioSvcErr != nil {
+		log.Fatalln(minioSvcErr)
+	}
+	i18nTranslatorSvc, i18nErr := i18nv2.NewI18nTranslatorSvc()
+	if i18nErr != nil {
+		log.Fatalln(i18nErr)
+	}
+	redisSvc := redisv6.NewRedisClientSvc(config)
 	tokenSvc := jwtv5.NewJwtSvc(config)
-	userSvc := userService.NewUserSvcImpl(userRepo, i18nTranslatorSvc)
-	notificationSvc := notificationService.NewNotificationServiceImpl(notificationRepo, userSvc, i18nTranslatorSvc)
+	userSvc := userService.NewUserSvc(unitOfWork)
+	notificationSvc := notificationService.NewNotificationSvc(unitOfWork)
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
-	authSvc := authService.NewAuthServiceImpl(userSvc, redisSvc, tokenSvc, i18nTranslatorSvc)
-	categorySvc := categoryService.NewCategoryServiceImpl(categoryRepo, i18nTranslatorSvc)
-	courseSvc := courseService.NewCourseServiceImpl(courseRepo, i18nTranslatorSvc, userSvc, categorySvc, notificationSvc)
+	authSvc := authService.NewAuthSvc(redisSvc, tokenSvc, unitOfWork)
+	categorySvc := categoryService.NewCategorySvc(unitOfWork)
+	courseSvc := courseService.NewCourseSvc(unitOfWork)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
-	videoSvc := videoService.NewVideoServiceImpl(minioSvc, ffmpegSvc, logrusSvc, courseSvc, videoRepo, notificationSvc, i18nTranslatorSvc, userSvc)
+	videoSvc := videoService.NewVideoSvc(unitOfWork, minioSvc, ffmpegSvc, logrusSvc)
 	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc, courseSvc)
 	tusHookSvc := tusHookService.NewTusServiceImpl(videoSvc, logrusSvc, temporalSvc, videoWorkflowSvc)
-	teacherCourseSvc := teacherService.NewTeacherCourseServiceImpl(courseSvc, categorySvc, userSvc, courseRepo, i18nTranslatorSvc)
-	teacherVideoSvc := teacherService.NewTeacherVideoServiceImpl(videoSvc, i18nTranslatorSvc, courseSvc, videoRepo)
-	teacherCommentSvc := teacherService.NewTeacherCommentServiceImpl(userSvc, courseSvc, commentRepo, i18nTranslatorSvc)
-	commentSvc := commentService.NewCommentServiceImpl(commentRepo, userSvc, courseSvc, i18nTranslatorSvc)
-	likeSvc := likeService.NewLikeServiceImpl(likeRepo, userSvc, i18nTranslatorSvc, courseSvc)
-	cartSvc := cartService.NewCartService(cartRepo, i18nTranslatorSvc, userSvc, courseSvc)
-	questionSvc := questionService.NewQuestionServiceImpl(questionRepo, userSvc, courseSvc, i18nTranslatorSvc, videoSvc)
-	questionAnswerSvc := questionService.NewQuestionAnswerServiceImpl(questionAnswerRepo, questionSvc, i18nTranslatorSvc, userSvc)
-	teacherQuestionSvc := teacherService.NewTeacherQuestionServiceImpl(questionSvc, i18nTranslatorSvc, userSvc, courseSvc)
+	teacherCourseSvc := teacherService.NewTeacherCourseService(unitOfWork)
+	teacherVideoSvc := teacherService.NewTeacherVideoSvc(unitOfWork)
+	teacherCommentSvc := teacherService.NewTeacherCommentSvc(unitOfWork)
+	commentSvc := commentService.NewCommentSvc(unitOfWork)
+	likeSvc := likeService.NewLikeSvc(unitOfWork)
+	cartSvc := cartService.NewCartSvc(unitOfWork)
+	questionSvc := questionService.NewQuestionSvc(unitOfWork)
+	questionAnswerSvc := questionService.NewQuestionAnswerSvc(unitOfWork)
+	teacherQuestionSvc := teacherService.NewTeacherQuestionSvc(unitOfWork)
 	restyHttpClient := restyv2.NewRestyHttpSvc()
 	zarinpalSvc := zarinpalv1.NewZarinpalClient(restyHttpClient, config)
 	zibalSvc := zibalv1.NewZibalClient(restyHttpClient, config)
@@ -188,47 +131,28 @@ func main() {
 	if stripeSvcErr != nil {
 		panic("stripe client error occured")
 	}
-	transactionSvc := transactionService.NewTransactionService(transactionRepo)
-	paymentSvc := paymentService.NewPaymentService(zarinpalSvc, zibalSvc, stripeSvc, paymentRepo, config, i18nTranslatorSvc, transactionSvc)
-	orderSvc := orderService.NewOrderService(orderRepo, orderItemRepo, userSvc, cartSvc, i18nTranslatorSvc, paymentSvc)
+	transactionSvc := transactionService.NewTransactionSvc(unitOfWork)
+	paymentSvc := paymentService.NewPaymentService(unitOfWork, zarinpalSvc, zibalSvc, stripeSvc, config)
+	orderSvc := orderService.NewOrderService(unitOfWork, paymentSvc)
 
 	// middlewares
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
 
-	// handlers
-	userHandler := userApiHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
-	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
-	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc, questionSvc)
-	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
-	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
-	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
-	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
-	teacherVideoHandler := teacherApiHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
-	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc)
-	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc)
-	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
-	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc)
-	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc)
-	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc)
-	paymentHandler := paymentApiHandler.NewHandler(paymentSvc)
-	transactionHandler := transactionApiHandler.NewHandler(transactionSvc)
-
 	// modules
-	userModule := user.NewModule(userHandler, middlewares)
-	authModule := auth.NewModule(authHandler)
-	categoryModule := category.NewModule(categoryHandler, middlewares)
-	courseModule := course.NewModule(courseHandler, middlewares)
-	tusModule := tus.NewModule(tusHandler)
-	videoModule := video.NewModule(videoHandler, middlewares)
-	notificationModule := notification.NewModule(notificationHandler, middlewares)
-	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler)
-	commentModule := comment.NewModule(commentHandler, middlewares)
-	questionModule := question.NewModule(questionHandler, middlewares)
-	cartModule := cart.NewModule(cartHandler, middlewares)
-	orderModule := order.NewModule(orderHandler, middlewares)
-	paymentModule := payment.NewModule(paymentHandler, middlewares)
-	transactionModule := transaction.NewModule(transactionHandler, middlewares)
+	userModule := user.NewModule(middlewares, i18nTranslatorSvc, userSvc, validationSvc)
+	authModule := auth.NewModule(authSvc, validationSvc, i18nTranslatorSvc)
+	categoryModule := category.NewModule(categorySvc, middlewares, i18nTranslatorSvc, validationSvc)
+	courseModule := course.NewModule(courseSvc, validationSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc, middlewares, i18nTranslatorSvc)
+	tusModule := tus.NewModule(tusHookSvc, i18nTranslatorSvc)
+	videoModule := video.NewModule(userSvc, videoSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	notificationModule := notification.NewModule(notificationSvc, middlewares, i18nTranslatorSvc)
+	teacherModule := teacher.NewModule(teacherCourseSvc, teacherVideoSvc, teacherCommentSvc, teacherQuestionSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	commentModule := comment.NewModule(commentSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	questionModule := question.NewModule(questionAnswerSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	cartModule := cart.NewModule(userSvc, cartSvc, validationSvc, middlewares, i18nTranslatorSvc)
+	orderModule := order.NewModule(orderSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
+	paymentModule := payment.NewModule(paymentSvc, middlewares, i18nTranslatorSvc)
+	transactionModule := transaction.NewModule(transactionSvc, middlewares, i18nTranslatorSvc)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -237,7 +161,6 @@ func main() {
 		videoSvc.CalculateDuration,
 		videoSvc.Encode,
 		videoSvc.UpdateURLAndDuration,
-		notificationSvc.Create,
 		videoSvc.CreateCompleteUploadVideoNotification,
 	); err != nil {
 		log.Printf("Error in add worker: %+v", err)
@@ -273,53 +196,4 @@ func main() {
 
 	// run http handler
 	log.Fatalln(server.Run(port))
-}
-
-func SetupMinio(config *dtos.EnvConfig) (*minio.Client, error) {
-	endpoint := config.Minio.URL
-	accessKey := config.Minio.AccessKey
-	secretKey := config.Minio.SecretKey
-	region := config.Minio.Region
-	return minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: false,
-		Region: region,
-	})
-}
-
-func SetupRedis(config *dtos.EnvConfig) *redis.Client {
-	host := config.Redis.Host
-	port := config.Redis.Port
-	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Password: "",
-		DB:       0,
-	})
-}
-
-func SetupLocalizer() (*i18n.Localizer, error) {
-	locales := map[string]struct {
-		langTag  language.Tag
-		langText string
-	}{
-		"fa": {
-			langTag:  language.Persian,
-			langText: "fa",
-		},
-		"en": {
-			langTag:  language.English,
-			langText: "en",
-		},
-	}
-	defaultLocale := "fa"
-	localizationBundle := i18n.NewBundle(locales[defaultLocale].langTag)
-	localizationBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	rootDir, rootDirErr := os.Getwd()
-	if rootDirErr != nil {
-		return nil, rootDirErr
-	}
-	translationFolderPath := path.Join(rootDir, "translations")
-	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "fa.json"))
-	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "en.json"))
-	return i18n.NewLocalizer(localizationBundle, locales[defaultLocale].langText), nil
 }

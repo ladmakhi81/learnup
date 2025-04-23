@@ -1,101 +1,69 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
-	questionRepository "github.com/ladmakhi81/learnup/internals/question/repo"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	questionError "github.com/ladmakhi81/learnup/internals/question/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type QuestionAnswerService interface {
-	Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error)
+	Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReqDto) (*entities.QuestionAnswer, error)
 	GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error)
 }
 
-type QuestionAnswerServiceImpl struct {
-	answerRepo     questionRepository.QuestionAnswerRepo
-	questionSvc    QuestionService
-	userSvc        userService.UserSvc
-	translationSvc contracts.Translator
+type questionAnswerService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewQuestionAnswerServiceImpl(
-	answerRepo questionRepository.QuestionAnswerRepo,
-	questionSvc QuestionService,
-	translationSvc contracts.Translator,
-	userSvc userService.UserSvc,
-) *QuestionAnswerServiceImpl {
-	return &QuestionAnswerServiceImpl{
-		answerRepo:     answerRepo,
-		questionSvc:    questionSvc,
-		translationSvc: translationSvc,
-		userSvc:        userSvc,
-	}
+func NewQuestionAnswerSvc(unitOfWork db.UnitOfWork) QuestionAnswerService {
+	return &questionAnswerService{unitOfWork: unitOfWork}
 }
 
-func (svc QuestionAnswerServiceImpl) Create(dto questionDtoReq.AnswerQuestionReq) (*entities.QuestionAnswer, error) {
-	sender, senderErr := svc.userSvc.FindById(dto.SenderID)
-	if senderErr != nil {
-		return nil, senderErr
-	}
-	if sender == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.not_found"),
-		)
-	}
-	question, questionErr := svc.questionSvc.FindById(dto.QuestionID)
-	if questionErr != nil {
-		return nil, questionErr
+func (svc questionAnswerService) Create(sender *entities.User, dto questionDtoReq.AnswerQuestionReqDto) (*entities.QuestionAnswer, error) {
+	const operationName = "questionAnswerService.Create"
+	question, err := svc.unitOfWork.QuestionRepo().GetByID(dto.QuestionID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching question by id", operationName, err)
 	}
 	if question == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("question.errors.not_found"),
-		)
+		return nil, questionError.Question_NotFound
 	}
 	if question.IsClosed {
-		return nil, types.NewBadRequestError(
-			svc.translationSvc.Translate("question.errors.closed"),
-		)
+		return nil, questionError.Question_ClosedStatus
 	}
 	answer := &entities.QuestionAnswer{
 		QuestionID: dto.QuestionID,
 		Content:    dto.Content,
 		SenderID:   sender.ID,
 	}
-	if err := svc.answerRepo.Create(answer); err != nil {
-		return nil, types.NewServerError(
-			"Error in creating answer",
-			"QuestionAnswerServiceImpl.Create",
-			err,
-		)
+	if err := svc.unitOfWork.AnswerRepo().Create(answer); err != nil {
+		return nil, types.NewServerError("Error in creating answer", operationName, err)
 	}
 	return answer, nil
 }
 
-func (svc QuestionAnswerServiceImpl) GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error) {
-	question, questionErr := svc.questionSvc.FindById(questionID)
-	if questionErr != nil {
-		return nil, questionErr
+func (svc questionAnswerService) GetQuestionAnswers(questionID uint) ([]*entities.QuestionAnswer, error) {
+	const operationName = "questionAnswerService.GetQuestionAnswers"
+	question, err := svc.unitOfWork.QuestionRepo().GetByID(questionID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching question by id", operationName, err)
 	}
 	if question == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("question.errors.not_found"),
-		)
+		return nil, questionError.Question_NotFound
 	}
-	answers, answersErr := svc.answerRepo.Fetch(
-		questionRepository.FetchAnswerOption{
-			QuestionID: &question.ID,
-			Preloads:   []string{"Sender"},
+	order := "created_at asc"
+	answers, err := svc.unitOfWork.AnswerRepo().GetAll(repositories.GetAllOptions{
+		Conditions: map[string]any{
+			"question_id": questionID,
 		},
-	)
-	if answersErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching answers",
-			"QuestionAnswerServiceImpl.GetQuestionAnswers",
-			answersErr,
-		)
+		Relations: []string{"Sender"},
+		Order:     &order,
+	})
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching answers", operationName, err)
 	}
 	return answers, nil
 }

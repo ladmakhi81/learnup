@@ -1,88 +1,59 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	questionService "github.com/ladmakhi81/learnup/internals/question/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type GetQuestionOptions struct {
-	TeacherID uint
-	CourseID  *uint
-	Page      int
-	PageSize  int
+	CourseID *uint
+	Page     int
+	PageSize int
 }
 
 type TeacherQuestionService interface {
-	GetQuestions(options GetQuestionOptions) ([]*entities.Question, error)
-	GetQuestionCount(courseId *uint) (int, error)
+	GetQuestions(teacher *entities.User, options GetQuestionOptions) ([]*entities.Question, int, error)
 }
 
-type TeacherQuestionServiceImpl struct {
-	questionSvc    questionService.QuestionService
-	translationSvc contracts.Translator
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
+type teacherQuestionService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewTeacherQuestionServiceImpl(
-	questionSvc questionService.QuestionService,
-	translationSvc contracts.Translator,
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
-) *TeacherQuestionServiceImpl {
-	return &TeacherQuestionServiceImpl{
-		questionSvc:    questionSvc,
-		translationSvc: translationSvc,
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
-	}
+func NewTeacherQuestionSvc(unitOfWork db.UnitOfWork) TeacherQuestionService {
+	return &teacherQuestionService{unitOfWork: unitOfWork}
 }
 
-func (svc TeacherQuestionServiceImpl) GetQuestions(options GetQuestionOptions) ([]*entities.Question, error) {
-	teacher, teacherErr := svc.userSvc.FindById(options.TeacherID)
-	if teacherErr != nil {
-		return nil, teacherErr
-	}
-	if teacher == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.teacher_not_found"),
-		)
-	}
+func (svc teacherQuestionService) GetQuestions(teacher *entities.User, options GetQuestionOptions) ([]*entities.Question, int, error) {
+	const operationName = "teacherQuestionService.GetQuestions"
 	if options.CourseID != nil {
-		course, courseErr := svc.courseSvc.FindById(*options.CourseID)
-		if courseErr != nil {
-			return nil, courseErr
+		course, err := svc.unitOfWork.CourseRepo().GetByID(*options.CourseID, nil)
+		if err != nil {
+			return nil, 0, types.NewServerError("Error in fetching course by id", operationName, err)
 		}
 		if course == nil {
-			return nil, types.NewNotFoundError(
-				svc.translationSvc.Translate("course.errors.not_found"),
-			)
+			return nil, 0, courseError.Course_NotFound
 		}
-		if *course.TeacherID != teacher.ID {
-			return nil, types.NewForbiddenAccessError(
-				svc.translationSvc.Translate("common.errors.forbidden_access"),
-			)
+		if !course.IsTeacher(teacher.ID) {
+			return nil, 0, courseError.Course_ForbiddenAccess
 		}
 	}
-	questions, questionsErr := svc.questionSvc.GetPageable(
-		options.CourseID,
-		options.Page,
-		options.PageSize,
+	questionCondition := make(map[string]any)
+	if options.CourseID != nil {
+		questionCondition["course_id"] = *options.CourseID
+	}
+	questions, count, err := svc.unitOfWork.QuestionRepo().GetPaginated(
+		repositories.GetPaginatedOptions{
+			Offset:     &options.Page,
+			Limit:      &options.PageSize,
+			Conditions: questionCondition,
+			Relations:  []string{"User", "Course", "Video"},
+		},
 	)
-	if questionsErr != nil {
-		return nil, questionsErr
+	if err != nil {
+		return nil, 0, err
 	}
-	return questions, nil
-}
-
-func (svc TeacherQuestionServiceImpl) GetQuestionCount(courseId *uint) (int, error) {
-	count, countErr := svc.questionSvc.GetCount(courseId)
-	if countErr != nil {
-		return 0, countErr
-	}
-	return count, nil
+	return questions, count, nil
 }

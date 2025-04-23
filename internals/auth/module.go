@@ -2,22 +2,29 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/auth/handler"
-	"github.com/ladmakhi81/learnup/utils"
+	authHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
+	authService "github.com/ladmakhi81/learnup/internals/auth/service"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
+	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type Module struct {
-	userAuthHandler *handler.Handler
+	authHandler    *authHandler.Handler
+	translationSvc contracts.Translator
 }
 
-func NewModule(userAuthHandler *handler.Handler) *Module {
+func NewModule(
+	authSvc authService.AuthService,
+	validationSvc contracts.Validation,
+	translationSvc contracts.Translator,
+) *Module {
 	return &Module{
-		userAuthHandler: userAuthHandler,
+		authHandler:    authHandler.NewHandler(authSvc, validationSvc, translationSvc),
+		translationSvc: translationSvc,
 	}
 }
 
 func (m Module) Register(api *gin.RouterGroup) {
 	authApi := api.Group("/auth")
-
-	authApi.POST("/login", utils.JsonHandler(m.userAuthHandler.Login))
+	authApi.POST("/login", utils.JsonHandler(m.translationSvc, m.authHandler.Login))
 }

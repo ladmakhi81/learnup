@@ -1,107 +1,45 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	commentRepo "github.com/ladmakhi81/learnup/internals/comment/repo"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type TeacherCommentService interface {
-	GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, error)
-	GetCommentCountByCourseId(authContext any, courseId uint) (int, error)
+	GetPageableCommentByCourseId(teacher *entities.User, courseId uint, page, pageSize int) ([]*entities.Comment, int, error)
 }
 
-type TeacherCommentServiceImpl struct {
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
-	commentRepo    commentRepo.CommentRepo
-	translationSvc contracts.Translator
+type teacherCommentService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewTeacherCommentServiceImpl(
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
-	commentRepo commentRepo.CommentRepo,
-	translationSvc contracts.Translator,
-) *TeacherCommentServiceImpl {
-	return &TeacherCommentServiceImpl{
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
-		commentRepo:    commentRepo,
-		translationSvc: translationSvc,
-	}
+func NewTeacherCommentSvc(unitOfWork db.UnitOfWork) TeacherCommentService {
+	return &teacherCommentService{unitOfWork: unitOfWork}
 }
 
-func (svc TeacherCommentServiceImpl) GetPageableCommentByCourseId(authContext any, courseId uint, page, pageSize int) ([]*entities.Comment, error) {
-	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.userSvc.FindById(teacherClaim.UserID)
-	if teacherErr != nil {
-		return nil, teacherErr
-	}
-	if teacher == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.teacher_not_found"),
-		)
-	}
-	course, courseErr := svc.courseSvc.FindById(courseId)
-	if courseErr != nil {
-		return nil, courseErr
+func (svc teacherCommentService) GetPageableCommentByCourseId(teacher *entities.User, courseId uint, page, pageSize int) ([]*entities.Comment, int, error) {
+	const operationName = "teacherCommentService.GetPageableCommentByCourseId"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(courseId, nil)
+	if err != nil {
+		return nil, 0, types.NewServerError("Error in fetching course detail", operationName, err)
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("course.errors.not_found"),
-		)
+		return nil, 0, courseError.Course_NotFound
 	}
-	comments, commentsErr := svc.commentRepo.Fetch(commentRepo.FetchCommentOption{
-		PageSize: &pageSize,
-		Page:     &page,
-		Preloads: []string{"User", "Course"},
-		UserID:   &teacher.ID,
-		CourseID: &course.ID,
+	comments, count, err := svc.unitOfWork.CommentRepo().GetPaginated(repositories.GetPaginatedOptions{
+		Limit:     &pageSize,
+		Offset:    &page,
+		Relations: []string{"User", "Course"},
+		Conditions: map[string]any{
+			"course_id": courseId,
+			"user_id":   teacher.ID,
+		},
 	})
-	if commentsErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching comments",
-			"TeacherCommentServiceImpl.GetPageableCommentByCourseId",
-			commentsErr,
-		)
+	if err != nil {
+		return nil, 0, types.NewServerError("Error in fetching comments", operationName, err)
 	}
-	return comments, nil
-}
-
-func (svc TeacherCommentServiceImpl) GetCommentCountByCourseId(authContext any, courseId uint) (int, error) {
-	teacherClaim := authContext.(*types.TokenClaim)
-	teacher, teacherErr := svc.userSvc.FindById(teacherClaim.UserID)
-	if teacherErr != nil {
-		return 0, teacherErr
-	}
-	if teacher == nil {
-		return 0, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.teacher_not_found"),
-		)
-	}
-	course, courseErr := svc.courseSvc.FindById(courseId)
-	if courseErr != nil {
-		return 0, courseErr
-	}
-	if course == nil {
-		return 0, types.NewNotFoundError(
-			svc.translationSvc.Translate("course.errors.not_found"),
-		)
-	}
-	count, countErr := svc.commentRepo.FetchCount(commentRepo.FetchCountCommentOption{
-		CourseID: &course.ID,
-		UserID:   &teacher.ID,
-	})
-	if countErr != nil {
-		return 0, types.NewServerError(
-			"Error in fetching count of comments based on course id and user id",
-			"TeacherCommentServiceImpl.GetCommentCountByCourseId",
-			countErr,
-		)
-	}
-	return count, nil
+	return comments, count, nil
 }

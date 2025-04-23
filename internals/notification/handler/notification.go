@@ -5,10 +5,9 @@ import (
 	"github.com/ladmakhi81/learnup/internals/notification/dto/res"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -39,12 +38,11 @@ func NewHandler(
 //
 //	@Security	BearerAuth
 func (h Handler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) {
-	notificationIdParam := ctx.Param("notification-id")
-	notificationID, notificationIDErr := strconv.Atoi(notificationIdParam)
-	if notificationIDErr != nil {
+	notificationID, err := utils.ToUint(ctx.Param("notification-id"))
+	if err != nil {
 		return nil, types.NewBadRequestError(h.translationSvc.Translate("notifications.errors.invalid_notification_id"))
 	}
-	if err := h.notificationSvc.SeenById(uint(notificationID)); err != nil {
+	if err := h.notificationSvc.SeenById(notificationID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(http.StatusOK, map[string]any{}), nil
@@ -56,7 +54,7 @@ func (h Handler) SeenNotification(ctx *gin.Context) (*types.ApiResponse, error) 
 //	@Tags		notifications
 //	@Param		page		query		int	false	"Page number"		default(0)
 //	@Param		pageSize	query		int	false	"Number per page"	default(10)
-//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.NotificationPageItem}}
+//	@Success	200			{object}	types.ApiResponse{data=types.PaginationRes{row=[]dtores.NotificationPageItemDto}}
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
 //	@Router		/notifications/page [get]
@@ -67,20 +65,15 @@ func (h Handler) GetNotificationsPage(ctx *gin.Context) (*types.ApiResponse, err
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	notifications, notificationsErr := h.notificationSvc.FetchPageable(page, pageSize)
-	if notificationsErr != nil {
-		return nil, notificationsErr
+	notifications, count, err := h.notificationSvc.FetchPageable(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
-	notificationsCount, notificationsCountErr := h.notificationSvc.FetchCount()
-	if notificationsCountErr != nil {
-		return nil, notificationsCountErr
-	}
-	mappedNotifications := dtores.NewNotificationPageItems(notifications)
 	res := types.NewPaginationRes(
-		mappedNotifications,
+		dtores.NewNotificationPageItemsDto(notifications),
 		page,
-		notificationsCount,
-		utils.CalculatePaginationTotalPage(notificationsCount, pageSize),
+		count,
+		utils.CalculatePaginationTotalPage(count, pageSize),
 	)
 	return types.NewApiResponse(http.StatusOK, res), nil
 }

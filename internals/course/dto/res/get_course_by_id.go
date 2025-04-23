@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -21,7 +21,7 @@ type verifiedByItem struct {
 	FullName string `json:"fullName"`
 }
 
-type GetCourseByIdRes struct {
+type GetCourseByItemDto struct {
 	ID                          uint                             `json:"id"`
 	CreatedAt                   time.Time                        `json:"createdAt"`
 	UpdatedAt                   time.Time                        `json:"updatedAt"`
@@ -32,14 +32,14 @@ type GetCourseByIdRes struct {
 	ThumbnailImage              string                           `json:"thumbnailImage"`
 	Image                       string                           `json:"image"`
 	Description                 string                           `json:"description"`
-	Prerequisite                string                           `json:"prerequisite"`
-	Level                       entities.CourseLevel             `json:"level"`
-	Status                      entities.CourseStatus            `json:"status"`
-	StatusChangedAt             *time.Time                       `json:"statusChangedAt"`
+	Prerequisite        string                           `json:"prerequisite"`
+	Level               entities.CourseLevel             `json:"level"`
+	Status              entities.CourseStatus            `json:"status"`
+	StatusChangedAt     *time.Time                       `json:"statusChangedAt"`
 	Tags                        []string                         `json:"tags"`
-	AbilityToAddComment         bool                             `json:"abilityToAddComment"`
-	CommentAccessMode           entities.CourseCommentAccessMode `json:"commentAccessMode"`
-	IsPublished                 bool                             `json:"isPublished"`
+	AbilityToAddComment bool                             `json:"abilityToAddComment"`
+	CommentAccessMode   entities.CourseCommentAccessMode `json:"commentAccessMode"`
+	IsPublished         bool                             `json:"isPublished"`
 	IsVerifiedByAdmin           bool                             `json:"isVerifiedByAdmin"`
 	VerifiedBy                  *verifiedByItem                  `json:"verifiedBy"`
 	VerifiedDate                *time.Time                       `json:"verifiedDate"`
@@ -50,8 +50,8 @@ type GetCourseByIdRes struct {
 	DiscountFeeAmountPercentage float64                          `json:"discountFeeAmountPercentage"`
 }
 
-func NewGetCourseByIdRes(course *entities.Course) GetCourseByIdRes {
-	res := GetCourseByIdRes{
+func NewGetCourseByItemDto(course *entities.Course) GetCourseByItemDto {
+	res := GetCourseByItemDto{
 		ID:                course.ID,
 		Status:            course.Status,
 		VerifiedDate:      course.VerifiedDate,

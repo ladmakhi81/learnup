@@ -1,16 +1,16 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 )
 
-type CreateCommentRes struct {
+type CreateCommentResDto struct {
 	ID      uint   `json:"id"`
 	Content string `json:"content"`
 }
 
-func NewCreateCommentRes(comment *entities.Comment) *CreateCommentRes {
-	return &CreateCommentRes{
+func NewCreateCommentResDto(comment *entities.Comment) *CreateCommentResDto {
+	return &CreateCommentResDto{
 		ID:      comment.ID,
 		Content: comment.Content,
 	}

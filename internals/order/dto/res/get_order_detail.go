@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
 	"gorm.io/gorm"
 	"time"
 )
@@ -25,21 +25,21 @@ type orderItem struct {
 	Course orderCourseItem `json:"course"`
 }
 
-type GetOrderDetailRes struct {
-	ID              uint                 `json:"id"`
-	CreatedAt       time.Time            `json:"createdAt"`
-	UpdatedAt       time.Time            `json:"updatedAt"`
-	DeletedAt       gorm.DeletedAt       `json:"deletedAt"`
-	User            userOrderDetailItem  `json:"user"`
-	FinalPrice      float64              `json:"finalPrice"`
-	DiscountPrice   float64              `json:"discountPrice"`
-	TotalPrice      float64              `json:"totalPrice"`
-	Status          entities.OrderStatus `json:"status"`
-	StatusChangedAt *time.Time           `json:"statusChangedAt"`
-	Items           []orderItem          `json:"items"`
+type GetOrderDetailItemDto struct {
+	ID              uint                  `json:"id"`
+	CreatedAt       time.Time             `json:"createdAt"`
+	UpdatedAt       time.Time             `json:"updatedAt"`
+	DeletedAt       gorm.DeletedAt        `json:"deletedAt"`
+	User            userOrderDetailItem   `json:"user"`
+	FinalPrice      float64               `json:"finalPrice"`
+	DiscountPrice   float64               `json:"discountPrice"`
+	TotalPrice      float64               `json:"totalPrice"`
+	Status          entities2.OrderStatus `json:"status"`
+	StatusChangedAt *time.Time            `json:"statusChangedAt"`
+	Items           []orderItem           `json:"items"`
 }
 
-func NewGetOrderDetailRes(order *entities.Order) *GetOrderDetailRes {
+func NewGetOrderDetailItemDto(order *entities2.Order) *GetOrderDetailItemDto {
 	items := make([]orderItem, len(order.Items))
 
 	for i, item := range order.Items {
@@ -55,7 +55,7 @@ func NewGetOrderDetailRes(order *entities.Order) *GetOrderDetailRes {
 		}
 	}
 
-	return &GetOrderDetailRes{
+	return &GetOrderDetailItemDto{
 		ID:        order.ID,
 		CreatedAt: order.CreatedAt,
 		UpdatedAt: order.UpdatedAt,

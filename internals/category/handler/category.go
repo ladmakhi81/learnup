@@ -6,10 +6,9 @@ import (
 	dtores "github.com/ladmakhi81/learnup/internals/category/dto/res"
 	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -37,7 +36,7 @@ func NewHandler(
 //	@Accept		json
 //	@Produce	json
 //	@Param		request	body		dtoreq.CreateCategoryReq	true	" "
-//	@Success	201		{object}	types.ApiResponse{data=dtores.CreateCategoryRes}
+//	@Success	201		{object}	types.ApiResponse{data=dtores.CreateCategoryResDto}
 //	@Failure	400		{object}	types.ApiError
 //	@Failure	404		{object}	types.ApiError
 //	@Failure	409		{object}	types.ApiError
@@ -55,16 +54,11 @@ func (h Handler) CreateCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	category, categoryErr := h.categorySvc.Create(*dto)
-	if categoryErr != nil {
-		return nil, categoryErr
+	category, err := h.categorySvc.Create(*dto)
+	if err != nil {
+		return nil, err
 	}
-	categoryRes := dtores.NewCreateCategoryRes(
-		category.ID,
-		category.Name,
-		category.CreatedAt,
-	)
-	return types.NewApiResponse(http.StatusCreated, categoryRes), nil
+	return types.NewApiResponse(http.StatusCreated, dtores.NewCreateCategoryResDto(category)), nil
 }
 
 // GetCategoriesTree godoc
@@ -73,18 +67,17 @@ func (h Handler) CreateCategory(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Tags		categories
 //	@Accept		json
 //	@Produce	json
-//	@Success	200	{object}	types.ApiResponse{data=dtores.GetCategoriesTreeRes}
+//	@Success	200	{object}	types.ApiResponse{data=[]dtores.GetCategoriesTreeItemDto}
 //	@Failure	500	{object}	types.ApiResponse
 //	@Router		/categories/tree [get]
 //
 // @Security BearerAuth
 func (h Handler) GetCategoriesTree(_ *gin.Context) (*types.ApiResponse, error) {
-	categoriesTree, categoriesTreeErr := h.categorySvc.GetCategoriesTree()
-	if categoriesTreeErr != nil {
-		return nil, categoriesTreeErr
+	categories, err := h.categorySvc.GetCategoriesTree()
+	if err != nil {
+		return nil, err
 	}
-	categoriesTreeRes := dtores.NewGetCategoriesTreeRes(categoriesTree)
-	return types.NewApiResponse(http.StatusOK, categoriesTreeRes), nil
+	return types.NewApiResponse(http.StatusOK, dtores.MapGetCategoriesTreeItemsDto(categories)), nil
 }
 
 // GetCategories godoc
@@ -105,22 +98,16 @@ func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 		ctx.Query("page"),
 		ctx.Query("pageSize"),
 	)
-	categories, categoriesErr := h.categorySvc.GetCategories(page, pageSize)
-	if categoriesErr != nil {
-		return nil, categoriesErr
+	categories, count, err := h.categorySvc.GetCategories(page, pageSize)
+	if err != nil {
+		return nil, err
 	}
-	categoriesCount, categoriesCountErr := h.categorySvc.GetCategoriesCount()
-	if categoriesCountErr != nil {
-		return nil, categoriesCountErr
-	}
-	pageableCategoryItems := dtores.MapCategoriesToPageableItems(categories)
 	pageableCategoryRes := types.NewPaginationRes(
-		pageableCategoryItems,
+		dtores.MapCategoryPageableItemsDto(categories),
 		page,
-		utils.CalculatePaginationTotalPage(categoriesCount, pageSize),
-		categoriesCount,
+		utils.CalculatePaginationTotalPage(count, pageSize),
+		count,
 	)
-
 	return types.NewApiResponse(http.StatusOK, pageableCategoryRes), nil
 }
 
@@ -138,14 +125,13 @@ func (h Handler) GetCategories(ctx *gin.Context) (*types.ApiResponse, error) {
 //
 // @Security BearerAuth
 func (h Handler) DeleteCategory(ctx *gin.Context) (*types.ApiResponse, error) {
-	categoryIDParam := ctx.Param("categoryId")
-	categoryId, categoryIdErr := strconv.Atoi(categoryIDParam)
-	if categoryIdErr != nil {
+	categoryID, err := utils.ToUint(ctx.Param("categoryId"))
+	if err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("category.errors.invalid_category_id"),
 		)
 	}
-	if err := h.categorySvc.DeleteById(uint(categoryId)); err != nil {
+	if err := h.categorySvc.DeleteById(categoryID); err != nil {
 		return nil, err
 	}
 	return types.NewApiResponse(

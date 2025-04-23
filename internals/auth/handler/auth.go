@@ -6,7 +6,7 @@ import (
 	dtores "github.com/ladmakhi81/learnup/internals/auth/dto/res"
 	"github.com/ladmakhi81/learnup/internals/auth/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"net/http"
 )
 
@@ -34,14 +34,14 @@ func NewHandler(
 //	@Tags		auth
 //	@Accept		json
 //	@Produce	json
-//	@Param		loginRequest	body		dtoreq.LoginReq	true	" "
-//	@Success	200				{object}	types.ApiResponse{data=dtores.LoginRes}
+//	@Param		loginRequest	body		dtoreq.LoginReqDto	true	" "
+//	@Success	200				{object}	types.ApiResponse{data=dtores.LoginResDto}
 //	@Failure	400				{object}	types.ApiError
 //	@Failure	404				{object}	types.ApiError
 //	@Failure	500				{object}	types.ApiError
 //	@Router		/auth/login [post]
 func (h Handler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
-	dto := new(dtoreq.LoginReq)
+	dto := new(dtoreq.LoginReqDto)
 	if err := ctx.ShouldBind(dto); err != nil {
 		return nil, types.NewBadRequestError(
 			h.translationSvc.Translate("common.errors.invalid_request_body"),
@@ -50,10 +50,9 @@ func (h Handler) Login(ctx *gin.Context) (*types.ApiResponse, error) {
 	if err := h.validationSvc.Validate(dto); err != nil {
 		return nil, err
 	}
-	accessToken, accessTokenErr := h.authSvc.Login(*dto)
-	if accessTokenErr != nil {
-		return nil, accessTokenErr
+	accessToken, err := h.authSvc.Login(*dto)
+	if err != nil {
+		return nil, err
 	}
-	loginRes := dtores.NewLoginRes(accessToken)
-	return types.NewApiResponse(http.StatusOK, loginRes), nil
+	return types.NewApiResponse(http.StatusOK, dtores.NewLoginResDto(accessToken)), nil
 }

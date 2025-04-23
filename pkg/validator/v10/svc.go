@@ -3,7 +3,7 @@ package validatorv10
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"reflect"
 )
 

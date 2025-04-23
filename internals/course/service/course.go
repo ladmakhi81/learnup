@@ -1,87 +1,55 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
-	categoryService "github.com/ladmakhi81/learnup/internals/category/service"
 	dtoreq "github.com/ladmakhi81/learnup/internals/course/dto/req"
-	"github.com/ladmakhi81/learnup/internals/course/repo"
-	notificationReqDto "github.com/ladmakhi81/learnup/internals/notification/dto/req"
-	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
-	"time"
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type CourseService interface {
-	Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error)
-	FindByName(name string) (*entities.Course, error)
-	IsCourseNameExist(name string) (bool, error)
-	GetCourses(page, pageSize int) ([]*entities.Course, error)
-	GetCoursesCount() (int, error)
-	FindById(id uint) (*entities.Course, error)
+	Create(createdBy *entities.User, dto dtoreq.CreateCourseReqDto) (*entities.Course, error)
+	GetCourses(page, pageSize int) ([]*entities.Course, int, error)
 	FindDetailById(id uint) (*entities.Course, error)
-	FindByVideoId(id uint) (*entities.Course, error)
-	VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error
-	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error
+	VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReqDto) error
+	UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReqDto) error
 	CreateCompleteIntroductionVideoNotification(id uint) error
 }
 
-type CourseServiceImpl struct {
-	courseRepo      repo.CourseRepo
-	categorySvc     categoryService.CategoryService
-	userSvc         userService.UserSvc
-	translateSvc    contracts.Translator
-	notificationSvc notificationService.NotificationService
+type courseService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewCourseServiceImpl(
-	courseRepo repo.CourseRepo,
-	translateSvc contracts.Translator,
-	userSvc userService.UserSvc,
-	categorySvc categoryService.CategoryService,
-	notificationSvc notificationService.NotificationService,
-) *CourseServiceImpl {
-	return &CourseServiceImpl{
-		courseRepo:      courseRepo,
-		translateSvc:    translateSvc,
-		userSvc:         userSvc,
-		categorySvc:     categorySvc,
-		notificationSvc: notificationSvc,
-	}
+func NewCourseSvc(unitOfWork db.UnitOfWork) CourseService {
+	return &courseService{unitOfWork: unitOfWork}
 }
 
-func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq) (*entities.Course, error) {
-	isCourseNameDuplicated, courseNameDuplicatedErr := svc.IsCourseNameExist(dto.Name)
-	if courseNameDuplicatedErr != nil {
-		return nil, courseNameDuplicatedErr
+func (svc courseService) Create(createdBy *entities.User, dto dtoreq.CreateCourseReqDto) (*entities.Course, error) {
+	const operationName = "courseService.Create"
+	isCourseNameDuplicated, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
+	if err != nil {
+		return nil, types.NewServerError("Error in checking course name exist or not", operationName, err)
 	}
 	if isCourseNameDuplicated {
-		return nil, types.NewConflictError(
-			svc.translateSvc.Translate("course.errors.name_duplicate"),
-		)
+		return nil, courseError.Course_NameDuplicated
 	}
-	category, categoryErr := svc.categorySvc.FindByID(dto.CategoryID)
-	if categoryErr != nil {
-		return nil, categoryErr
+	category, err := svc.unitOfWork.CategoryRepo().GetByID(dto.CategoryID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching category by id", operationName, err)
 	}
 	if category == nil {
-		return nil, types.NewNotFoundError("course.errors.not_found_category")
+		return nil, courseError.Course_NotFoundCategory
 	}
-	teacher, teacherErr := svc.userSvc.FindById(dto.TeacherID)
-	if teacherErr != nil {
-		return nil, teacherErr
+	teacher, err := svc.unitOfWork.UserRepo().GetByID(dto.TeacherID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching user teacher by id", operationName, err)
 	}
 	if teacher == nil {
-		return nil, types.NewNotFoundError("course.errors.not_found_teacher")
+		return nil, courseError.Course_NotFoundTeacher
 	}
-	authClaim := authContext.(*types.TokenClaim)
-	authUser, authUserErr := svc.userSvc.FindById(authClaim.UserID)
-	if authUserErr != nil {
-		return nil, authUserErr
-	}
-
-	verifiedDate := time.Now()
 	course := &entities.Course{
 		CategoryID:                  &category.ID,
 		Name:                        dto.Name,
@@ -101,224 +69,130 @@ func (svc CourseServiceImpl) Create(authContext any, dto dtoreq.CreateCourseReq)
 		Tags:                        dto.Tags,
 		TeacherID:                   &teacher.ID,
 		ThumbnailImage:              dto.ThumbnailImage,
-		VerifiedDate:                &verifiedDate,
-		VerifiedByID:                &authUser.ID,
+		VerifiedDate:                utils.Now(),
+		VerifiedByID:                &createdBy.ID,
 	}
-	if dto.Price == nil {
-		course.Price = 0
-	} else {
-		course.Price = *dto.Price
-	}
-
-	if dto.Fee == nil {
-		course.Fee = 0
-	}
-	if err := svc.courseRepo.Create(course); err != nil {
-		return nil, types.NewServerError(
-			"Create Course Throw Error",
-			"CourseServiceImpl.Create",
-			err,
-		)
+	course.SetPrice(dto.Price)
+	course.SetFee(dto.Fee)
+	if err := svc.unitOfWork.CourseRepo().Create(course); err != nil {
+		return nil, types.NewServerError("Create Course Throw Error", operationName, err)
 	}
 	return course, nil
 }
 
-func (svc CourseServiceImpl) FindByName(name string) (*entities.Course, error) {
-	course, courseErr := svc.courseRepo.FetchByName(name)
-	if courseErr != nil {
-		return nil, types.NewServerError(
-			"Error in finding course by name throw error",
-			"CourseServiceImpl.FetchByName",
-			courseErr,
-		)
-	}
-	if course == nil {
-		return nil, nil
-	}
-	return course, nil
-}
-
-func (svc CourseServiceImpl) IsCourseNameExist(name string) (bool, error) {
-	course, courseErr := svc.FindByName(name)
-	if courseErr != nil {
-		return false, courseErr
-	}
-	if course == nil {
-		return false, nil
-	}
-	return true, nil
-}
-
-func (svc CourseServiceImpl) GetCourses(page, pageSize int) ([]*entities.Course, error) {
-	courses, coursesErr := svc.courseRepo.FetchPage(repo.FetchPageOption{
-		PageSize: &pageSize,
-		Page:     &page,
-		Preloads: []string{
+func (svc courseService) GetCourses(page, pageSize int) ([]*entities.Course, int, error) {
+	const operationName = "courseService.GetCourses"
+	courses, count, err := svc.unitOfWork.CourseRepo().GetPaginated(repositories.GetPaginatedOptions{
+		Offset: &page,
+		Limit:  &pageSize,
+		Relations: []string{
 			"Teacher",
 			"Category",
 			"VerifiedBy",
 		},
 	})
-	if coursesErr != nil {
-		return nil, types.NewServerError(
-			"Find All Pageable Courses Throw Error",
-			"CourseServiceImpl.FetchPage",
-			coursesErr,
-		)
+	if err != nil {
+		return nil, 0, types.NewServerError("Find All Pageable Courses Throw Error", operationName, err)
 	}
-	return courses, nil
+	return courses, count, nil
 }
 
-func (svc CourseServiceImpl) GetCoursesCount() (int, error) {
-	count, countErr := svc.courseRepo.FetchCount(repo.FetchCountOption{})
-	if countErr != nil {
-		return 0, types.NewServerError(
-			"Get Count Of Courses Throw Error",
-			"CourseServiceImpl.FetchPage",
-			countErr,
-		)
-	}
-	return count, nil
-}
-
-func (svc CourseServiceImpl) FindById(id uint) (*entities.Course, error) {
-	course, courseErr := svc.courseRepo.FetchById(id)
-	if courseErr != nil {
-		return nil, types.NewServerError(
-			"Find Course By ID Throw Error",
-			"CourseServiceImpl.FetchById",
-			courseErr,
-		)
+func (svc courseService) FindDetailById(id uint) (*entities.Course, error) {
+	const operationName = "courseService.FindDetailById"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(id, []string{"Teacher", "Category", "VerifiedBy"})
+	if err != nil {
+		return nil, types.NewServerError("Find Course Detail By ID Throw Error", operationName, err)
 	}
 	return course, nil
 }
 
-func (svc CourseServiceImpl) FindDetailById(id uint) (*entities.Course, error) {
-	course, courseErr := svc.courseRepo.FetchDetailById(id)
-	if courseErr != nil {
-		return nil, types.NewServerError(
-			"Find Course Detail By ID Throw Error",
-			"CourseServiceImpl.FindDetailByID",
-			courseErr,
-		)
-	}
-	return course, nil
-}
-
-func (svc CourseServiceImpl) FindByVideoId(id uint) (*entities.Course, error) {
-	course, courseErr := svc.courseRepo.FetchByVideoId(id)
-	if courseErr != nil {
-		return nil, types.NewServerError(
-			"Error in happen in find course by video id",
-			"CourseServiceImpl.FetchByVideoId",
-			courseErr,
-		)
-	}
-	return course, nil
-}
-
-func (svc CourseServiceImpl) VerifyCourse(authContext any, dto dtoreq.VerifyCourseReq) error {
-	course, courseErr := svc.FindById(dto.ID)
-	if courseErr != nil {
-		return courseErr
+func (svc courseService) VerifyCourse(admin *entities.User, dto dtoreq.VerifyCourseReqDto) error {
+	const operationName = "courseService.VerifyCourse"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.ID, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
-		return types.NewNotFoundError(
-			svc.translateSvc.Translate(
-				"course.errors.not_found",
-			),
-		)
+		return courseError.Course_NotFound
 	}
 	if course.Status != entities.CourseStatus_InProgress {
-		return types.NewBadRequestError(
-			svc.translateSvc.Translate("course.errors.unable_to_verify"),
-		)
+		return courseError.Course_UnableToVerify
 	}
-	adminClaim := authContext.(*types.TokenClaim)
-	admin, adminErr := svc.userSvc.FindById(adminClaim.UserID)
-	if adminErr != nil {
-		return adminErr
-	}
-	if admin == nil {
-		return types.NewNotFoundError(
-			svc.translateSvc.Translate("user.errors.admin_not_found"),
-		)
-	}
-	if dto.Fee > course.Price || dto.Fee < 0 || dto.Fee > course.Price-course.MaxDiscountAmount {
-		return types.NewBadRequestError(
-			svc.translateSvc.Translate("course.errors.invalid_fee"),
-		)
+	if course.CheckFee(dto.Fee) {
+		return courseError.Course_InvalidFee
 	}
 	if dto.DiscountFeeAmountPercentage > 100 {
-		return types.NewBadRequestError(
-			svc.translateSvc.Translate("course.errors.invalid_max_discount_percentage"),
-		)
+		return courseError.Course_InvalidMaxDiscountPercentage
 	}
-	now := time.Now()
 	course.Fee = dto.Fee
 	if course.CanHaveDiscount {
 		course.DiscountFeeAmountPercentage = dto.DiscountFeeAmountPercentage
 	}
+	now := utils.Now()
 	course.Status = entities.CourseStatus_Verified
-	course.StatusChangedAt = &now
+	course.StatusChangedAt = now
 	course.VerifiedByID = &admin.ID
-	course.VerifiedDate = &now
+	course.VerifiedDate = now
 	course.IsVerifiedByAdmin = true
-	if err := svc.courseRepo.Update(course); err != nil {
+	if err := svc.unitOfWork.CourseRepo().Update(course); err != nil {
+		return types.NewServerError("Error in verifying the course by admin", operationName, err)
+	}
+	notification := &entities.Notification{
+		Type:   entities.NotificationType_CourseVerified,
+		UserID: course.TeacherID,
+		Metadata: map[string]any{
+			"course_id":            course.ID,
+			"verified_by":          admin.ID,
+			"course_name":          course.Name,
+			"verified_by_fullname": admin.FullName(),
+		},
+	}
+	if err := svc.unitOfWork.NotificationRepo().Create(notification); err != nil {
 		return types.NewServerError(
-			"Error in verifying the course by admin",
-			"CourseServiceImpl.VerifyCourse",
+			"Error in creating notification when course verified",
+			"CourseService.VerifyCourse",
 			err,
 		)
 	}
-	//TODO: notification system
-	// create notification for teacher that course verified
-	// send email for this notification
 	return nil
 }
 
-func (svc CourseServiceImpl) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReq) error {
-	course, courseErr := svc.FindById(dto.CourseId)
-	if courseErr != nil {
-		return courseErr
+func (svc courseService) UpdateIntroductionURL(dto dtoreq.UpdateIntroductionURLReqDto) error {
+	const operationName = "courseService.UpdateIntroductionURL"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseId, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
-		return types.NewNotFoundError(
-			svc.translateSvc.Translate("course.errors.not_found"),
-		)
+		return courseError.Course_NotFound
 	}
 	course.IntroductionVideo = dto.URL
-	if err := svc.courseRepo.Update(course); err != nil {
-		return types.NewServerError(
-			"Error in setting introduction video url",
-			"CourseServiceImpl.UpdateIntroductionURL",
-			err,
-		)
+	if err := svc.unitOfWork.CourseRepo().Update(course); err != nil {
+		return types.NewServerError("Error in setting introduction video url", operationName, err)
 	}
 	return nil
 }
 
-func (svc CourseServiceImpl) CreateCompleteIntroductionVideoNotification(id uint) error {
-	course, courseErr := svc.FindById(id)
-	if courseErr != nil {
-		return courseErr
+func (svc courseService) CreateCompleteIntroductionVideoNotification(id uint) error {
+	const operationName = "courseService.CreateCompleteIntroductionVideoNotification"
+	course, err := svc.unitOfWork.CourseRepo().GetByID(id, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
-		return types.NewNotFoundError(
-			svc.translateSvc.Translate("course.errors.not_found"),
-		)
+		return courseError.Course_NotFound
 	}
-	notificationDto := notificationReqDto.CreateNotificationReq{
-		UserID:    *course.TeacherID,
-		EventType: entities.NotificationType_CompleteIntroductionCourseVideoUpload,
+	notification := &entities.Notification{
+		Type: entities.NotificationType_CompleteIntroductionCourseVideoUpload,
 		Metadata: map[string]any{
 			"courseId":   course.ID,
 			"courseName": course.Name,
 		},
+		IsSeen: false,
+		UserID: course.TeacherID,
 	}
-	_, notificationErr := svc.notificationSvc.Create(notificationDto)
-	if notificationErr != nil {
-		return notificationErr
+	if err := svc.unitOfWork.NotificationRepo().Create(notification); err != nil {
+		return types.NewServerError("Error in creating notification", operationName, err)
 	}
 	return nil
 }

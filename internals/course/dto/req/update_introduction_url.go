@@ -1,6 +1,6 @@
 package dtoreq
 
-type UpdateIntroductionURLReq struct {
+type UpdateIntroductionURLReqDto struct {
 	URL      string
 	CourseId uint
 }

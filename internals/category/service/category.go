@@ -1,133 +1,77 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
-	"github.com/ladmakhi81/learnup/internals/category/repo"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	categoryError "github.com/ladmakhi81/learnup/internals/category/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type CategoryService interface {
 	Create(req dtoreq.CreateCategoryReq) (*entities.Category, error)
 	DeleteById(id uint) error
-	FindByID(id uint) (*entities.Category, error)
-	FindByName(name string) (*entities.Category, error)
-	IsCategoryNameExist(name string) (bool, error)
 	GetCategoriesTree() ([]*entities.Category, error)
-	GetCategories(page, pageSize int) ([]*entities.Category, error)
-	GetCategoriesCount() (int, error)
+	GetCategories(page, pageSize int) ([]*entities.Category, int, error)
 }
 
-type CategoryServiceImpl struct {
-	repo           repo.CategoryRepo
-	translationSvc contracts.Translator
+type categoryService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewCategoryServiceImpl(
-	repo repo.CategoryRepo,
-	translationSvc contracts.Translator,
-) *CategoryServiceImpl {
-	return &CategoryServiceImpl{
-		repo:           repo,
-		translationSvc: translationSvc,
+func NewCategorySvc(unitOfWork db.UnitOfWork) CategoryService {
+	return &categoryService{unitOfWork: unitOfWork}
+}
+
+func (svc categoryService) Create(dto dtoreq.CreateCategoryReq) (*entities.Category, error) {
+	const operationName = "categoryService.Create"
+	isNameDuplicated, err := svc.unitOfWork.CategoryRepo().Exist(map[string]any{"name": dto.Name})
+	if err != nil {
+		return nil, types.NewServerError("Error in checking category name exist", operationName, err)
 	}
-}
-
-func (svc CategoryServiceImpl) Create(dto dtoreq.CreateCategoryReq) (*entities.Category, error) {
-	isDuplicateName, duplicateNameErr := svc.IsCategoryNameExist(dto.Name)
-	if duplicateNameErr != nil {
-		return nil, duplicateNameErr
-	}
-	if isDuplicateName {
-		return nil, types.NewConflictError(
-			svc.translationSvc.Translate("category.errors.name_duplicate"),
-		)
+	if isNameDuplicated {
+		return nil, categoryError.Category_DuplicateName
 	}
 	if dto.ParentID != nil {
-		parentCategory, parentCategoryErr := svc.FindByID(*dto.ParentID)
-		if parentCategoryErr != nil {
-			return nil, parentCategoryErr
+		parentCategory, err := svc.unitOfWork.CategoryRepo().GetByID(*dto.ParentID, nil)
+		if err != nil {
+			return nil, types.NewServerError("Error in fetching parent category by id", operationName, err)
 		}
 		if parentCategory == nil {
-			return nil, types.NewNotFoundError(
-				svc.translationSvc.Translate(
-					"category.errors.parent_category_id_not_found",
-				),
-			)
+			return nil, categoryError.Category_ParentNotFound
 		}
 	}
 	category := &entities.Category{
 		Name:             dto.Name,
 		ParentCategoryID: dto.ParentID,
 	}
-	if err := svc.repo.Create(category); err != nil {
-		return nil, types.NewServerError(
-			"Create Category Throw Error",
-			"CategoryServiceImpl.Create",
-			err,
-		)
+	if err := svc.unitOfWork.CategoryRepo().Create(category); err != nil {
+		return nil, types.NewServerError("Create Category Throw Error", operationName, err)
 	}
 	return category, nil
 }
 
-func (svc CategoryServiceImpl) DeleteById(id uint) error {
-	category, categoryErr := svc.FindByID(id)
-	if categoryErr != nil {
-		return categoryErr
+func (svc categoryService) DeleteById(id uint) error {
+	const operationName = "categoryService.DeleteById"
+	category, err := svc.unitOfWork.CategoryRepo().GetByID(id, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching category by id", operationName, err)
 	}
 	if category == nil {
-		return types.NewNotFoundError(
-			svc.translationSvc.Translate("category.errors.not_found"),
-		)
+		return categoryError.Category_NotFound
 	}
-	if err := svc.repo.Delete(category); err != nil {
-		return types.NewServerError(
-			"Delete Category By ID Throw Error",
-			"CategoryServiceImpl.DeleteById",
-			err,
-		)
+	if err := svc.unitOfWork.CategoryRepo().Delete(category); err != nil {
+		return types.NewServerError("Delete Category By ID Throw Error", operationName, err)
 	}
 	return nil
 }
 
-func (svc CategoryServiceImpl) FindByID(id uint) (*entities.Category, error) {
-	category, categoryErr := svc.repo.FetchById(id)
-	if categoryErr != nil {
-		return nil, types.NewServerError("Find Category By Id Throw Error",
-			"CategoryServiceImpl.FetchById",
-			categoryErr,
-		)
-	}
-	return category, nil
-}
-
-func (svc CategoryServiceImpl) FindByName(name string) (*entities.Category, error) {
-	category, categoryErr := svc.repo.FetchByName(name)
-	if categoryErr != nil {
-		return nil, types.NewServerError("Find Category By Name Throw Error",
-			"CategoryServiceImpl.FetchByName",
-			categoryErr,
-		)
-	}
-	return category, nil
-}
-
-func (svc CategoryServiceImpl) IsCategoryNameExist(name string) (bool, error) {
-	category, categoryErr := svc.FindByName(name)
-	if categoryErr != nil {
-		return false, categoryErr
-	}
-	if category == nil {
-		return false, nil
-	}
-	return true, nil
-}
-
-func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]*entities.Category, error) {
-	subCategories, subCategoriesErr := svc.repo.FetchChildren(category.ID)
-	if subCategoriesErr != nil {
-		return nil, subCategoriesErr
+func (svc categoryService) getSubCategories(category *entities.Category) ([]*entities.Category, error) {
+	const operationName = "categoryService.getSubCategories"
+	subCategories, err := svc.unitOfWork.CategoryRepo().GetChildren(category.ID)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching sub categories", operationName, err)
 	}
 	for _, subCategory := range subCategories {
 		nextSubCategory, nextSubCategoryErr := svc.getSubCategories(subCategory)
@@ -139,19 +83,17 @@ func (svc CategoryServiceImpl) getSubCategories(category *entities.Category) ([]
 	return subCategories, nil
 }
 
-func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entities.Category, error) {
-	rootCategories, rootCategoriesErr := svc.repo.FetchRoot()
-	if rootCategoriesErr != nil {
-		return nil, types.NewServerError("Fetch Categories As Tree Throw Error",
-			"CategoryServiceImpl.GetCategoriesTree",
-			rootCategoriesErr,
-		)
+func (svc categoryService) GetCategoriesTree() ([]*entities.Category, error) {
+	const operationName = "categoryService.GetCategoriesTree"
+	rootCategories, err := svc.unitOfWork.CategoryRepo().GetAll(repositories.GetAllOptions{Conditions: map[string]any{"parent_category_id": nil}})
+	if err != nil {
+		return nil, types.NewServerError("Fetch Categories As Tree Throw Error", operationName, err)
 	}
 	treeCategories := make([]*entities.Category, len(rootCategories))
 	for rootCategoryIndex, rootCategory := range rootCategories {
-		subCategory, subCategoryErr := svc.getSubCategories(rootCategory)
-		if subCategoryErr != nil {
-			return nil, subCategoryErr
+		subCategory, err := svc.getSubCategories(rootCategory)
+		if err != nil {
+			return nil, err
 		}
 		rootCategory.Children = subCategory
 		treeCategories[rootCategoryIndex] = rootCategory
@@ -159,24 +101,11 @@ func (svc CategoryServiceImpl) GetCategoriesTree() ([]*entities.Category, error)
 	return treeCategories, nil
 }
 
-func (svc CategoryServiceImpl) GetCategories(page, pageSize int) ([]*entities.Category, error) {
-	categories, categoriesErr := svc.repo.FetchPage(page, pageSize)
-	if categoriesErr != nil {
-		return nil, types.NewServerError("Get Categories List Throw Error",
-			"CategoryServiceImpl.FetchPage",
-			categoriesErr,
-		)
+func (svc categoryService) GetCategories(page, pageSize int) ([]*entities.Category, int, error) {
+	const operationName = "categoryService.GetCategories"
+	categories, count, err := svc.unitOfWork.CategoryRepo().GetPaginated(repositories.GetPaginatedOptions{Offset: &page, Limit: &pageSize})
+	if err != nil {
+		return nil, 0, types.NewServerError("Get Categories List Throw Error", operationName, err)
 	}
-	return categories, nil
-}
-
-func (svc CategoryServiceImpl) GetCategoriesCount() (int, error) {
-	count, countErr := svc.repo.FetchCount()
-	if countErr != nil {
-		return 0, types.NewServerError("Get Count Of Categories Throw Error",
-			"CategoryServiceImpl.FetchCount",
-			countErr,
-		)
-	}
-	return count, nil
+	return categories, count, nil
 }

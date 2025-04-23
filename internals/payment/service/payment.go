@@ -1,88 +1,61 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
-	paymentRepository "github.com/ladmakhi81/learnup/internals/payment/repo"
-	transactionDtoReq "github.com/ladmakhi81/learnup/internals/transaction/dto/req"
-	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
+	paymentError "github.com/ladmakhi81/learnup/internals/payment/error"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
+	"log"
 )
 
 type PaymentService interface {
-	Create(dto paymentDtoReq.CreatePaymentReq) (*entities.Payment, error)
-	Verify(dto paymentDtoReq.VerifyPaymentReq) error
-	FetchByAuthority(authority string) (*entities.Payment, error)
-	FetchPageable(page, pageSize int) ([]*entities.Payment, error)
-	FetchCount() (int, error)
+	Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReqDto) (*entities.Payment, error)
+	Verify(dto paymentDtoReq.VerifyPaymentReqDto) error
+	FetchPageable(page, pageSize int) ([]*entities.Payment, int, error)
 }
 
-type PaymentServiceImpl struct {
+type paymentService struct {
+	unitOfWork      db.UnitOfWork
 	zarinpalGateway contracts.PaymentGateway
 	zibalGateway    contracts.PaymentGateway
 	stripeGateway   contracts.PaymentGateway
-	paymentRepo     paymentRepository.PaymentRepo
 	config          *dtos.EnvConfig
-	translationSvc  contracts.Translator
-	transactionSvc  transactionService.TransactionService
 }
 
 func NewPaymentService(
+	unitOfWork db.UnitOfWork,
 	zarinpalGateway contracts.PaymentGateway,
 	zibalGateway contracts.PaymentGateway,
 	stripeGateway contracts.PaymentGateway,
-	paymentRepo paymentRepository.PaymentRepo,
 	config *dtos.EnvConfig,
-	translationSvc contracts.Translator,
-	transactionSvc transactionService.TransactionService,
-) *PaymentServiceImpl {
-	return &PaymentServiceImpl{
+) PaymentService {
+	return &paymentService{
 		zarinpalGateway: zarinpalGateway,
 		zibalGateway:    zibalGateway,
 		stripeGateway:   stripeGateway,
-		paymentRepo:     paymentRepo,
 		config:          config,
-		translationSvc:  translationSvc,
-		transactionSvc:  transactionSvc,
+		unitOfWork:      unitOfWork,
 	}
 }
 
-func (svc PaymentServiceImpl) FetchByAuthority(authority string) (*entities.Payment, error) {
-	payment, paymentErr := svc.paymentRepo.FetchByAuthority(authority)
-	if paymentErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching payment by authority",
-			"PaymentServiceImpl.FetchByAuthority",
-			paymentErr,
-		)
-	}
-	return payment, nil
-}
-
-func (svc PaymentServiceImpl) Create(dto paymentDtoReq.CreatePaymentReq) (*entities.Payment, error) {
+func (svc paymentService) Create(tx db.UnitOfWorkTx, dto paymentDtoReq.CreatePaymentReqDto) (*entities.Payment, error) {
+	const operationName = "paymentService.Create"
 	gateway := svc.selectGateway(dto.Gateway)
 	if gateway == nil {
-		return nil, types.NewBadRequestError(
-			svc.translationSvc.Translate("payment.errors.gateway_not_found"),
-		)
+		return nil, paymentError.Payment_GatewayNotFound
 	}
 	merchant := svc.getMerchantID(dto.Gateway)
 	if merchant == "" {
-		return nil, types.NewBadRequestError(
-			svc.translationSvc.Translate("payment.errors.merchant_not_found"),
-		)
+		return nil, paymentError.Payment_MerchantNotFound
 	}
-	resp, respErr := gateway.CreateRequest(dtos.CreatePaymentGatewayDto{
-		Amount: dto.Amount,
-	})
-	if respErr != nil {
-		return nil, types.NewServerError(
-			"Error in generating URL for gateway and initialize request",
-			"PaymentServiceImpl.Create",
-			respErr,
-		)
+	resp, err := gateway.CreateRequest(dtos.CreatePaymentGatewayDto{Amount: dto.Amount})
+	if err != nil {
+		return nil, types.NewServerError("Error in generating URL for gateway and initialize request", operationName, err)
 	}
 	payment := &entities.Payment{
 		Amount:     dto.Amount,
@@ -94,68 +67,70 @@ func (svc PaymentServiceImpl) Create(dto paymentDtoReq.CreatePaymentReq) (*entit
 		OrderID:    dto.OrderID,
 		PayLink:    resp.PayLink,
 	}
-	if err := svc.paymentRepo.Create(payment); err != nil {
-		return nil, err
+	if err := tx.PaymentRepo().Create(payment); err != nil {
+		return nil, types.NewServerError("Error in creating payment", operationName, err)
 	}
 	return payment, nil
 }
 
-func (svc PaymentServiceImpl) Verify(dto paymentDtoReq.VerifyPaymentReq) error {
-	gateway := svc.selectGateway(dto.Gateway)
-	if gateway == nil {
-		return types.NewBadRequestError(
-			svc.translationSvc.Translate("payment.errors.gateway_not_found"),
-		)
-	}
-	payment, paymentErr := svc.FetchByAuthority(dto.Authority)
-	if paymentErr != nil {
-		return paymentErr
-	}
-	if payment == nil {
-		return types.NewNotFoundError(
-			svc.translationSvc.Translate("payment.errors.not_found"),
-		)
-	}
-	resp, respErr := gateway.VerifyTransaction(dtos.VerifyTransactionDto{
-		ID:     payment.Authority,
-		Amount: payment.Amount,
-	})
-	if respErr != nil {
-		return types.NewServerError(
-			"Error in verifying transaction from server",
-			"PaymentServiceImpl.Verify",
-			respErr,
-		)
-	}
-	if resp.IsSuccess {
-		transaction, transactionErr := svc.transactionSvc.Create(transactionDtoReq.CreateTransactionReq{
-			Currency: svc.getCurrency(dto.Gateway),
-			User:     payment.User.FullName(),
-			Phone:    payment.User.Phone,
-			Amount:   payment.Amount,
-			Type:     entities.TransactionType_Deposit,
-			Tag:      entities.TransactionTag_Sell,
-		})
-		if transactionErr != nil {
-			return transactionErr
+func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReqDto) error {
+	const operationName = "paymentService.Verify"
+	transactionID, err := db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (uint, error) {
+		gateway := svc.selectGateway(dto.Gateway)
+		if gateway == nil {
+			return 0, paymentError.Payment_GatewayNotFound
 		}
-		payment.TransactionID = &transaction.ID
-		payment.Status = entities.PaymentStatus_Success
-		payment.RefID = resp.RefCode
-	} else {
-		payment.Status = entities.PaymentStatus_Failure
+		payment, err := tx.PaymentRepo().GetOne(map[string]any{"authority": dto.Authority}, []string{"User", "Order"})
+		if err != nil {
+			return 0, types.NewServerError("Error in fetching payment by authority", operationName, err)
+		}
+		if payment == nil {
+			return 0, paymentError.Payment_NotFound
+		}
+		resp, err := gateway.VerifyTransaction(dtos.VerifyTransactionDto{ID: payment.Authority, Amount: payment.Amount})
+		if err != nil {
+			return 0, types.NewServerError("Error in verifying transaction from server", operationName, err)
+		}
+		var transactionID uint
+		if resp.IsSuccess {
+			transaction := &entities.Transaction{
+				Amount:   payment.Amount,
+				Type:     entities.TransactionType_Deposit,
+				User:     payment.User.FullName(),
+				Phone:    payment.User.Phone,
+				Tag:      entities.TransactionTag_Sell,
+				Currency: svc.getCurrency(dto.Gateway),
+			}
+			if err := tx.TransactionRepo().Create(transaction); err != nil {
+				return 0, types.NewServerError("Error in creating transaction based on the payment", operationName, err)
+			}
+			transactionID = transaction.ID
+			payment.TransactionID = &transaction.ID
+			payment.Status = entities.PaymentStatus_Success
+			payment.RefID = resp.RefCode
+			payment.Order.Status = entities.OrderStatus_Success
+
+		} else {
+			payment.Status = entities.PaymentStatus_Failure
+			payment.Order.Status = entities.OrderStatus_Failed
+		}
+		if err := tx.PaymentRepo().Update(payment); err != nil {
+			return 0, types.NewServerError("Error in updating the payment", operationName, err)
+		}
+		payment.Order.StatusChangedAt = utils.Now()
+		if err := tx.OrderRepo().Update(payment.Order); err != nil {
+			return 0, types.NewServerError("Error in updating status of order", operationName, err)
+		}
+		return transactionID, nil
+	})
+	if err != nil {
+		return err
 	}
-	if err := svc.paymentRepo.Update(payment); err != nil {
-		return types.NewServerError(
-			"Error in updating the payment",
-			"PaymentServiceImpl.Verify",
-			err,
-		)
-	}
+	log.Printf("New Transaction Generated : %v \n", transactionID)
 	return nil
 }
 
-func (svc PaymentServiceImpl) selectGateway(paymentGateway entities.PaymentGateway) contracts.PaymentGateway {
+func (svc paymentService) selectGateway(paymentGateway entities.PaymentGateway) contracts.PaymentGateway {
 	switch paymentGateway {
 	case entities.PaymentGateway_Zarinpal:
 		return svc.zarinpalGateway
@@ -168,7 +143,7 @@ func (svc PaymentServiceImpl) selectGateway(paymentGateway entities.PaymentGatew
 	}
 }
 
-func (svc PaymentServiceImpl) getMerchantID(paymentGateway entities.PaymentGateway) string {
+func (svc paymentService) getMerchantID(paymentGateway entities.PaymentGateway) string {
 	switch paymentGateway {
 	case entities.PaymentGateway_Zarinpal:
 		return svc.config.Zarinpal.Merchant
@@ -181,7 +156,7 @@ func (svc PaymentServiceImpl) getMerchantID(paymentGateway entities.PaymentGatew
 	}
 }
 
-func (svc PaymentServiceImpl) getCurrency(paymentGateway entities.PaymentGateway) string {
+func (svc paymentService) getCurrency(paymentGateway entities.PaymentGateway) string {
 	switch paymentGateway {
 	case entities.PaymentGateway_Zarinpal:
 		return "IRT"
@@ -194,18 +169,16 @@ func (svc PaymentServiceImpl) getCurrency(paymentGateway entities.PaymentGateway
 	}
 }
 
-func (svc PaymentServiceImpl) FetchCount() (int, error) {
-	count, countErr := svc.paymentRepo.FetchCount()
-	if countErr != nil {
-		return 0, countErr
+func (svc paymentService) FetchPageable(page, pageSize int) ([]*entities.Payment, int, error) {
+	const operationName = "paymentService.FetchPageable"
+	payments, count, err := svc.unitOfWork.PaymentRepo().GetPaginated(
+		repositories.GetPaginatedOptions{
+			Offset: &page,
+			Limit:  &pageSize,
+		},
+	)
+	if err != nil {
+		return nil, 0, types.NewServerError("Error in fetching payments pages", operationName, err)
 	}
-	return count, nil
-}
-
-func (svc PaymentServiceImpl) FetchPageable(page, pageSize int) ([]*entities.Payment, error) {
-	payments, paymentsErr := svc.paymentRepo.FetchPageable(page, pageSize)
-	if paymentsErr != nil {
-		return nil, paymentsErr
-	}
-	return payments, nil
+	return payments, count, nil
 }

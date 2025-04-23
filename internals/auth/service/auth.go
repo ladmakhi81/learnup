@@ -3,66 +3,49 @@ package service
 import (
 	"github.com/ladmakhi81/learnup/internals/auth/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/auth/dto/req"
-	"github.com/ladmakhi81/learnup/internals/user/service"
+	authError "github.com/ladmakhi81/learnup/internals/auth/error"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type AuthService interface {
-	Login(req dtoreq.LoginReq) (string, error)
+	Login(req dtoreq.LoginReqDto) (string, error)
 }
 
-type AuthServiceImpl struct {
-	userSvc        service.UserSvc
-	cacheSvc       contracts.Cache
-	tokenSvc       contracts.Token
-	translationSvc contracts.Translator
+type authService struct {
+	cacheSvc   contracts.Cache
+	tokenSvc   contracts.Token
+	unitOfWork db.UnitOfWork
 }
 
-func NewAuthServiceImpl(
-	userSvc service.UserSvc,
+func NewAuthSvc(
 	cacheSvc contracts.Cache,
 	tokenSvc contracts.Token,
-	translationSvc contracts.Translator,
-) *AuthServiceImpl {
-	return &AuthServiceImpl{
-		userSvc:        userSvc,
-		cacheSvc:       cacheSvc,
-		tokenSvc:       tokenSvc,
-		translationSvc: translationSvc,
+	unitOfWork db.UnitOfWork,
+) AuthService {
+	return &authService{
+		cacheSvc:   cacheSvc,
+		tokenSvc:   tokenSvc,
+		unitOfWork: unitOfWork,
 	}
 }
 
-func (svc AuthServiceImpl) Login(dto dtoreq.LoginReq) (string, error) {
-	user, userErr := svc.userSvc.FindByPhone(dto.Phone)
-	if userErr != nil {
-		return "", userErr
+func (svc authService) Login(dto dtoreq.LoginReqDto) (string, error) {
+	const operationName = "authService.Login"
+	user, err := svc.unitOfWork.UserRepo().GetOne(map[string]any{"phone_number": dto.Phone}, nil)
+	if err != nil {
+		return "", types.NewServerError("Error in fetching user by phone number", operationName, err)
 	}
-	if user == nil {
-		return "", types.NewNotFoundError(
-			svc.translationSvc.Translate("auth.errors.invalid_credentials"),
-		)
+	if user == nil || !user.IsPasswordMatch(dto.Password) {
+		return "", authError.Auth_InvalidCredentials
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.Password)); err != nil {
-		return "", types.NewNotFoundError(
-			svc.translationSvc.Translate("auth.errors.invalid_credentials"),
-		)
-	}
-	accessToken, accessTokenErr := svc.tokenSvc.GenerateToken(user.ID)
-	if accessTokenErr != nil {
-		return "", types.NewServerError(
-			"Error in generating access token",
-			"AuthServiceImpl.Login",
-			accessTokenErr,
-		)
+	accessToken, err := svc.tokenSvc.GenerateToken(user.ID)
+	if err != nil {
+		return "", types.NewServerError("Error in generating access token", operationName, err)
 	}
 	if err := svc.cacheSvc.SetVal(constant.LoginCacheKey, accessToken); err != nil {
-		return "", types.NewServerError(
-			"Error in updating cache redis",
-			"AuthServiceImpl.Login",
-			err,
-		)
+		return "", types.NewServerError("Error in updating cache redis", operationName, err)
 	}
 	return accessToken, nil
 }

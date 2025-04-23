@@ -1,18 +1,18 @@
 package workflow
 
 import (
-	videoEntity "github.com/ladmakhi81/learnup/db/entities"
 	courseDtoReq "github.com/ladmakhi81/learnup/internals/course/dto/req"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
 	videoDtoReq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
+	videoEntity "github.com/ladmakhi81/learnup/shared/db/entities"
 	"go.temporal.io/sdk/workflow"
 )
 
 type VideoWorkflow interface {
-	AddNewCourseVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddNewCourseVideoWorkflowReq) error
-	AddIntroductionVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddIntroductionVideoWorkflowReq) error
+	AddNewCourseVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddNewCourseVideoWorkflowReqDto) error
+	AddIntroductionVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddIntroductionVideoWorkflowReqDto) error
 }
 
 type VideoWorkflowImpl struct {
@@ -33,9 +33,9 @@ func NewVideoWorkflowImpl(
 	}
 }
 
-func (svc VideoWorkflowImpl) AddNewCourseVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddNewCourseVideoWorkflowReq) error {
+func (svc VideoWorkflowImpl) AddNewCourseVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddNewCourseVideoWorkflowReqDto) error {
 	// calculate duration
-	calculateDurationDto := videoDtoReq.CalculateVideoDurationReq{
+	calculateDurationDto := videoDtoReq.CalculateVideoDurationReqDto{
 		ObjectId: dto.ObjectID,
 	}
 	var videoDuration string
@@ -45,7 +45,7 @@ func (svc VideoWorkflowImpl) AddNewCourseVideoWorkflow(ctx workflow.Context, dto
 	}
 	// encode
 	var videoURL string
-	encodeVideoDto := videoDtoReq.EncodeVideoReq{
+	encodeVideoDto := videoDtoReq.EncodeVideoReqDto{
 		ObjectId: dto.ObjectID,
 	}
 	encodeErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.Encode, encodeVideoDto, &videoURL)
@@ -54,7 +54,7 @@ func (svc VideoWorkflowImpl) AddNewCourseVideoWorkflow(ctx workflow.Context, dto
 	}
 	// update url and duration
 	var video *videoEntity.Video
-	updateVideoDto := videoDtoReq.UpdateURLAndDurationVideoReq{
+	updateVideoDto := videoDtoReq.UpdateURLAndDurationVideoReqDto{
 		Duration: videoDuration,
 		URL:      videoURL,
 		ID:       dto.VideoID,
@@ -71,10 +71,10 @@ func (svc VideoWorkflowImpl) AddNewCourseVideoWorkflow(ctx workflow.Context, dto
 	return nil
 }
 
-func (svc VideoWorkflowImpl) AddIntroductionVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddIntroductionVideoWorkflowReq) error {
+func (svc VideoWorkflowImpl) AddIntroductionVideoWorkflow(ctx workflow.Context, dto videoDtoReq.AddIntroductionVideoWorkflowReqDto) error {
 	// encode
 	var videoURL string
-	encodeVideoDto := videoDtoReq.EncodeVideoReq{
+	encodeVideoDto := videoDtoReq.EncodeVideoReqDto{
 		ObjectId: dto.ObjectId,
 	}
 	encodeErr := svc.temporalSvc.ExecuteTask(ctx, svc.videoSvc.Encode, encodeVideoDto, &videoURL)
@@ -82,7 +82,7 @@ func (svc VideoWorkflowImpl) AddIntroductionVideoWorkflow(ctx workflow.Context, 
 		return encodeErr
 	}
 	// update video introduction url
-	updateIntroductionUrlDto := courseDtoReq.UpdateIntroductionURLReq{
+	updateIntroductionUrlDto := courseDtoReq.UpdateIntroductionURLReqDto{
 		URL:      videoURL,
 		CourseId: dto.CourseId,
 	}

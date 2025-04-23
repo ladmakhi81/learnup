@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -23,7 +23,7 @@ type courseCategory struct {
 	IsPublished bool   `json:"isPublished"`
 }
 
-type courseItems struct {
+type GetPageableCourseItemDto struct {
 	ID                uint                  `json:"id"`
 	Name              string                `json:"name"`
 	Teacher           *courseTeacher        `json:"teacher"`
@@ -42,14 +42,18 @@ type courseItems struct {
 	StatusChangedAt   *time.Time            `json:"statusChangedAt"`
 }
 
-type GetCoursesRes struct {
-	Courses []*courseItems `json:"courses"`
-}
-
-func mapCoursesToCoursesPageableItems(courses []*entities.Course) []*courseItems {
-	mappedCourses := make([]*courseItems, len(courses))
+func MapGetPageableCourseItemsDto(courses []*entities.Course) []*GetPageableCourseItemDto {
+	mappedCourses := make([]*GetPageableCourseItemDto, len(courses))
 	for courseIndex, course := range courses {
-		mappedCourses[courseIndex] = &courseItems{
+		var verifiedBy *courseUserVerifier
+		if course.VerifiedBy != nil {
+			verifiedBy = &courseUserVerifier{
+				ID:       course.VerifiedBy.ID,
+				FullName: course.VerifiedBy.FullName(),
+				Phone:    course.VerifiedBy.Phone,
+			}
+		}
+		mappedCourses[courseIndex] = &GetPageableCourseItemDto{
 			ID:   course.ID,
 			Name: course.Name,
 			Teacher: &courseTeacher{
@@ -73,18 +77,8 @@ func mapCoursesToCoursesPageableItems(courses []*entities.Course) []*courseItems
 			StatusChangedAt:   course.StatusChangedAt,
 			CreatedAt:         course.CreatedAt,
 			UpdatedAt:         course.UpdatedAt,
-			VerifiedBy: &courseUserVerifier{
-				ID:       course.VerifiedBy.ID,
-				FullName: course.VerifiedBy.FullName(),
-				Phone:    course.VerifiedBy.Phone,
-			},
+			VerifiedBy:        verifiedBy,
 		}
 	}
 	return mappedCourses
-}
-
-func NewGetCoursesRes(courses []*entities.Course) GetCoursesRes {
-	res := GetCoursesRes{}
-	res.Courses = mapCoursesToCoursesPageableItems(courses)
-	return res
 }

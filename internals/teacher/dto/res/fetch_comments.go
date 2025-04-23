@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type getCommentCourseItem struct {
 	Description string `json:"description"`
 }
 
-type GetCommentPageableItemRes struct {
+type GetCommentPageableItemDto struct {
 	ID        uint                  `json:"id"`
 	Content   string                `json:"content"`
 	CreatedAt time.Time             `json:"createdAt"`
@@ -26,10 +26,10 @@ type GetCommentPageableItemRes struct {
 	Course    *getCommentCourseItem `json:"course"`
 }
 
-func MappedGetCommentPageableItemsRes(comments []*entities.Comment) []*GetCommentPageableItemRes {
-	res := make([]*GetCommentPageableItemRes, len(comments))
+func MapGetCommentPageableItemsDto(comments []*entities.Comment) []*GetCommentPageableItemDto {
+	res := make([]*GetCommentPageableItemDto, len(comments))
 	for i, comment := range comments {
-		res[i] = &GetCommentPageableItemRes{
+		res[i] = &GetCommentPageableItemDto{
 			ID:        comment.ID,
 			Content:   comment.Content,
 			CreatedAt: comment.CreatedAt,

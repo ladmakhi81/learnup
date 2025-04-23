@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -11,17 +11,17 @@ type courseCartItem struct {
 	Description string `json:"description"`
 }
 
-type GetCartItem struct {
+type GetCartItemDto struct {
 	ID        uint            `json:"id"`
 	CreatedAt time.Time       `json:"createdAt"`
 	UpdatedAt time.Time       `json:"updatedAt"`
 	Course    *courseCartItem `json:"course"`
 }
 
-func MapGetCartItems(cartItems []*entities.Cart) []*GetCartItem {
-	res := make([]*GetCartItem, len(cartItems))
+func MapGetCartItemDto(cartItems []*entities.Cart) []*GetCartItemDto {
+	res := make([]*GetCartItemDto, len(cartItems))
 	for index, cart := range cartItems {
-		res[index] = &GetCartItem{
+		res[index] = &GetCartItemDto{
 			ID:        cart.ID,
 			CreatedAt: cart.CreatedAt,
 			UpdatedAt: cart.UpdatedAt,

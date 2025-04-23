@@ -1,180 +1,86 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
 	cartDtoReq "github.com/ladmakhi81/learnup/internals/cart/dto/req"
-	cartRepo "github.com/ladmakhi81/learnup/internals/cart/repo"
-	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	userService "github.com/ladmakhi81/learnup/internals/user/service"
-	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	cartError "github.com/ladmakhi81/learnup/internals/cart/error"
+	courseError "github.com/ladmakhi81/learnup/internals/course/error"
+	userError "github.com/ladmakhi81/learnup/internals/user/error"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type CartService interface {
-	Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, error)
-	FetchByID(id uint) (*entities.Cart, error)
+	Create(user *entities.User, dto cartDtoReq.CreateCartReqDto) (*entities.Cart, error)
 	DeleteByID(userID, id uint) error
-	DeleteAllByUserID(userID uint) error
 	FetchAllByUserID(userID uint) ([]*entities.Cart, error)
-	FetchByUserAndCourse(userID uint, courseID uint) (*entities.Cart, error)
-	FetchByCartIDs(ids []uint) ([]*entities.Cart, error)
 }
 
-type CartServiceImpl struct {
-	cartRepo       cartRepo.CartRepo
-	translationSvc contracts.Translator
-	userSvc        userService.UserSvc
-	courseSvc      courseService.CourseService
+type cartService struct {
+	unitOfWork db.UnitOfWork
 }
 
-func NewCartService(
-	cartRepo cartRepo.CartRepo,
-	translationSvc contracts.Translator,
-	userSvc userService.UserSvc,
-	courseSvc courseService.CourseService,
-) *CartServiceImpl {
-	return &CartServiceImpl{
-		cartRepo:       cartRepo,
-		translationSvc: translationSvc,
-		userSvc:        userSvc,
-		courseSvc:      courseSvc,
-	}
+func NewCartSvc(unitOfWork db.UnitOfWork) CartService {
+	return &cartService{unitOfWork: unitOfWork}
 }
 
-func (svc CartServiceImpl) Create(dto cartDtoReq.CreateCartReq) (*entities.Cart, error) {
-	cartExist, cartExistErr := svc.FetchByUserAndCourse(dto.UserID, dto.CourseID)
-	if cartExistErr != nil {
-		return nil, cartExistErr
+func (svc cartService) Create(user *entities.User, dto cartDtoReq.CreateCartReqDto) (*entities.Cart, error) {
+	const operationName = "cartService.Create"
+	isCartExist, err := svc.unitOfWork.CartRepo().Exist(map[string]any{"course_id": dto.CourseID, "user_id": user.ID})
+	if err != nil {
+		return nil, types.NewServerError("Error in checking cart exist", operationName, err)
 	}
-	if cartExist != nil {
-		return nil, types.NewConflictError(
-			svc.translationSvc.Translate("cart.errors.exist_before"),
-		)
+	if isCartExist {
+		return nil, cartError.Cart_Duplicated
 	}
-	course, courseErr := svc.courseSvc.FindById(dto.CourseID)
-	if courseErr != nil {
-		return nil, courseErr
+	course, err := svc.unitOfWork.CourseRepo().GetByID(dto.CourseID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching course by id", operationName, err)
 	}
 	if course == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("course.errors.not_found"),
-		)
+		return nil, courseError.Course_NotFound
 	}
 	cart := &entities.Cart{
-		UserID:   dto.UserID,
+		UserID:   user.ID,
 		CourseID: dto.CourseID,
 	}
-	if err := svc.cartRepo.Create(cart); err != nil {
-		return nil, types.NewServerError(
-			"Error in creating cart items",
-			"CartServiceImpl.Create",
-			err,
-		)
+	if err := svc.unitOfWork.CartRepo().Create(cart); err != nil {
+		return nil, types.NewServerError("Error in creating cart items", operationName, err)
 	}
 	return cart, nil
 }
 
-func (svc CartServiceImpl) FetchByID(id uint) (*entities.Cart, error) {
-	cart, cartErr := svc.cartRepo.FetchByID(id)
-	if cartErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching cart by id",
-			"CartServiceImpl.FetchByID",
-			cartErr,
-		)
-	}
-	return cart, nil
-}
-
-func (svc CartServiceImpl) DeleteByID(userID, id uint) error {
-	cart, cartErr := svc.FetchByID(id)
-	if cartErr != nil {
-		return cartErr
+func (svc cartService) DeleteByID(userID, id uint) error {
+	const operationName = "cartService.DeleteByID"
+	cart, err := svc.unitOfWork.CartRepo().GetByID(id, nil)
+	if err != nil {
+		return types.NewServerError("Error in fetching cart by id", operationName, err)
 	}
 	if cart == nil {
-		return types.NewNotFoundError(
-			svc.translationSvc.Translate("cart.errors.not_found"),
-		)
+		return cartError.Cart_NotFound
 	}
-	if cart.UserID != userID {
-		return types.NewForbiddenAccessError(
-			svc.translationSvc.Translate("cart.errors.owner_delete"),
-		)
+	if cart.IsOwner(userID) {
+		return cartError.Cart_ForbiddenAccess
 	}
-	deleteErr := svc.cartRepo.DeleteByID(id)
-	if deleteErr != nil {
-		return types.NewServerError(
-			"Error in deleting cart by id",
-			"CartServiceImpl.DeleteByID",
-			deleteErr,
-		)
+	if err := svc.unitOfWork.CartRepo().Delete(cart); err != nil {
+		return types.NewServerError("Error in deleting cart by id", operationName, err)
 	}
 	return nil
 }
 
-func (svc CartServiceImpl) DeleteAllByUserID(userID uint) error {
-	user, userErr := svc.userSvc.FindById(userID)
-	if userErr != nil {
-		return userErr
+func (svc cartService) FetchAllByUserID(userID uint) ([]*entities.Cart, error) {
+	const operationName = "cartService.FetchAllByUserID"
+	user, err := svc.unitOfWork.UserRepo().GetByID(userID, nil)
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching carts by user id", operationName, err)
 	}
 	if user == nil {
-		return types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.not_found"),
-		)
+		return nil, userError.User_NotFound
 	}
-	deleteErr := svc.cartRepo.DeleteAllByUserID(user.ID)
-	if deleteErr != nil {
-		return types.NewServerError(
-			"Error in deleting carts by user id",
-			"CartServiceImpl.DeleteAllByUserID",
-			deleteErr,
-		)
-	}
-	return nil
-}
-
-func (svc CartServiceImpl) FetchAllByUserID(userID uint) ([]*entities.Cart, error) {
-	user, userErr := svc.userSvc.FindById(userID)
-	if userErr != nil {
-		return nil, userErr
-	}
-	if user == nil {
-		return nil, types.NewNotFoundError(
-			svc.translationSvc.Translate("user.errors.not_found"),
-		)
-	}
-	carts, cartsErr := svc.cartRepo.FetchAllByUserID(user.ID)
-	if cartsErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching all carts by user id",
-			"CartServiceImpl.FetchAllByUserID",
-			cartsErr,
-		)
-	}
-	return carts, nil
-}
-
-func (svc CartServiceImpl) FetchByUserAndCourse(userID uint, courseID uint) (*entities.Cart, error) {
-	cart, cartErr := svc.cartRepo.FetchByUserAndCourse(userID, courseID)
-	if cartErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching cart by user and course",
-			"CartServiceImpl.FetchByUserAndCourse",
-			cartErr,
-		)
-	}
-
-	return cart, nil
-}
-
-func (svc CartServiceImpl) FetchByCartIDs(ids []uint) ([]*entities.Cart, error) {
-	carts, cartsErr := svc.cartRepo.FetchByCartIDs(ids)
-	if cartsErr != nil {
-		return nil, types.NewServerError(
-			"Error in fetching carts by ids",
-			"CartServiceImpl.FetchByCartIDS",
-			cartsErr,
-		)
+	carts, err := svc.unitOfWork.CartRepo().GetAll(repositories.GetAllOptions{Conditions: map[string]any{"user_id": userID}, Relations: []string{"Course"}})
+	if err != nil {
+		return nil, types.NewServerError("Error in fetching all carts by user id", operationName, err)
 	}
 	return carts, nil
 }

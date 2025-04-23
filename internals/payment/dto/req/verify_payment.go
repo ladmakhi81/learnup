@@ -1,8 +1,10 @@
 package dtoreq
 
-import "github.com/ladmakhi81/learnup/db/entities"
+import (
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+)
 
-type VerifyPaymentReq struct {
+type VerifyPaymentReqDto struct {
 	Authority string
 	Gateway   entities.PaymentGateway
 }

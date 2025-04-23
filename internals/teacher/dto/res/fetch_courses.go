@@ -1,12 +1,12 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"gorm.io/gorm"
 	"time"
 )
 
-type FetchCourseItemRes struct {
+type FetchCourseItemDto struct {
 	ID          uint           `json:"id"`
 	CreatedAt   time.Time      `json:"createdAt"`
 	UpdatedAt   time.Time      `json:"updatedAt"`
@@ -15,10 +15,10 @@ type FetchCourseItemRes struct {
 	Description string         `json:"description"`
 }
 
-func MapCoursesToFetchCourseItemRes(courses []*entities.Course) []*FetchCourseItemRes {
-	res := make([]*FetchCourseItemRes, len(courses))
+func MapFetchCourseItemsDto(courses []*entities.Course) []*FetchCourseItemDto {
+	res := make([]*FetchCourseItemDto, len(courses))
 	for index, course := range courses {
-		res[index] = &FetchCourseItemRes{
+		res[index] = &FetchCourseItemDto{
 			ID:          course.ID,
 			CreatedAt:   course.CreatedAt,
 			UpdatedAt:   course.UpdatedAt,
