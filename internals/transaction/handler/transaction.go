@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	transactionDtoRes "github.com/ladmakhi81/learnup/internals/transaction/dto/res"
 	transactionService "github.com/ladmakhi81/learnup/internals/transaction/service"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
 )
 

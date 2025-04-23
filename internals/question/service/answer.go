@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
 	questionError "github.com/ladmakhi81/learnup/internals/question/error"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type QuestionAnswerService interface {

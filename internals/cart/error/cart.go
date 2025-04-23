@@ -1,6 +1,8 @@
 package error
 
-import "github.com/ladmakhi81/learnup/types"
+import (
+	"github.com/ladmakhi81/learnup/shared/types"
+)
 
 var (
 	Cart_Duplicated      = types.NewConflictError("cart.errors.exist_before")

@@ -2,11 +2,11 @@ package service
 
 import (
 	courseError "github.com/ladmakhi81/learnup/internals/course/error"
-	"github.com/ladmakhi81/learnup/internals/db"
-	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/teacher/dto/req"
 	videoError "github.com/ladmakhi81/learnup/internals/video/error"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type TeacherVideoService interface {

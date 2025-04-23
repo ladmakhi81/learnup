@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	reqdto "github.com/ladmakhi81/learnup/internals/tus/dto"
 	"github.com/ladmakhi81/learnup/internals/tus/service"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"net/http"
 )
 

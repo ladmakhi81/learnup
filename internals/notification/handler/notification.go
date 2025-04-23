@@ -5,8 +5,8 @@ import (
 	"github.com/ladmakhi81/learnup/internals/notification/dto/res"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
 )
 

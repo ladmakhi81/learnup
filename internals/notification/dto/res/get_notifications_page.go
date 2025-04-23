@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -11,8 +11,8 @@ type userItem struct {
 }
 
 type NotificationPageItemDto struct {
-	Type     entities.NotificationType `json:"type"`
-	IsSeen   bool                      `json:"isSeen"`
+	Type   entities.NotificationType `json:"type"`
+	IsSeen bool                      `json:"isSeen"`
 	SeenAt   *time.Time                `json:"seenAt"`
 	User     *userItem                 `json:"user"`
 	Metadata any                       `json:"metadata"`

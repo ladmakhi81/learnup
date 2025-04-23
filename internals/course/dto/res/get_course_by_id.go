@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -32,14 +32,14 @@ type GetCourseByItemDto struct {
 	ThumbnailImage              string                           `json:"thumbnailImage"`
 	Image                       string                           `json:"image"`
 	Description                 string                           `json:"description"`
-	Prerequisite                string                           `json:"prerequisite"`
-	Level                       entities.CourseLevel             `json:"level"`
-	Status                      entities.CourseStatus            `json:"status"`
-	StatusChangedAt             *time.Time                       `json:"statusChangedAt"`
+	Prerequisite        string                           `json:"prerequisite"`
+	Level               entities.CourseLevel             `json:"level"`
+	Status              entities.CourseStatus            `json:"status"`
+	StatusChangedAt     *time.Time                       `json:"statusChangedAt"`
 	Tags                        []string                         `json:"tags"`
-	AbilityToAddComment         bool                             `json:"abilityToAddComment"`
-	CommentAccessMode           entities.CourseCommentAccessMode `json:"commentAccessMode"`
-	IsPublished                 bool                             `json:"isPublished"`
+	AbilityToAddComment bool                             `json:"abilityToAddComment"`
+	CommentAccessMode   entities.CourseCommentAccessMode `json:"commentAccessMode"`
+	IsPublished         bool                             `json:"isPublished"`
 	IsVerifiedByAdmin           bool                             `json:"isVerifiedByAdmin"`
 	VerifiedBy                  *verifiedByItem                  `json:"verifiedBy"`
 	VerifiedDate                *time.Time                       `json:"verifiedDate"`

@@ -1,6 +1,8 @@
 package error
 
-import "github.com/ladmakhi81/learnup/types"
+import (
+	"github.com/ladmakhi81/learnup/shared/types"
+)
 
 var (
 	User_NotFound        = types.NewNotFoundError("user.errors.not_found")

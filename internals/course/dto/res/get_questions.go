@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
 	"gorm.io/gorm"
 	"time"
 )
@@ -28,9 +28,9 @@ type GetQuestionItemDto struct {
 	CreatedAt time.Time                  `json:"createdAt"`
 	UpdatedAt time.Time                  `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt             `json:"deletedAt"`
-	Content   string                     `json:"content"`
-	Priority  entities2.QuestionPriority `json:"priority"`
-	User      *questionUserItem          `json:"user"`
+	Content  string                     `json:"content"`
+	Priority entities2.QuestionPriority `json:"priority"`
+	User     *questionUserItem          `json:"user"`
 	Course    *questionCourseItem        `json:"course"`
 	Video     *questionVideoItem         `json:"video"`
 }

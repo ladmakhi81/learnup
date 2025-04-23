@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/internals/auth"
 	authApiHandler "github.com/ladmakhi81/learnup/internals/auth/handler"
 	authService "github.com/ladmakhi81/learnup/internals/auth/service"
@@ -21,9 +19,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/course"
 	courseApiHandler "github.com/ladmakhi81/learnup/internals/course/handler"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	"github.com/ladmakhi81/learnup/internals/db"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
-	"github.com/ladmakhi81/learnup/internals/middleware"
 	"github.com/ladmakhi81/learnup/internals/notification"
 	notificationApiHandler "github.com/ladmakhi81/learnup/internals/notification/handler"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
@@ -46,13 +42,11 @@ import (
 	tusHookApiHandler "github.com/ladmakhi81/learnup/internals/tus/handler"
 	tusHookService "github.com/ladmakhi81/learnup/internals/tus/service"
 	"github.com/ladmakhi81/learnup/internals/user"
-	userApiHandler "github.com/ladmakhi81/learnup/internals/user/handler"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/internals/video"
 	videoApiHandler "github.com/ladmakhi81/learnup/internals/video/handler"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
-	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
 	"github.com/ladmakhi81/learnup/pkg/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/jwt/v5"
@@ -67,13 +61,9 @@ import (
 	"github.com/ladmakhi81/learnup/pkg/validator/v10"
 	zarinpalv1 "github.com/ladmakhi81/learnup/pkg/zarinpal/v1"
 	zibalv1 "github.com/ladmakhi81/learnup/pkg/zibal/v1"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"golang.org/x/text/language"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/middleware"
 	"log"
-	"os"
-	"path"
 
 	_ "github.com/ladmakhi81/learnup/docs"
 	"github.com/swaggo/files"
@@ -100,15 +90,6 @@ func main() {
 		log.Fatalf("temporal throw error: %v", err)
 	}
 
-	// minio
-	minioClient, minioClientErr := SetupMinio(config)
-	if minioClientErr != nil {
-		log.Fatalf("Failed to connect minio: %v", minioClientErr)
-	}
-
-	// redis
-	redisClient := SetupRedis(config)
-
 	// database
 	dbClient := db.NewDatabase(config)
 	if err := dbClient.Connect(); err != nil {
@@ -120,11 +101,6 @@ func main() {
 	port := fmt.Sprintf(":%d", config.App.Port)
 	api := server.Group("/api")
 
-	localizer, localizerErr := SetupLocalizer()
-	if localizerErr != nil {
-		log.Fatalf("Failed to initialize localizer: %v\n", localizerErr)
-	}
-
 	// swagger documentation
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -132,9 +108,15 @@ func main() {
 
 	// svcs
 	logrusSvc := logrusv1.NewLogrusLoggerSvc()
-	minioSvc := miniov7.NewMinioClientSvc(minioClient, config.Minio.Region)
-	i18nTranslatorSvc := i18nv2.NewI18nTranslatorSvc(localizer)
-	redisSvc := redisv6.NewRedisClientSvc(redisClient)
+	minioSvc, minioSvcErr := miniov7.NewMinioClientSvc(config)
+	if minioSvcErr != nil {
+		log.Fatalln(minioSvcErr)
+	}
+	i18nTranslatorSvc, i18nErr := i18nv2.NewI18nTranslatorSvc()
+	if i18nErr != nil {
+		log.Fatalln(i18nErr)
+	}
+	redisSvc := redisv6.NewRedisClientSvc(config)
 	tokenSvc := jwtv5.NewJwtSvc(config)
 	userSvc := userService.NewUserSvc(unitOfWork)
 	notificationSvc := notificationService.NewNotificationSvc(unitOfWork)
@@ -170,39 +152,38 @@ func main() {
 	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
 
 	// handlers
-	userHandler := userApiHandler.NewHandler(userSvc, validationSvc, i18nTranslatorSvc)
 	authHandler := authApiHandler.NewHandler(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryHandler := categoryApiHandler.NewHandler(categorySvc, i18nTranslatorSvc, validationSvc)
-	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc, questionSvc)
-	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc)
+	courseHandler := courseApiHandler.NewHandler(courseSvc, validationSvc, i18nTranslatorSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc)
+	videoHandler := videoApiHandler.NewHandler(validationSvc, videoSvc, i18nTranslatorSvc, userSvc)
 	tusHandler := tusHookApiHandler.NewTusHookHandler(tusHookSvc)
 	notificationHandler := notificationApiHandler.NewHandler(notificationSvc, i18nTranslatorSvc)
-	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc)
+	teacherCourseHandler := teacherApiHandler.NewCourseHandler(teacherCourseSvc, validationSvc, i18nTranslatorSvc, userSvc)
 	teacherVideoHandler := teacherApiHandler.NewVideoHandler(teacherVideoSvc, i18nTranslatorSvc, validationSvc)
-	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc)
-	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc)
+	teacherCommentHandler := teacherApiHandler.NewCommentHandler(teacherCommentSvc, i18nTranslatorSvc, userSvc)
+	teacherQuestionHandler := teacherApiHandler.NewQuestionHandler(i18nTranslatorSvc, teacherQuestionSvc, userSvc)
 	commentHandler := commentApiHandler.NewHandler(commentSvc, i18nTranslatorSvc, validationSvc)
-	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc)
-	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc)
-	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc)
+	questionHandler := questionApiHandler.NewHandler(questionAnswerSvc, i18nTranslatorSvc, validationSvc, userSvc)
+	cartHandler := cartApiHandler.NewHandler(i18nTranslatorSvc, validationSvc, cartSvc, userSvc)
+	orderHandler := orderApiHandler.NewHandler(orderSvc, i18nTranslatorSvc, validationSvc, userSvc)
 	paymentHandler := paymentApiHandler.NewHandler(paymentSvc)
 	transactionHandler := transactionApiHandler.NewHandler(transactionSvc)
 
 	// modules
-	userModule := user.NewModule(userHandler, middlewares)
-	authModule := auth.NewModule(authHandler)
-	categoryModule := category.NewModule(categoryHandler, middlewares)
-	courseModule := course.NewModule(courseHandler, middlewares)
-	tusModule := tus.NewModule(tusHandler)
-	videoModule := video.NewModule(videoHandler, middlewares)
-	notificationModule := notification.NewModule(notificationHandler, middlewares)
-	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler)
-	commentModule := comment.NewModule(commentHandler, middlewares)
-	questionModule := question.NewModule(questionHandler, middlewares)
-	cartModule := cart.NewModule(cartHandler, middlewares)
-	orderModule := order.NewModule(orderHandler, middlewares)
-	paymentModule := payment.NewModule(paymentHandler, middlewares)
-	transactionModule := transaction.NewModule(transactionHandler, middlewares)
+	userModule := user.NewModule(middlewares, i18nTranslatorSvc, userSvc, validationSvc)
+	authModule := auth.NewModule(i18nTranslatorSvc, authHandler)
+	categoryModule := category.NewModule(categoryHandler, middlewares, i18nTranslatorSvc)
+	courseModule := course.NewModule(courseHandler, middlewares, i18nTranslatorSvc)
+	tusModule := tus.NewModule(tusHandler, i18nTranslatorSvc)
+	videoModule := video.NewModule(videoHandler, middlewares, i18nTranslatorSvc)
+	notificationModule := notification.NewModule(notificationHandler, middlewares, i18nTranslatorSvc)
+	teacherModule := teacher.NewModule(teacherCourseHandler, teacherVideoHandler, middlewares, teacherCommentHandler, teacherQuestionHandler, i18nTranslatorSvc)
+	commentModule := comment.NewModule(commentHandler, middlewares, i18nTranslatorSvc)
+	questionModule := question.NewModule(questionHandler, middlewares, i18nTranslatorSvc)
+	cartModule := cart.NewModule(cartHandler, middlewares, i18nTranslatorSvc)
+	orderModule := order.NewModule(orderHandler, middlewares, i18nTranslatorSvc)
+	paymentModule := payment.NewModule(paymentHandler, middlewares, i18nTranslatorSvc)
+	transactionModule := transaction.NewModule(transactionHandler, middlewares, i18nTranslatorSvc)
 
 	// workers
 	if err := temporalSvc.AddWorker(
@@ -246,53 +227,4 @@ func main() {
 
 	// run http handler
 	log.Fatalln(server.Run(port))
-}
-
-func SetupMinio(config *dtos.EnvConfig) (*minio.Client, error) {
-	endpoint := config.Minio.URL
-	accessKey := config.Minio.AccessKey
-	secretKey := config.Minio.SecretKey
-	region := config.Minio.Region
-	return minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
-		Secure: false,
-		Region: region,
-	})
-}
-
-func SetupRedis(config *dtos.EnvConfig) *redis.Client {
-	host := config.Redis.Host
-	port := config.Redis.Port
-	return redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%d", host, port),
-		Password: "",
-		DB:       0,
-	})
-}
-
-func SetupLocalizer() (*i18n.Localizer, error) {
-	locales := map[string]struct {
-		langTag  language.Tag
-		langText string
-	}{
-		"fa": {
-			langTag:  language.Persian,
-			langText: "fa",
-		},
-		"en": {
-			langTag:  language.English,
-			langText: "en",
-		},
-	}
-	defaultLocale := "fa"
-	localizationBundle := i18n.NewBundle(locales[defaultLocale].langTag)
-	localizationBundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	rootDir, rootDirErr := os.Getwd()
-	if rootDirErr != nil {
-		return nil, rootDirErr
-	}
-	translationFolderPath := path.Join(rootDir, "translations")
-	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "fa.json"))
-	localizationBundle.MustLoadMessageFile(path.Join(translationFolderPath, "en.json"))
-	return i18n.NewLocalizer(localizationBundle, locales[defaultLocale].langText), nil
 }

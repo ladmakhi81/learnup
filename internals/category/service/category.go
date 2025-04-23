@@ -3,10 +3,10 @@ package service
 import (
 	dtoreq "github.com/ladmakhi81/learnup/internals/category/dto/req"
 	categoryError "github.com/ladmakhi81/learnup/internals/category/error"
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type CategoryService interface {

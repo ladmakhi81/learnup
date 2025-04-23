@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
 	"gorm.io/gorm"
 	"time"
 )

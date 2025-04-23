@@ -1,12 +1,12 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db"
-	notificationEntity "github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	notificationError "github.com/ladmakhi81/learnup/internals/notification/error"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/db"
+	notificationEntity "github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 )
 
 type NotificationService interface {

@@ -2,11 +2,11 @@ package service
 
 import (
 	courseError "github.com/ladmakhi81/learnup/internals/course/error"
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	teacherDtoReq "github.com/ladmakhi81/learnup/internals/teacher/dto/req"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type TeacherCourseService interface {

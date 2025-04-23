@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/smtp"
 )
 

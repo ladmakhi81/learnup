@@ -1,6 +1,7 @@
 package redisv6
 
 import (
+	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 )
@@ -9,9 +10,20 @@ type RedisClientSvc struct {
 	redis *redis.Client
 }
 
-func NewRedisClientSvc(redis *redis.Client) *RedisClientSvc {
+func setupRedisClient(config *dtos.EnvConfig) *redis.Client {
+	host := config.Redis.Host
+	port := config.Redis.Port
+	return redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", host, port),
+		Password: "",
+		DB:       0,
+	})
+}
+
+func NewRedisClientSvc(config *dtos.EnvConfig) *RedisClientSvc {
+	client := setupRedisClient(config)
 	return &RedisClientSvc{
-		redis: redis,
+		redis: client,
 	}
 }
 

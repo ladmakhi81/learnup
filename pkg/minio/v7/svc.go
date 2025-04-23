@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
 )
 
@@ -14,14 +15,24 @@ type MinioClientSvc struct {
 	region string
 }
 
-func NewMinioClientSvc(
-	minio *minio.Client,
-	region string,
-) *MinioClientSvc {
-	return &MinioClientSvc{
-		minio:  minio,
-		region: region,
+func setupMinioClient(config *dtos.EnvConfig) (*minio.Client, error) {
+	endpoint := config.Minio.URL
+	accessKey := config.Minio.AccessKey
+	secretKey := config.Minio.SecretKey
+	region := config.Minio.Region
+	return minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+		Secure: false,
+		Region: region,
+	})
+}
+
+func NewMinioClientSvc(config *dtos.EnvConfig) (*MinioClientSvc, error) {
+	client, err := setupMinioClient(config)
+	if err != nil {
+		return nil, err
 	}
+	return &MinioClientSvc{minio: client, region: config.Minio.Region}, nil
 }
 
 func (svc MinioClientSvc) BucketExist(

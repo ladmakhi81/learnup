@@ -1,7 +1,7 @@
 package db
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
 	"gorm.io/gorm"
 )
 

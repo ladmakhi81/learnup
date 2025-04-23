@@ -2,12 +2,12 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentDtoRes "github.com/ladmakhi81/learnup/internals/payment/dto/res"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"net/http"
 )
 

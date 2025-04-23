@@ -1,6 +1,8 @@
 package error
 
-import "github.com/ladmakhi81/learnup/types"
+import (
+	"github.com/ladmakhi81/learnup/shared/types"
+)
 
 var (
 	Comment_SenderNotFound = types.NewNotFoundError("comment.errors.sender_not_found")

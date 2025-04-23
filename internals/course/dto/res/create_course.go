@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -14,13 +14,13 @@ type CreateCourseResDto struct {
 	Price                       float64                          `json:"price"`
 	ThumbnailImage              string                           `json:"thumbnailImage"`
 	Image                       string                           `json:"image"`
-	Prerequisite                string                           `json:"prerequisite"`
-	Level                       entities.CourseLevel             `json:"level"`
-	Status                      entities.CourseStatus            `json:"courseStatus"`
-	Tags                        []string                         `json:"tags"`
-	AbilityToAddComment         bool                             `json:"abilityToAddComment"`
-	CommentAccessMode           entities.CourseCommentAccessMode `json:"commentAccessMode"`
-	IsPublished                 bool                             `json:"isPublished"`
+	Prerequisite        string                           `json:"prerequisite"`
+	Level               entities.CourseLevel             `json:"level"`
+	Status              entities.CourseStatus            `json:"courseStatus"`
+	Tags                []string                         `json:"tags"`
+	AbilityToAddComment bool                             `json:"abilityToAddComment"`
+	CommentAccessMode   entities.CourseCommentAccessMode `json:"commentAccessMode"`
+	IsPublished         bool                             `json:"isPublished"`
 	IsVerifiedByAdmin           bool                             `json:"isVerifiedByAdmin"`
 	VerifiedByID                *uint                            `json:"verifiedByID"`
 	VerifiedDate                *time.Time                       `json:"verifiedDate"`

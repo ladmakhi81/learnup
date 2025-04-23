@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"log"
 	"net/http"
 	"time"
@@ -12,18 +13,18 @@ import (
 
 type Handler func(*gin.Context) (*types.ApiResponse, error)
 
-func JsonHandler(fn Handler) gin.HandlerFunc {
+func JsonHandler(translationSvc contracts.Translator, fn Handler) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		resp, err := fn(ctx)
 		if err != nil {
-			errorHandler(ctx, err)
+			errorHandler(ctx, err, translationSvc)
 			return
 		}
 		ctx.JSON(http.StatusOK, resp)
 	}
 }
 
-func errorHandler(ctx *gin.Context, err error) {
+func errorHandler(ctx *gin.Context, err error, translationSvc contracts.Translator) {
 	timestamp := time.Now().Unix()
 	traceId := uuid.New().String()
 
@@ -43,6 +44,7 @@ func errorHandler(ctx *gin.Context, err error) {
 			clientErr,
 			timestamp,
 			traceId,
+			translationSvc,
 		)
 		return
 	}
@@ -108,12 +110,13 @@ func clientErrorHandler(
 	clientErr *types.ClientError,
 	timestamp int64,
 	traceId string,
+	translationSvc contracts.Translator,
 ) {
 	var errorMessage any
 	if clientErr.Message == "" {
 		errorMessage = clientErr.Metadata
 	} else {
-		errorMessage = clientErr.Message
+		errorMessage = translationSvc.Translate(clientErr.Message)
 	}
 	ctx.JSON(
 		clientErr.StatusCode,

@@ -6,7 +6,7 @@ import (
 	dtores "github.com/ladmakhi81/learnup/internals/teacher/dto/res"
 	"github.com/ladmakhi81/learnup/internals/teacher/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"net/http"
 )
 

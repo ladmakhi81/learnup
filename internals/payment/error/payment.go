@@ -1,6 +1,8 @@
 package error
 
-import "github.com/ladmakhi81/learnup/types"
+import (
+	"github.com/ladmakhi81/learnup/shared/types"
+)
 
 var (
 	Payment_GatewayNotFound  = types.NewBadRequestError("payment.errors.gateway_not_found")

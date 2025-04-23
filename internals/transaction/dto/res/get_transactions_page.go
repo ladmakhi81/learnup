@@ -1,7 +1,7 @@
 package dtores
 
 import (
-	entities2 "github.com/ladmakhi81/learnup/internals/db/entities"
+	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
 	"time"
 )
 
@@ -10,10 +10,10 @@ type GetTransactionPageableItemDto struct {
 	CreatedAt time.Time                 `json:"createdAt"`
 	Amount    float64                   `json:"amount"`
 	User      string                    `json:"user"`
-	Phone     string                    `json:"phone"`
-	Type      entities2.TransactionType `json:"type"`
-	Tag       entities2.TransactionTag  `json:"tag"`
-	Currency  string                    `json:"currency"`
+	Phone    string                    `json:"phone"`
+	Type     entities2.TransactionType `json:"type"`
+	Tag      entities2.TransactionTag  `json:"tag"`
+	Currency string                    `json:"currency"`
 }
 
 func MapGetTransactionPageableItemsDto(transactions []*entities2.Transaction) []*GetTransactionPageableItemDto {

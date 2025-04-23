@@ -1,15 +1,15 @@
 package service
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentError "github.com/ladmakhi81/learnup/internals/payment/error"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
-	"github.com/ladmakhi81/learnup/types"
-	"github.com/ladmakhi81/learnup/utils"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
+	"github.com/ladmakhi81/learnup/shared/utils"
 	"log"
 )
 

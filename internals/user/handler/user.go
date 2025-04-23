@@ -6,7 +6,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/user/dto/res"
 	"github.com/ladmakhi81/learnup/internals/user/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"net/http"
 )
 

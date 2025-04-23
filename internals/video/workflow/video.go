@@ -3,10 +3,10 @@ package workflow
 import (
 	courseDtoReq "github.com/ladmakhi81/learnup/internals/course/dto/req"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
-	videoEntity "github.com/ladmakhi81/learnup/internals/db/entities"
 	videoDtoReq "github.com/ladmakhi81/learnup/internals/video/dto/req"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
+	videoEntity "github.com/ladmakhi81/learnup/shared/db/entities"
 	"go.temporal.io/sdk/workflow"
 )
 

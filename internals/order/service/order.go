@@ -2,13 +2,13 @@ package service
 
 import (
 	cartError "github.com/ladmakhi81/learnup/internals/cart/error"
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
-	"github.com/ladmakhi81/learnup/internals/db/repositories"
 	orderDtoReq "github.com/ladmakhi81/learnup/internals/order/dto/req"
 	paymentDtoReq "github.com/ladmakhi81/learnup/internals/payment/dto/req"
 	paymentService "github.com/ladmakhi81/learnup/internals/payment/service"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/repositories"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type OrderService interface {

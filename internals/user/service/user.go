@@ -2,11 +2,11 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/ladmakhi81/learnup/internals/db"
-	"github.com/ladmakhi81/learnup/internals/db/entities"
 	dtoreq "github.com/ladmakhi81/learnup/internals/user/dto/req"
 	userError "github.com/ladmakhi81/learnup/internals/user/error"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/types"
 	"golang.org/x/crypto/bcrypt"
 )
 

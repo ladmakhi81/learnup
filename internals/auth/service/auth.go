@@ -4,9 +4,9 @@ import (
 	"github.com/ladmakhi81/learnup/internals/auth/constant"
 	dtoreq "github.com/ladmakhi81/learnup/internals/auth/dto/req"
 	authError "github.com/ladmakhi81/learnup/internals/auth/error"
-	"github.com/ladmakhi81/learnup/internals/db"
 	"github.com/ladmakhi81/learnup/pkg/contracts"
-	"github.com/ladmakhi81/learnup/types"
+	"github.com/ladmakhi81/learnup/shared/db"
+	"github.com/ladmakhi81/learnup/shared/types"
 )
 
 type AuthService interface {

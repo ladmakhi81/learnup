@@ -1,7 +1,7 @@
 package dtoreq
 
 import (
-	"github.com/ladmakhi81/learnup/internals/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 )
 
 type VerifyPaymentReqDto struct {
