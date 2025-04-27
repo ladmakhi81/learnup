@@ -1,24 +1,27 @@
 package db
 
 import (
-	entities2 "github.com/ladmakhi81/learnup/shared/db/entities"
+	"github.com/ladmakhi81/learnup/shared/db/entities"
 )
 
 func LoadEntities() map[string]any {
 	return map[string]any{
-		"user":            &entities2.User{},
-		"category":        &entities2.Category{},
-		"course":          &entities2.Course{},
-		"video":           &entities2.Video{},
-		"notification":    &entities2.Notification{},
-		"comment":         &entities2.Comment{},
-		"like":            &entities2.Like{},
-		"question":        &entities2.Question{},
-		"question_answer": &entities2.QuestionAnswer{},
-		"cart":            &entities2.Cart{},
-		"order":           &entities2.Order{},
-		"order_items":     &entities2.OrderItem{},
-		"payment":         &entities2.Payment{},
-		"transaction":     &entities2.Transaction{},
+		"user":               &entities.User{},
+		"category":           &entities.Category{},
+		"course":             &entities.Course{},
+		"video":              &entities.Video{},
+		"notification":       &entities.Notification{},
+		"comment":            &entities.Comment{},
+		"like":               &entities.Like{},
+		"question":           &entities.Question{},
+		"question_answer":    &entities.QuestionAnswer{},
+		"cart":               &entities.Cart{},
+		"order":              &entities.Order{},
+		"order_items":        &entities.OrderItem{},
+		"payment":            &entities.Payment{},
+		"transaction":        &entities.Transaction{},
+		"course_forum":       &entities.CourseForum{},
+		"course_participant": &entities.CourseParticipant{},
+		"course_message":     &entities.ForumMessage{},
 	}
 }

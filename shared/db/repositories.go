@@ -20,41 +20,47 @@ type Repo interface {
 	TransactionRepo() repositories.TransactionRepo
 	UserRepo() repositories.UserRepo
 	VideoRepo() repositories.VideoRepo
+	CourseParticipantRepo() repositories.CourseParticipantRepo
+	CourseForumRepo() repositories.CourseForumRepo
 }
 
 type RepoProvider struct {
-	answerRepo       repositories.AnswerRepo
-	cartRepo         repositories.CartRepo
-	categoryRepo     repositories.CategoryRepo
-	commentRepo      repositories.CommentRepo
-	courseRepo       repositories.CourseRepo
-	likeRepo         repositories.LikeRepo
-	notificationRepo repositories.NotificationRepo
-	orderRepo        repositories.OrderRepo
-	orderItemRepo    repositories.OrderItemRepo
-	paymentRepo      repositories.PaymentRepo
-	questionRepo     repositories.QuestionRepo
-	transactionRepo  repositories.TransactionRepo
-	userRepo         repositories.UserRepo
-	videoRepo        repositories.VideoRepo
+	answerRepo            repositories.AnswerRepo
+	cartRepo              repositories.CartRepo
+	categoryRepo          repositories.CategoryRepo
+	commentRepo           repositories.CommentRepo
+	courseRepo            repositories.CourseRepo
+	likeRepo              repositories.LikeRepo
+	notificationRepo      repositories.NotificationRepo
+	orderRepo             repositories.OrderRepo
+	orderItemRepo         repositories.OrderItemRepo
+	paymentRepo           repositories.PaymentRepo
+	questionRepo          repositories.QuestionRepo
+	transactionRepo       repositories.TransactionRepo
+	userRepo              repositories.UserRepo
+	videoRepo             repositories.VideoRepo
+	courseParticipantRepo repositories.CourseParticipantRepo
+	courseForumRepo       repositories.CourseForumRepo
 }
 
 func NewRepoProvider(tx *gorm.DB) *RepoProvider {
 	return &RepoProvider{
-		answerRepo:       repositories.NewAnswerRepo(tx),
-		cartRepo:         repositories.NewCartRepo(tx),
-		categoryRepo:     repositories.NewCategoryRepo(tx),
-		commentRepo:      repositories.NewCommentRepo(tx),
-		courseRepo:       repositories.NewCourseRepo(tx),
-		likeRepo:         repositories.NewLikeRepo(tx),
-		notificationRepo: repositories.NewNotificationRepo(tx),
-		orderRepo:        repositories.NewOrderRepo(tx),
-		orderItemRepo:    repositories.NewOrderItemRepo(tx),
-		paymentRepo:      repositories.NewPaymentRepo(tx),
-		questionRepo:     repositories.NewQuestionRepo(tx),
-		transactionRepo:  repositories.NewTransactionRepo(tx),
-		userRepo:         repositories.NewUserRepo(tx),
-		videoRepo:        repositories.NewVideoRepo(tx),
+		answerRepo:            repositories.NewAnswerRepo(tx),
+		cartRepo:              repositories.NewCartRepo(tx),
+		categoryRepo:          repositories.NewCategoryRepo(tx),
+		commentRepo:           repositories.NewCommentRepo(tx),
+		courseRepo:            repositories.NewCourseRepo(tx),
+		likeRepo:              repositories.NewLikeRepo(tx),
+		notificationRepo:      repositories.NewNotificationRepo(tx),
+		orderRepo:             repositories.NewOrderRepo(tx),
+		orderItemRepo:         repositories.NewOrderItemRepo(tx),
+		paymentRepo:           repositories.NewPaymentRepo(tx),
+		questionRepo:          repositories.NewQuestionRepo(tx),
+		transactionRepo:       repositories.NewTransactionRepo(tx),
+		userRepo:              repositories.NewUserRepo(tx),
+		videoRepo:             repositories.NewVideoRepo(tx),
+		courseParticipantRepo: repositories.NewCourseParticipantRepo(tx),
+		courseForumRepo:       repositories.NewCourseForumRepo(tx),
 	}
 }
 
@@ -99,4 +105,10 @@ func (svc RepoProvider) UserRepo() repositories.UserRepo {
 }
 func (svc RepoProvider) VideoRepo() repositories.VideoRepo {
 	return svc.videoRepo
+}
+func (svc RepoProvider) CourseParticipantRepo() repositories.CourseParticipantRepo {
+	return svc.courseParticipantRepo
+}
+func (svc RepoProvider) CourseForumRepo() repositories.CourseForumRepo {
+	return svc.courseForumRepo
 }

@@ -1,4 +1,9 @@
 {
+  "forum": {
+    "errors": {
+      "not_found": "انجمن گفتگویی یافت نشد"
+    }
+  },
   "payment": {
     "errors": {
       "gateway_not_found": "درگاه پرداختی یافت نشد",

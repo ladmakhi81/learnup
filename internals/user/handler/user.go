@@ -35,13 +35,13 @@ func NewHandler(
 //	@Accept		json
 //	@Produce	json
 //	@Param		CreateBasicUserReqDto	body		dtoreq.CreateBasicUserReqDto	true	" "
-//	@Success	201					{object}	types.ApiResponse{data=dtores.CreateBasicUserResDto}
-//	@Failure	400					{object}	types.ApiError
-//	@Failure	409					{object}	types.ApiError
-//	@Failure	500					{object}	types.ApiError
+//	@Success	201						{object}	types.ApiResponse{data=dtores.CreateBasicUserResDto}
+//	@Failure	400						{object}	types.ApiError
+//	@Failure	409						{object}	types.ApiError
+//	@Failure	500						{object}	types.ApiError
 //	@Router		/users/basic [post]
 //
-// @Security BearerAuth
+//	@Security	BearerAuth
 func (h Handler) CreateBasicUser(ctx *gin.Context) (*types.ApiResponse, error) {
 	dto := new(dtoreq.CreateBasicUserReqDto)
 	if err := ctx.ShouldBind(dto); err != nil {

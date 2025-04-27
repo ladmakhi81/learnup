@@ -3,18 +3,23 @@ package jwtv5
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/ladmakhi81/learnup/internals/auth/constant"
+	"github.com/ladmakhi81/learnup/pkg/contracts"
 	"github.com/ladmakhi81/learnup/pkg/dtos"
 	"github.com/ladmakhi81/learnup/shared/types"
+	"strings"
 	"time"
 )
 
 type JwtSvc struct {
-	config *dtos.EnvConfig
+	config   *dtos.EnvConfig
+	redisSvc contracts.Cache
 }
 
-func NewJwtSvc(config *dtos.EnvConfig) *JwtSvc {
+func NewJwtSvc(config *dtos.EnvConfig, redisSvc contracts.Cache) *JwtSvc {
 	return &JwtSvc{
-		config: config,
+		config:   config,
+		redisSvc: redisSvc,
 	}
 }
 
@@ -40,11 +45,38 @@ func (svc JwtSvc) VerifyToken(tokenString string) (*types.TokenClaim, error) {
 		return nil, errors.New("Error happen in verify token")
 	}
 	if !token.Valid {
-		return nil, errors.New("token is invalid")
+		return nil, nil
 	}
 	return claims, nil
 }
 
 func (svc JwtSvc) getSecretKey() []byte {
 	return []byte(svc.config.App.TokenSecretKey)
+}
+
+func (svc JwtSvc) DecodeToken(tokenString string) (*types.TokenClaim, error) {
+	if tokenString == "" {
+		return nil, nil
+	}
+	tokenStringSegments := strings.Split(tokenString, " ")
+	if len(tokenStringSegments) != 2 {
+		return nil, nil
+	}
+	tokenBearer := strings.Trim(strings.ToLower(tokenStringSegments[0]), " ")
+	token := tokenStringSegments[1]
+	if tokenBearer != "bearer" || token == "" {
+		return nil, nil
+	}
+	cachedToken, err := svc.redisSvc.GetVal(constant.LoginCacheKey)
+	if err != nil {
+		return nil, err
+	}
+	if cachedToken == "" {
+		return nil, nil
+	}
+	tokenClaims, err := svc.VerifyToken(token)
+	if err != nil {
+		return nil, err
+	}
+	return tokenClaims, nil
 }

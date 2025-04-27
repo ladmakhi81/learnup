@@ -14,6 +14,7 @@ import (
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	"github.com/ladmakhi81/learnup/internals/course"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	forumService "github.com/ladmakhi81/learnup/internals/forum/service"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	"github.com/ladmakhi81/learnup/internals/notification"
 	notificationService "github.com/ladmakhi81/learnup/internals/notification/service"
@@ -34,6 +35,7 @@ import (
 	"github.com/ladmakhi81/learnup/internals/video"
 	videoService "github.com/ladmakhi81/learnup/internals/video/service"
 	"github.com/ladmakhi81/learnup/internals/video/workflow"
+	"github.com/ladmakhi81/learnup/internals/websocket"
 	"github.com/ladmakhi81/learnup/pkg/ffmpeg/v1"
 	"github.com/ladmakhi81/learnup/pkg/i18n/v2"
 	"github.com/ladmakhi81/learnup/pkg/jwt/v5"
@@ -91,6 +93,9 @@ func main() {
 	// swagger documentation
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// websocket
+	wsManager := websocket.NewWsManager()
+
 	unitOfWork := db.NewUnitOfWork(dbClient.Core)
 
 	// svcs
@@ -104,13 +109,14 @@ func main() {
 		log.Fatalln(i18nErr)
 	}
 	redisSvc := redisv6.NewRedisClientSvc(config)
-	tokenSvc := jwtv5.NewJwtSvc(config)
+	tokenSvc := jwtv5.NewJwtSvc(config, redisSvc)
 	userSvc := userService.NewUserSvc(unitOfWork)
 	notificationSvc := notificationService.NewNotificationSvc(unitOfWork)
 	validationSvc := validatorv10.NewValidatorSvc(validator.New(), i18nTranslatorSvc)
 	authSvc := authService.NewAuthSvc(redisSvc, tokenSvc, unitOfWork)
 	categorySvc := categoryService.NewCategorySvc(unitOfWork)
 	courseSvc := courseService.NewCourseSvc(unitOfWork)
+	forumSvc := forumService.NewForumService(unitOfWork)
 	ffmpegSvc := ffmpegv1.NewFfmpegSvc()
 	videoSvc := videoService.NewVideoSvc(unitOfWork, minioSvc, ffmpegSvc, logrusSvc)
 	videoWorkflowSvc := workflow.NewVideoWorkflowImpl(videoSvc, temporalSvc, courseSvc)
@@ -136,13 +142,13 @@ func main() {
 	orderSvc := orderService.NewOrderService(unitOfWork, paymentSvc)
 
 	// middlewares
-	middlewares := middleware.NewMiddleware(tokenSvc, redisSvc)
+	middlewares := middleware.NewMiddleware(tokenSvc)
 
 	// modules
 	userModule := user.NewModule(middlewares, i18nTranslatorSvc, userSvc, validationSvc)
 	authModule := auth.NewModule(authSvc, validationSvc, i18nTranslatorSvc)
 	categoryModule := category.NewModule(categorySvc, middlewares, i18nTranslatorSvc, validationSvc)
-	courseModule := course.NewModule(courseSvc, validationSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc, middlewares, i18nTranslatorSvc)
+	courseModule := course.NewModule(courseSvc, validationSvc, videoSvc, likeSvc, commentSvc, questionSvc, userSvc, forumSvc, middlewares, i18nTranslatorSvc)
 	tusModule := tus.NewModule(tusHookSvc, i18nTranslatorSvc)
 	videoModule := video.NewModule(userSvc, videoSvc, validationSvc, middlewares, i18nTranslatorSvc)
 	notificationModule := notification.NewModule(notificationSvc, middlewares, i18nTranslatorSvc)
@@ -153,6 +159,8 @@ func main() {
 	orderModule := order.NewModule(orderSvc, validationSvc, userSvc, middlewares, i18nTranslatorSvc)
 	paymentModule := payment.NewModule(paymentSvc, middlewares, i18nTranslatorSvc)
 	transactionModule := transaction.NewModule(transactionSvc, middlewares, i18nTranslatorSvc)
+
+	server.GET("/ws", websocket.Handler(wsManager, tokenSvc))
 
 	// workers
 	if err := temporalSvc.AddWorker(
