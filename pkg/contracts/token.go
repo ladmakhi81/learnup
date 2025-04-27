@@ -7,4 +7,5 @@ import (
 type Token interface {
 	GenerateToken(userID uint) (string, error)
 	VerifyToken(tokenString string) (*types.TokenClaim, error)
+	DecodeToken(tokenString string) (*types.TokenClaim, error)
 }

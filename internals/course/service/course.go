@@ -28,56 +28,68 @@ func NewCourseSvc(unitOfWork db.UnitOfWork) CourseService {
 }
 
 func (svc courseService) Create(createdBy *entities.User, dto dtoreq.CreateCourseReqDto) (*entities.Course, error) {
-	const operationName = "courseService.Create"
-	isCourseNameDuplicated, err := svc.unitOfWork.CourseRepo().Exist(map[string]any{"name": dto.Name})
-	if err != nil {
-		return nil, types.NewServerError("Error in checking course name exist or not", operationName, err)
-	}
-	if isCourseNameDuplicated {
-		return nil, courseError.Course_NameDuplicated
-	}
-	category, err := svc.unitOfWork.CategoryRepo().GetByID(dto.CategoryID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching category by id", operationName, err)
-	}
-	if category == nil {
-		return nil, courseError.Course_NotFoundCategory
-	}
-	teacher, err := svc.unitOfWork.UserRepo().GetByID(dto.TeacherID, nil)
-	if err != nil {
-		return nil, types.NewServerError("Error in fetching user teacher by id", operationName, err)
-	}
-	if teacher == nil {
-		return nil, courseError.Course_NotFoundTeacher
-	}
-	course := &entities.Course{
-		CategoryID:                  &category.ID,
-		Name:                        dto.Name,
-		AbilityToAddComment:         dto.AbilityToAddComment,
-		CanHaveDiscount:             dto.CanHaveDiscount,
-		CommentAccessMode:           dto.CommentAccessMode,
-		Description:                 dto.Description,
-		DiscountFeeAmountPercentage: dto.DiscountFeeAmountPercentage,
-		IsPublished:                 true,
-		Image:                       dto.Image,
-		IntroductionVideo:           dto.IntroductionVideo,
-		IsVerifiedByAdmin:           true,
-		Level:                       dto.Level,
-		MaxDiscountAmount:           dto.MaxDiscountAmount,
-		Prerequisite:                dto.Prerequisite,
-		Status:                      entities.CourseStatus_Starting,
-		Tags:                        dto.Tags,
-		TeacherID:                   &teacher.ID,
-		ThumbnailImage:              dto.ThumbnailImage,
-		VerifiedDate:                utils.Now(),
-		VerifiedByID:                &createdBy.ID,
-	}
-	course.SetPrice(dto.Price)
-	course.SetFee(dto.Fee)
-	if err := svc.unitOfWork.CourseRepo().Create(course); err != nil {
-		return nil, types.NewServerError("Create Course Throw Error", operationName, err)
-	}
-	return course, nil
+	return db.WithTx(svc.unitOfWork, func(tx db.UnitOfWorkTx) (*entities.Course, error) {
+		const operationName = "courseService.Create"
+		isCourseNameDuplicated, err := tx.CourseRepo().Exist(map[string]any{"name": dto.Name})
+		if err != nil {
+			return nil, types.NewServerError("Error in checking course name exist or not", operationName, err)
+		}
+		if isCourseNameDuplicated {
+			return nil, courseError.Course_NameDuplicated
+		}
+		category, err := tx.CategoryRepo().GetByID(dto.CategoryID, nil)
+		if err != nil {
+			return nil, types.NewServerError("Error in fetching category by id", operationName, err)
+		}
+		if category == nil {
+			return nil, courseError.Course_NotFoundCategory
+		}
+		teacher, err := tx.UserRepo().GetByID(dto.TeacherID, nil)
+		if err != nil {
+			return nil, types.NewServerError("Error in fetching user teacher by id", operationName, err)
+		}
+		if teacher == nil {
+			return nil, courseError.Course_NotFoundTeacher
+		}
+		course := &entities.Course{
+			CategoryID:                  &category.ID,
+			Name:                        dto.Name,
+			AbilityToAddComment:         dto.AbilityToAddComment,
+			CanHaveDiscount:             dto.CanHaveDiscount,
+			CommentAccessMode:           dto.CommentAccessMode,
+			Description:                 dto.Description,
+			DiscountFeeAmountPercentage: dto.DiscountFeeAmountPercentage,
+			IsPublished:                 true,
+			Image:                       dto.Image,
+			IntroductionVideo:           dto.IntroductionVideo,
+			IsVerifiedByAdmin:           true,
+			Level:                       dto.Level,
+			MaxDiscountAmount:           dto.MaxDiscountAmount,
+			Prerequisite:                dto.Prerequisite,
+			Status:                      entities.CourseStatus_Starting,
+			Tags:                        dto.Tags,
+			TeacherID:                   &teacher.ID,
+			ThumbnailImage:              dto.ThumbnailImage,
+			VerifiedDate:                utils.Now(),
+			VerifiedByID:                &createdBy.ID,
+		}
+		course.SetPrice(dto.Price)
+		course.SetFee(dto.Fee)
+		if err := tx.CourseRepo().Create(course); err != nil {
+			return nil, types.NewServerError("Create Course Throw Error", operationName, err)
+		}
+		forum := &entities.CourseForum{
+			TeacherID:  teacher.ID,
+			CourseID:   course.ID,
+			AccessMode: dto.ForumAccessMode,
+			Status:     dto.ForumStatus,
+			IsPublic:   dto.IsForumPublic,
+		}
+		if err := tx.CourseForumRepo().Create(forum); err != nil {
+			return nil, types.NewServerError("Error in creating course forum", operationName, err)
+		}
+		return course, nil
+	})
 }
 
 func (svc courseService) GetCourses(page, pageSize int) ([]*entities.Course, int, error) {

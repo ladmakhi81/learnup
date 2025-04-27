@@ -7,6 +7,7 @@ import (
 	courseDtoReq "github.com/ladmakhi81/learnup/internals/course/dto/req"
 	courseDtoRes "github.com/ladmakhi81/learnup/internals/course/dto/res"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	forumService "github.com/ladmakhi81/learnup/internals/forum/service"
 	likeDtoReq "github.com/ladmakhi81/learnup/internals/like/dto/req"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	questionDtoReq "github.com/ladmakhi81/learnup/internals/question/dto/req"
@@ -28,6 +29,7 @@ type Handler struct {
 	commentSvc    commentService.CommentService
 	questionSvc   questionService.QuestionService
 	userSvc       userService.UserSvc
+	forumSvc      forumService.ForumService
 }
 
 func NewHandler(
@@ -39,6 +41,7 @@ func NewHandler(
 	commentSvc commentService.CommentService,
 	questionSvc questionService.QuestionService,
 	userSvc userService.UserSvc,
+	forumSvc forumService.ForumService,
 ) *Handler {
 	return &Handler{
 		courseSvc:     courseSvc,
@@ -49,6 +52,7 @@ func NewHandler(
 		commentSvc:    commentSvc,
 		questionSvc:   questionSvc,
 		userSvc:       userSvc,
+		forumSvc:      forumSvc,
 	}
 }
 
@@ -124,7 +128,7 @@ func (h Handler) GetCourses(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Summary	Get Videos by Course ID
 //	@Tags		courses
 //	@Param		course-id	path		int	true	"Course ID"
-//	@Success	200			{object}	courseDtoRes.GetVideosByCourseIDRes
+//	@Success	200			{object}	[]courseDtoRes.GetVideoByCourseItemDto
 //	@Failure	400			{object}	types.ApiError
 //	@Failure	404			{object}	types.ApiError
 //	@Failure	500			{object}	types.ApiError
@@ -290,7 +294,7 @@ func (h Handler) FetchLikes(ctx *gin.Context) (*types.ApiResponse, error) {
 //	@Tags		courses
 //	@Accept		json
 //	@Produce	json
-//	@Param		course-id	path		int								true	"Course ID"
+//	@Param		course-id	path		int									true	"Course ID"
 //	@Param		request		body		commentDtoReq.CreateCommentReqDto	true	" "
 //	@Success	201			{object}	types.ApiResponse{data=courseDtoRes.CreateCommentResDto}
 //	@Failure	400			{object}	types.ApiError
@@ -425,4 +429,29 @@ func (h Handler) GetQuestions(ctx *gin.Context) (*types.ApiResponse, error) {
 		count,
 	)
 	return types.NewApiResponse(http.StatusOK, questionRes), nil
+}
+
+// GetForumByCourseID godoc
+// @Summary	Get Forum by Course ID
+// @Tags		courses
+// @Accept		json
+// @Produce	json
+// @Param		course-id	path		int	true	"Course ID"
+// @Success	200			{object}	types.ApiResponse{data=courseDtoRes.GetForumByCourseIDDto}
+// @Failure	400			{object}	types.ApiError
+// @Failure	500			{object}	types.ApiError
+// @Router		/courses/{course-id}/forum [get]
+// @Security	BearerAuth
+func (h Handler) GetForumByCourseID(ctx *gin.Context) (*types.ApiResponse, error) {
+	courseID, err := utils.ToUint(ctx.Param("course-id"))
+	if err != nil {
+		return nil, types.NewBadRequestError(
+			h.translateSvc.Translate("course.errors.invalid_course_id"),
+		)
+	}
+	forum, err := h.forumSvc.GetForumByCourseID(courseID)
+	if err != nil {
+		return nil, err
+	}
+	return types.NewApiResponse(http.StatusOK, courseDtoRes.MapGetForumByCourseIDDto(forum)), nil
 }

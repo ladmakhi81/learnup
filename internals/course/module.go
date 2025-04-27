@@ -5,6 +5,7 @@ import (
 	commentService "github.com/ladmakhi81/learnup/internals/comment/service"
 	courseHandler "github.com/ladmakhi81/learnup/internals/course/handler"
 	courseService "github.com/ladmakhi81/learnup/internals/course/service"
+	forumService "github.com/ladmakhi81/learnup/internals/forum/service"
 	likeService "github.com/ladmakhi81/learnup/internals/like/service"
 	questionService "github.com/ladmakhi81/learnup/internals/question/service"
 	userService "github.com/ladmakhi81/learnup/internals/user/service"
@@ -28,6 +29,7 @@ func NewModule(
 	commentSvc commentService.CommentService,
 	questionSvc questionService.QuestionService,
 	userSvc userService.UserSvc,
+	forumSvc forumService.ForumService,
 	middleware *middleware.Middleware,
 	translationSvc contracts.Translator,
 ) *Module {
@@ -43,6 +45,7 @@ func NewModule(
 			commentSvc,
 			questionSvc,
 			userSvc,
+			forumSvc,
 		),
 	}
 }
@@ -62,4 +65,5 @@ func (m Module) Register(api *gin.RouterGroup) {
 	coursesApi.DELETE("/comments/:comment-id", utils.JsonHandler(m.translationSvc, m.courseHandler.DeleteComment))
 	coursesApi.POST("/:course-id/question", utils.JsonHandler(m.translationSvc, m.courseHandler.CreateQuestion))
 	coursesApi.GET("/:course-id/questions", utils.JsonHandler(m.translationSvc, m.courseHandler.GetQuestions))
+	coursesApi.GET("/:course-id/forum", utils.JsonHandler(m.translationSvc, m.courseHandler.GetForumByCourseID))
 }

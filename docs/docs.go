@@ -34,7 +34,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReqDto"
                         }
                     }
                 ],
@@ -50,7 +50,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginResDto"
                                         }
                                     }
                                 }
@@ -106,7 +106,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItem"
+                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItemDto"
                                             }
                                         }
                                     }
@@ -151,7 +151,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReqDto"
                         }
                     }
                 ],
@@ -167,7 +167,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartResDto"
                                         }
                                     }
                                 }
@@ -295,7 +295,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryResDto"
                                         }
                                     }
                                 }
@@ -419,7 +419,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItemDto"
+                                            }
                                         }
                                     }
                                 }
@@ -538,7 +541,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItem"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItemDto"
                                                             }
                                                         }
                                                     }
@@ -583,7 +586,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReqDto"
                         }
                     }
                 ],
@@ -599,7 +602,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseResDto"
                                         }
                                     }
                                 }
@@ -749,7 +752,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItemDto"
                                                             }
                                                         }
                                                     }
@@ -800,7 +803,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByItemDto"
                         }
                     },
                     "400": {
@@ -855,7 +858,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReqDto"
                         }
                     }
                 ],
@@ -871,7 +874,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentResDto"
                                         }
                                     }
                                 }
@@ -892,6 +895,66 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/courses/{course-id}/forum": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "summary": "Get Forum by Course ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Course ID",
+                        "name": "course-id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.ApiResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetForumByCourseIDDto"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/types.ApiError"
                         }
@@ -936,7 +999,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReqDto"
                         }
                     }
                 ],
@@ -1036,7 +1099,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItemDto"
                                                             }
                                                         }
                                                     }
@@ -1100,7 +1163,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReqDto"
                         }
                     }
                 ],
@@ -1116,7 +1179,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionResDto"
                                         }
                                     }
                                 }
@@ -1212,7 +1275,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemRes"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemDto"
                                                             }
                                                         }
                                                     }
@@ -1276,7 +1339,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReqDto"
                         }
                     }
                 ],
@@ -1338,7 +1401,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideoByCourseItemDto"
+                            }
                         }
                     },
                     "400": {
@@ -1411,7 +1477,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItemDto"
                                                             }
                                                         }
                                                     }
@@ -1541,7 +1607,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItem"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItemDto"
                                                             }
                                                         }
                                                     }
@@ -1596,7 +1662,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReqDto"
                         }
                     }
                 ],
@@ -1612,7 +1678,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderResDto"
                                         }
                                     }
                                 }
@@ -1670,7 +1736,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailRes"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailItemDto"
                         }
                     },
                     "400": {
@@ -1753,7 +1819,7 @@ const docTemplate = `{
                                                     "type": "object",
                                                     "properties": {
                                                         "rows": {
-                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem"
+                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItemDto"
                                                         }
                                                     }
                                                 }
@@ -1810,7 +1876,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReqDto"
                         }
                     }
                 ],
@@ -1826,7 +1892,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerResDto"
                                         }
                                     }
                                 }
@@ -1900,7 +1966,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswersRes"
+                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswerItemDto"
                                             }
                                         }
                                     }
@@ -1997,7 +2063,7 @@ const docTemplate = `{
                                                         "rows": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemRes"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemDto"
                                                             }
                                                         }
                                                     }
@@ -2060,7 +2126,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReqDto"
                         }
                     }
                 ],
@@ -2076,7 +2142,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseResDto"
                                         }
                                     }
                                 }
@@ -2165,7 +2231,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemDto"
                                                             }
                                                         }
                                                     }
@@ -2259,7 +2325,7 @@ const docTemplate = `{
                                                         "row": {
                                                             "type": "array",
                                                             "items": {
-                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemRes"
+                                                                "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemDto"
                                                             }
                                                         }
                                                     }
@@ -2322,7 +2388,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_req.AddVideoToCourseReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_req.AddVideoToCourseReqDto"
                         }
                     }
                 ],
@@ -2338,7 +2404,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.AddVideoToCourseRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_teacher_dto_res.AddVideoToCourseResDto"
                                         }
                                     }
                                 }
@@ -2425,7 +2491,7 @@ const docTemplate = `{
                                                     "type": "object",
                                                     "properties": {
                                                         "rows": {
-                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem"
+                                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItemDto"
                                                         }
                                                     }
                                                 }
@@ -2471,11 +2537,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": " ",
-                        "name": "CreateBasicUserReq",
+                        "name": "CreateBasicUserReqDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq"
+                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReqDto"
                         }
                     }
                 ],
@@ -2491,7 +2557,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes"
+                                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserResDto"
                                         }
                                     }
                                 }
@@ -2581,7 +2647,128 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReq": {
+        "entities.CourseForumAccessMode": {
+            "type": "string",
+            "enum": [
+                "student-only",
+                "teacher-only",
+                "student-teacher"
+            ],
+            "x-enum-varnames": [
+                "CourseForumAccessMode_Student",
+                "CourseForumAccessMode_Teacher",
+                "CourseForumAccessMode_StudentTeacher"
+            ]
+        },
+        "entities.CourseForumStatus": {
+            "type": "string",
+            "enum": [
+                "open",
+                "close",
+                "close-temporary"
+            ],
+            "x-enum-varnames": [
+                "CourseForumStatus_Open",
+                "CourseForumStatus_Close",
+                "CourseForumStatus_CloseTemporary"
+            ]
+        },
+        "entities.CourseStatus": {
+            "type": "string",
+            "enum": [
+                "in-progress",
+                "verified",
+                "starting",
+                "done",
+                "pause",
+                "cancel"
+            ],
+            "x-enum-varnames": [
+                "CourseStatus_InProgress",
+                "CourseStatus_Verified",
+                "CourseStatus_Starting",
+                "CourseStatus_Done",
+                "CourseStatus_Pause",
+                "CourseStatus_Cancel"
+            ]
+        },
+        "entities.OrderStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "OrderStatus_Pending",
+                "OrderStatus_Success",
+                "OrderStatus_Failed"
+            ]
+        },
+        "entities.PaymentStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "PaymentStatus_Pending",
+                "PaymentStatus_Success",
+                "PaymentStatus_Failure"
+            ]
+        },
+        "entities.TransactionTag": {
+            "type": "string",
+            "enum": [
+                "sell",
+                "charge_wallet",
+                "deposit_wallet",
+                "salary_payment"
+            ],
+            "x-enum-varnames": [
+                "TransactionTag_Sell",
+                "TransactionTag_ChargeWallet",
+                "TransactionTag_DepositWallet",
+                "TransactionTag_SalaryPayment"
+            ]
+        },
+        "entities.TransactionType": {
+            "type": "string",
+            "enum": [
+                "withdraw",
+                "deposit"
+            ],
+            "x-enum-varnames": [
+                "TransactionType_Withdraw",
+                "TransactionType_Deposit"
+            ]
+        },
+        "entities.VideoAccessLevel": {
+            "type": "string",
+            "enum": [
+                "private",
+                "public"
+            ],
+            "x-enum-varnames": [
+                "VideoAccessLevel_Private",
+                "VideoAccessLevel_Public"
+            ]
+        },
+        "entities.VideoStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "fail",
+                "done"
+            ],
+            "x-enum-varnames": [
+                "VideoStatus_Pending",
+                "VideoStatus_Fail",
+                "VideoStatus_Done"
+            ]
+        },
+        "github_com_ladmakhi81_learnup_internals_auth_dto_req.LoginReqDto": {
             "type": "object",
             "required": [
                 "password",
@@ -2597,7 +2784,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginRes": {
+        "github_com_ladmakhi81_learnup_internals_auth_dto_res.LoginResDto": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -2605,7 +2792,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReq": {
+        "github_com_ladmakhi81_learnup_internals_cart_dto_req.CreateCartReqDto": {
             "type": "object",
             "required": [
                 "courseId"
@@ -2617,7 +2804,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartRes": {
+        "github_com_ladmakhi81_learnup_internals_cart_dto_res.AddCartResDto": {
             "type": "object",
             "properties": {
                 "courseId": {
@@ -2634,7 +2821,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItem": {
+        "github_com_ladmakhi81_learnup_internals_cart_dto_res.GetCartItemDto": {
             "type": "object",
             "properties": {
                 "course": {
@@ -2680,7 +2867,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryRes": {
+        "github_com_ladmakhi81_learnup_internals_category_dto_res.CreateCategoryResDto": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -2694,7 +2881,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem": {
+        "github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItemDto": {
             "type": "object",
             "properties": {
                 "id": {
@@ -2709,23 +2896,12 @@ const docTemplate = `{
                 "subCategories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem"
+                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItemDto"
                     }
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeRes": {
-            "type": "object",
-            "properties": {
-                "categories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_category_dto_res.GetCategoriesTreeItem"
-                    }
-                }
-            }
-        },
-        "github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReq": {
+        "github_com_ladmakhi81_learnup_internals_comment_dto_req.CreateCommentReqDto": {
             "type": "object",
             "required": [
                 "content"
@@ -2740,7 +2916,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItem": {
+        "github_com_ladmakhi81_learnup_internals_comment_dto_res.GetCommentPageItemDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -2797,7 +2973,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReq": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_req.CreateCourseReqDto": {
             "type": "object",
             "required": [
                 "abilityToAddComment",
@@ -2806,8 +2982,11 @@ const docTemplate = `{
                 "courseLevel",
                 "description",
                 "fee",
+                "forumAccessMode",
+                "forumStatus",
                 "image",
                 "introductionVideo",
+                "isForumPublic",
                 "name",
                 "prerequisite",
                 "price",
@@ -2853,6 +3032,29 @@ const docTemplate = `{
                     "type": "number",
                     "minimum": 0
                 },
+                "forumAccessMode": {
+                    "enum": [
+                        "student-only",
+                        "teacher-only",
+                        "student-teacher"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.CourseForumAccessMode"
+                        }
+                    ]
+                },
+                "forumStatus": {
+                    "enum": [
+                        "open",
+                        "close"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.CourseForumStatus"
+                        }
+                    ]
+                },
                 "image": {
                     "type": "string",
                     "minLength": 10
@@ -2860,6 +3062,9 @@ const docTemplate = `{
                 "introductionVideo": {
                     "type": "string",
                     "minLength": 20
+                },
+                "isForumPublic": {
+                    "type": "boolean"
                 },
                 "maxDiscountAmount": {
                     "type": "number",
@@ -2893,7 +3098,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReq": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_req.VerifyCourseReqDto": {
             "type": "object",
             "properties": {
                 "discountFeeAmountPercentage": {
@@ -2906,7 +3111,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCommentResDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -2917,7 +3122,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateCourseResDto": {
             "type": "object",
             "properties": {
                 "abilityToAddComment": {
@@ -2933,7 +3138,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "courseStatus": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
+                    "$ref": "#/definitions/entities.CourseStatus"
                 },
                 "description": {
                     "type": "string"
@@ -2997,7 +3202,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.CreateQuestionResDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3014,7 +3219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByIdRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetCourseByItemDto": {
             "type": "object",
             "properties": {
                 "abilityToAddComment": {
@@ -3072,7 +3277,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
+                    "$ref": "#/definitions/entities.CourseStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3100,7 +3305,45 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItem": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetForumByCourseIDDto": {
+            "type": "object",
+            "properties": {
+                "accessMode": {
+                    "$ref": "#/definitions/entities.CourseForumAccessMode"
+                },
+                "course": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDCourse"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isPublic": {
+                    "type": "boolean"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDMembers"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/entities.CourseForumStatus"
+                },
+                "statusChangedAt": {
+                    "type": "string"
+                },
+                "teacher": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDTeacher"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetLikesPageableItemDto": {
             "type": "object",
             "properties": {
                 "type": {
@@ -3111,7 +3354,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItem": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetPageableCourseItemDto": {
             "type": "object",
             "properties": {
                 "category": {
@@ -3142,7 +3385,7 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus"
+                    "$ref": "#/definitions/entities.CourseStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3164,7 +3407,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetQuestionItemDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3196,17 +3439,47 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideosByCourseIDRes": {
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.GetVideoByCourseItemDto": {
             "type": "object",
             "properties": {
-                "courseId": {
+                "accessLevel": {
+                    "$ref": "#/definitions/entities.VideoAccessLevel"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "integer"
                 },
-                "videos": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem"
-                    }
+                "isPublished": {
+                    "type": "boolean"
+                },
+                "isVerified": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/entities.VideoStatus"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "verifiedBy": {
+                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser"
+                },
+                "verifiedDate": {
+                    "type": "string"
                 }
             }
         },
@@ -3260,6 +3533,45 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDCourse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDMembers": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_ladmakhi81_learnup_internals_course_dto_res.getForumByCourseIDTeacher": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "phone": {
                     "type": "string"
@@ -3352,146 +3664,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_course_dto_res.videosItem": {
-            "type": "object",
-            "properties": {
-                "accessLevel": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "duration": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "isPublished": {
-                    "type": "boolean"
-                },
-                "isVerified": {
-                    "type": "boolean"
-                },
-                "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "verifiedBy": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_course_dto_res.verifiedByUser"
-                },
-                "verifiedDate": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.CourseStatus": {
-            "type": "string",
-            "enum": [
-                "in-progress",
-                "verified",
-                "starting",
-                "done",
-                "pause",
-                "cancel"
-            ],
-            "x-enum-varnames": [
-                "CourseStatus_InProgress",
-                "CourseStatus_Verified",
-                "CourseStatus_Starting",
-                "CourseStatus_Done",
-                "CourseStatus_Pause",
-                "CourseStatus_Cancel"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "success",
-                "failed"
-            ],
-            "x-enum-varnames": [
-                "OrderStatus_Pending",
-                "OrderStatus_Success",
-                "OrderStatus_Failed"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "success",
-                "failed"
-            ],
-            "x-enum-varnames": [
-                "PaymentStatus_Pending",
-                "PaymentStatus_Success",
-                "PaymentStatus_Failure"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag": {
-            "type": "string",
-            "enum": [
-                "sell",
-                "charge_wallet",
-                "deposit_wallet",
-                "salary_payment"
-            ],
-            "x-enum-varnames": [
-                "TransactionTag_Sell",
-                "TransactionTag_ChargeWallet",
-                "TransactionTag_DepositWallet",
-                "TransactionTag_SalaryPayment"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.TransactionType": {
-            "type": "string",
-            "enum": [
-                "withdraw",
-                "deposit"
-            ],
-            "x-enum-varnames": [
-                "TransactionType_Withdraw",
-                "TransactionType_Deposit"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel": {
-            "type": "string",
-            "enum": [
-                "private",
-                "public"
-            ],
-            "x-enum-varnames": [
-                "VideoAccessLevel_Private",
-                "VideoAccessLevel_Public"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_db_entities.VideoStatus": {
-            "type": "string",
-            "enum": [
-                "pending",
-                "fail",
-                "done"
-            ],
-            "x-enum-varnames": [
-                "VideoStatus_Pending",
-                "VideoStatus_Fail",
-                "VideoStatus_Done"
-            ]
-        },
-        "github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReq": {
+        "github_com_ladmakhi81_learnup_internals_like_dto_req.CreateLikeReqDto": {
             "type": "object",
             "required": [
                 "type"
@@ -3507,7 +3680,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItem": {
+        "github_com_ladmakhi81_learnup_internals_notification_dto_res.NotificationPageItemDto": {
             "type": "object",
             "properties": {
                 "isSeen": {
@@ -3536,7 +3709,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReq": {
+        "github_com_ladmakhi81_learnup_internals_order_dto_req.CreateOrderReqDto": {
             "type": "object",
             "required": [
                 "carts",
@@ -3559,7 +3732,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderRes": {
+        "github_com_ladmakhi81_learnup_internals_order_dto_res.CreateOrderResDto": {
             "type": "object",
             "properties": {
                 "payLink": {
@@ -3567,7 +3740,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailRes": {
+        "github_com_ladmakhi81_learnup_internals_order_dto_res.GetOrderDetailItemDto": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3592,7 +3765,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus"
+                    "$ref": "#/definitions/entities.OrderStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3608,7 +3781,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItem": {
+        "github_com_ladmakhi81_learnup_internals_order_dto_res.PaginatedOrderItemDto": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3627,7 +3800,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.OrderStatus"
+                    "$ref": "#/definitions/entities.OrderStatus"
                 },
                 "statusChangedAt": {
                     "type": "string"
@@ -3702,7 +3875,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItem": {
+        "github_com_ladmakhi81_learnup_internals_payment_dto_res.GetPageablePaymentItemDto": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -3718,7 +3891,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.PaymentStatus"
+                    "$ref": "#/definitions/entities.PaymentStatus"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -3728,7 +3901,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReq": {
+        "github_com_ladmakhi81_learnup_internals_question_dto_req.AnswerQuestionReqDto": {
             "type": "object",
             "required": [
                 "content"
@@ -3739,7 +3912,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReq": {
+        "github_com_ladmakhi81_learnup_internals_question_dto_req.CreateQuestionReqDto": {
             "type": "object",
             "required": [
                 "content",
@@ -3762,7 +3935,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerRes": {
+        "github_com_ladmakhi81_learnup_internals_question_dto_res.CreateAnswerResDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3785,7 +3958,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswersRes": {
+        "github_com_ladmakhi81_learnup_internals_question_dto_res.GetAnswerItemDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -3819,7 +3992,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_req.AddVideoToCourseReq": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_req.AddVideoToCourseReqDto": {
             "type": "object",
             "required": [
                 "accessLevel",
@@ -3836,7 +4009,7 @@ const docTemplate = `{
                     ],
                     "allOf": [
                         {
-                            "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
+                            "$ref": "#/definitions/entities.VideoAccessLevel"
                         }
                     ]
                 },
@@ -3857,7 +4030,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReq": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_req.CreateCourseReqDto": {
             "type": "object",
             "required": [
                 "abilityToAddComment",
@@ -3865,11 +4038,13 @@ const docTemplate = `{
                 "categoryId",
                 "courseLevel",
                 "description",
+                "forumAccessMode",
+                "forumStatus",
                 "image",
                 "introductionVideo",
+                "isForumPublic",
                 "name",
                 "prerequisite",
-                "price",
                 "thumbnailImage"
             ],
             "properties": {
@@ -3902,6 +4077,29 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 20
                 },
+                "forumAccessMode": {
+                    "enum": [
+                        "student-only",
+                        "teacher-only",
+                        "student-teacher"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.CourseForumAccessMode"
+                        }
+                    ]
+                },
+                "forumStatus": {
+                    "enum": [
+                        "open",
+                        "close"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/entities.CourseForumStatus"
+                        }
+                    ]
+                },
                 "image": {
                     "type": "string",
                     "minLength": 10
@@ -3909,6 +4107,9 @@ const docTemplate = `{
                 "introductionVideo": {
                     "type": "string",
                     "minLength": 20
+                },
+                "isForumPublic": {
+                    "type": "boolean"
                 },
                 "maxDiscountAmount": {
                     "type": "number",
@@ -3939,11 +4140,11 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.AddVideoToCourseRes": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.AddVideoToCourseResDto": {
             "type": "object",
             "properties": {
                 "accessLevel": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.VideoAccessLevel"
+                    "$ref": "#/definitions/entities.VideoAccessLevel"
                 },
                 "courseId": {
                     "type": "integer"
@@ -3962,7 +4163,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseRes": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.CreateCourseResDto": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3976,7 +4177,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemRes": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.FetchCourseItemDto": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -3999,7 +4200,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemRes": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetCommentPageableItemDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -4022,7 +4223,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemRes": {
+        "github_com_ladmakhi81_learnup_internals_teacher_dto_res.GetQuestionItemDto": {
             "type": "object",
             "properties": {
                 "content": {
@@ -4121,7 +4322,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItem": {
+        "github_com_ladmakhi81_learnup_internals_transaction_dto_res.GetTransactionPageableItemDto": {
             "type": "object",
             "properties": {
                 "amount": {
@@ -4140,17 +4341,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tag": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionTag"
+                    "$ref": "#/definitions/entities.TransactionTag"
                 },
                 "type": {
-                    "$ref": "#/definitions/github_com_ladmakhi81_learnup_internals_db_entities.TransactionType"
+                    "$ref": "#/definitions/entities.TransactionType"
                 },
                 "user": {
                     "type": "string"
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReq": {
+        "github_com_ladmakhi81_learnup_internals_user_dto_req.CreateBasicUserReqDto": {
             "type": "object",
             "required": [
                 "firstName",
@@ -4176,7 +4377,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserRes": {
+        "github_com_ladmakhi81_learnup_internals_user_dto_res.CreateBasicUserResDto": {
             "type": "object",
             "properties": {
                 "createdAt": {

@@ -10,6 +10,7 @@ import (
 	"github.com/ladmakhi81/learnup/shared/db/repositories"
 	"github.com/ladmakhi81/learnup/shared/types"
 	"github.com/ladmakhi81/learnup/shared/utils"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -80,7 +81,7 @@ func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReqDto) error {
 		if gateway == nil {
 			return 0, paymentError.Payment_GatewayNotFound
 		}
-		payment, err := tx.PaymentRepo().GetOne(map[string]any{"authority": dto.Authority}, []string{"User", "Order"})
+		payment, err := tx.PaymentRepo().GetOne(map[string]any{"authority": dto.Authority}, []string{"User"})
 		if err != nil {
 			return 0, types.NewServerError("Error in fetching payment by authority", operationName, err)
 		}
@@ -93,33 +94,27 @@ func (svc paymentService) Verify(dto paymentDtoReq.VerifyPaymentReqDto) error {
 		}
 		var transactionID uint
 		if resp.IsSuccess {
-			transaction := &entities.Transaction{
-				Amount:   payment.Amount,
-				Type:     entities.TransactionType_Deposit,
-				User:     payment.User.FullName(),
-				Phone:    payment.User.Phone,
-				Tag:      entities.TransactionTag_Sell,
-				Currency: svc.getCurrency(dto.Gateway),
-			}
-			if err := tx.TransactionRepo().Create(transaction); err != nil {
-				return 0, types.NewServerError("Error in creating transaction based on the payment", operationName, err)
+			transaction, err := svc.createPaymentTransaction(tx, payment, dto.Gateway)
+			if err != nil {
+				return 0, err
 			}
 			transactionID = transaction.ID
-			payment.TransactionID = &transaction.ID
-			payment.Status = entities.PaymentStatus_Success
-			payment.RefID = resp.RefCode
-			payment.Order.Status = entities.OrderStatus_Success
-
+			if err := svc.updateSuccessPayment(tx, payment.ID, transaction.ID, resp.RefCode); err != nil {
+				return 0, err
+			}
+			if err := svc.updateSuccessOrder(tx, payment.OrderID); err != nil {
+				return 0, err
+			}
+			if err := svc.createCourseParticipates(tx, payment.UserID, payment.OrderID); err != nil {
+				return 0, err
+			}
 		} else {
-			payment.Status = entities.PaymentStatus_Failure
-			payment.Order.Status = entities.OrderStatus_Failed
-		}
-		if err := tx.PaymentRepo().Update(payment); err != nil {
-			return 0, types.NewServerError("Error in updating the payment", operationName, err)
-		}
-		payment.Order.StatusChangedAt = utils.Now()
-		if err := tx.OrderRepo().Update(payment.Order); err != nil {
-			return 0, types.NewServerError("Error in updating status of order", operationName, err)
+			if err := svc.updateFailedOrder(tx, payment.OrderID); err != nil {
+				return 0, err
+			}
+			if err := svc.updateFailedPayment(tx, payment.OrderID); err != nil {
+				return 0, err
+			}
 		}
 		return transactionID, nil
 	})
@@ -181,4 +176,94 @@ func (svc paymentService) FetchPageable(page, pageSize int) ([]*entities.Payment
 		return nil, 0, types.NewServerError("Error in fetching payments pages", operationName, err)
 	}
 	return payments, count, nil
+}
+
+func (svc paymentService) createPaymentTransaction(tx db.UnitOfWorkTx, payment *entities.Payment, gateway entities.PaymentGateway,
+) (*entities.Transaction, error) {
+	const operationName = "paymentService.createPaymentTransaction"
+	transaction := &entities.Transaction{
+		Amount:   payment.Amount,
+		Type:     entities.TransactionType_Deposit,
+		User:     payment.User.FullName(),
+		Phone:    payment.User.Phone,
+		Tag:      entities.TransactionTag_Sell,
+		Currency: svc.getCurrency(gateway),
+	}
+	if err := tx.TransactionRepo().Create(transaction); err != nil {
+		return nil, types.NewServerError("Error in creating transaction based on the payment", operationName, err)
+	}
+	return transaction, nil
+}
+
+func (svc paymentService) updateSuccessPayment(tx db.UnitOfWorkTx, paymentID, transactionID uint, refCode string) error {
+	const operationName = "paymentService.updateSuccessPayment"
+	payment := &entities.Payment{
+		Model:           gorm.Model{ID: paymentID},
+		TransactionID:   &transactionID,
+		Status:          entities.PaymentStatus_Success,
+		RefID:           refCode,
+		StatusChangedAt: utils.Now(),
+	}
+	if err := tx.PaymentRepo().Update(payment); err != nil {
+		return types.NewServerError("Error in updating successful payment", operationName, err)
+	}
+	return nil
+}
+
+func (svc paymentService) updateSuccessOrder(tx db.UnitOfWorkTx, orderID uint) error {
+	const operationName = "paymentService.updateSuccessOrder"
+	order := &entities.Order{
+		Model:           gorm.Model{ID: orderID},
+		Status:          entities.OrderStatus_Success,
+		StatusChangedAt: utils.Now(),
+	}
+	if err := tx.OrderRepo().Update(order); err != nil {
+		return types.NewServerError("Error in updating successful order", operationName, err)
+	}
+	return nil
+}
+
+func (svc paymentService) updateFailedOrder(tx db.UnitOfWorkTx, orderID uint) error {
+	const operationName = "paymentService.updateFailedOrder"
+	order := &entities.Order{
+		Model:           gorm.Model{ID: orderID},
+		Status:          entities.OrderStatus_Failed,
+		StatusChangedAt: utils.Now(),
+	}
+	if err := tx.OrderRepo().Update(order); err != nil {
+		return types.NewServerError("Error in updating failed order", operationName, err)
+	}
+	return nil
+}
+
+func (svc paymentService) updateFailedPayment(tx db.UnitOfWorkTx, paymentID uint) error {
+	const operationName = "paymentService.updateFailedPayment"
+	payment := &entities.Payment{
+		Model:           gorm.Model{ID: paymentID},
+		Status:          entities.PaymentStatus_Failure,
+		StatusChangedAt: utils.Now(),
+	}
+	if err := tx.PaymentRepo().Update(payment); err != nil {
+		return types.NewServerError("Error in updating failed payment", operationName, err)
+	}
+	return nil
+}
+
+func (svc paymentService) createCourseParticipates(tx db.UnitOfWorkTx, userID, orderID uint) error {
+	const operationName = "paymentService.createCourseParticipates"
+	order, err := tx.OrderRepo().GetByID(orderID, []string{"Items", "Items.Course"})
+	if err != nil {
+		return types.NewServerError("Error in getting order", operationName, err)
+	}
+	for _, item := range order.Items {
+		courseParticipant := &entities.CourseParticipant{
+			CourseID:  item.CourseID,
+			TeacherID: *item.Course.TeacherID,
+			StudentID: userID,
+		}
+		if err := tx.CourseParticipantRepo().Create(courseParticipant); err != nil {
+			return types.NewServerError("Error in creating course participates", operationName, err)
+		}
+	}
+	return nil
 }

@@ -36,6 +36,7 @@ func (svc ZarinpalClient) CreateRequest(dto dtos.CreatePaymentGatewayDto) (*dtos
 		URL:  "https://sandbox.zarinpal.com/pg/v4/payment/request.json",
 		Body: body,
 	})
+	fmt.Println(string(httpResp.Result), httpResp.StatusCode, httpRespErr)
 	if httpRespErr != nil {
 		return nil, httpRespErr
 	}

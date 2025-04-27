@@ -8,13 +8,14 @@ import (
 type User struct {
 	gorm.Model
 
-	FirstName string `gorm:"column:first_name"`
-	LastName  string `gorm:"column:last_name"`
-	Phone     string `gorm:"index;column:phone_number"`
-	Password  string `gorm:"not null;column:password"`
+	FirstName string               `gorm:"column:first_name"`
+	LastName  string               `gorm:"column:last_name"`
+	Phone     string               `gorm:"index;column:phone_number"`
+	Password  string               `gorm:"not null;column:password"`
+	Courses   []*CourseParticipant `gorm:"foreignKey:student_id"`
+	Forums    []*CourseForum       `gorm:"foreignKey:teacher_id"`
 }
 
-// Change default name of users table
 func (User) TableName() string {
 	return "_users"
 }

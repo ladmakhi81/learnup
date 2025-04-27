@@ -6,12 +6,8 @@ import (
 
 type Middleware struct {
 	tokenSvc contracts.Token
-	redisSvc contracts.Cache
 }
 
-func NewMiddleware(tokenSvc contracts.Token, redisSvc contracts.Cache) *Middleware {
-	return &Middleware{
-		tokenSvc: tokenSvc,
-		redisSvc: redisSvc,
-	}
+func NewMiddleware(tokenSvc contracts.Token) *Middleware {
+	return &Middleware{tokenSvc: tokenSvc}
 }
